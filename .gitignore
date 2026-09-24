@@ -1,0 +1,12 @@
+# Arduino / embedded build output
+build/
+*.hex
+*.elf
+*.eep
+*.map
+*.bin
+
+# IDE / OS temporary files
+.arduinoIDE/
+.DS_Store
+Thumbs.db
