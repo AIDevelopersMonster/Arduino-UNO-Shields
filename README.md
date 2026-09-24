@@ -36,21 +36,28 @@ See: [boards/Arduino-UNO-Clone](boards/Arduino-UNO-Clone/)
 
 See: [shields/W5100-Ethernet-SD](shields/W5100-Ethernet-SD/)
 
+## Laboratories
+
+### LAB-01 — Arduino UNO Clone + W5100 + SD 4 GB
+
+The first complete hardware stand.
+
+Goal: first prove that the UNO, W5100 and SD card work separately and together,
+then use the verified stand for practical network projects.
+
+See: [labs/01-UNO-W5100-SD-4GB](labs/01-UNO-W5100-SD-4GB/)
+
 ## Project structure
 
 - `boards/` — Arduino UNO boards and hardware notes
 - `shields/` — individual shield projects
+- `labs/` — complete reproducible hardware stands and their test series
 - `docs/` — common project documentation
 - `examples/` — reusable Arduino sketches and demonstrations
 - `tools/` — utilities and test tools
 
-## First laboratory target
-
-**Arduino UNO + W5100 Ethernet Shield + SD Card**
-
-The first stage is to identify the hardware, document the assembly,
-verify Ethernet and SD separately, and then test them together in reproducible examples.
-
 ## Status
 
-Project started. Shield 01: **W5100 Ethernet + SD**.
+Project started.
+
+Current active stand: **LAB-01 — Arduino UNO Clone + W5100 Ethernet Shield + SD 4 GB**.
