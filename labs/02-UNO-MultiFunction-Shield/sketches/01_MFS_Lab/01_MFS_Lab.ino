@@ -65,12 +65,20 @@ static unsigned long lastTelemetryMs = 0;
 static char serialLine[80];
 static uint8_t serialLineLen = 0;
 
-enum BuzzerMode : uint8_t {
-  BUZZER_OFF = 0,
-  BUZZER_ACTIVE = 1
+enum BuzzerType : uint8_t {
+  BUZZER_TYPE_ACTIVE = 0,
+  BUZZER_TYPE_PASSIVE = 1
 };
 
+enum BuzzerMode : uint8_t {
+  BUZZER_OFF = 0,
+  BUZZER_ACTIVE = 1,
+  BUZZER_TONE = 2
+};
+
+static BuzzerType buzzerType = BUZZER_TYPE_ACTIVE;
 static BuzzerMode buzzerMode = BUZZER_OFF;
+static uint16_t buzzerHz = 0;
 static unsigned long buzzerStopAtMs = 0;
 
 enum TestStep : uint8_t {
@@ -92,9 +100,14 @@ static bool deadlineReached(unsigned long now, unsigned long deadline) {
   return (long)(now - deadline) >= 0;
 }
 
+static const __FlashStringHelper *buzzerTypeName() {
+  return buzzerType == BUZZER_TYPE_PASSIVE ? F("PASSIVE") : F("ACTIVE");
+}
+
 static const __FlashStringHelper *buzzerModeName() {
   switch (buzzerMode) {
     case BUZZER_ACTIVE: return F("ACTIVE");
+    case BUZZER_TONE: return F("TONE");
     default: return F("OFF");
   }
 }
@@ -172,18 +185,28 @@ static void serviceDisplay() {
 
 static void buzzerOff() {
   noTone(PIN_BUZZER);
-  // Bench-verified on our physical shield: D3 LOW = buzzer OFF.
+  // LOW is the bench-verified quiet state for our active sample and is also
+  // a safe idle level for a passive transducer.
   digitalWrite(PIN_BUZZER, LOW);
   buzzerMode = BUZZER_OFF;
+  buzzerHz = 0;
   buzzerStopAtMs = 0;
 }
 
 static void buzzerActiveOn() {
   noTone(PIN_BUZZER);
-  // Bench-verified on our physical shield: D3 HIGH = buzzer ON.
   digitalWrite(PIN_BUZZER, HIGH);
   buzzerMode = BUZZER_ACTIVE;
   buzzerHz = 0;
+  buzzerStopAtMs = 0;
+}
+
+static void buzzerToneOn(uint16_t hz) {
+  if (hz < 30) hz = 30;
+  if (hz > 5000) hz = 5000;
+  tone(PIN_BUZZER, hz);
+  buzzerMode = BUZZER_TONE;
+  buzzerHz = hz;
   buzzerStopAtMs = 0;
 }
 
@@ -220,10 +243,12 @@ static void serviceInputs() {
 }
 
 static void sendInfo() {
-  Serial.println(F("@SYS,MFSHIELD,LAB02,0.5,UNO,115200"));
+  Serial.println(F("@SYS,MFSHIELD,LAB02,0.6,UNO,115200"));
   Serial.println(F("@PINS,BUZ=3,LATCH=4,CLK=7,DATA=8,LED=13/12/11/10,BTN=A1/A2/A3,POT=A0"));
   Serial.print(F("@CFG,DIGITSEL,"));
   Serial.println(invertDigitSelect ? F("INV") : F("STD"));
+  Serial.print(F("@CFG,BUZZER,"));
+  Serial.println(buzzerTypeName());
 }
 
 static void sendState() {
@@ -293,14 +318,18 @@ static void serviceAutoTest() {
 
     case TEST_LED4:
       setAllLeds(false);
-      // Bench-verified behavior: this physical sample is used as an active
-      // buzzer only. Frequency/PWM control is intentionally not supported.
-      buzzerActiveOn();
-      buzzerStopAtMs = now + 500UL;
       setDisplayText("0000");
       testStep = TEST_BUZZER;
       testDeadlineMs = now + 600UL;
-      Serial.println(F("@TEST,BUZZER,ACTIVE"));
+      if (buzzerType == BUZZER_TYPE_ACTIVE) {
+        buzzerActiveOn();
+        buzzerStopAtMs = now + 500UL;
+        Serial.println(F("@TEST,BUZZER,ACTIVE"));
+      } else {
+        buzzerToneOn(1000);
+        buzzerStopAtMs = now + 500UL;
+        Serial.println(F("@TEST,BUZZER,PASSIVE,1000"));
+      }
       break;
 
     case TEST_BUZZER:
@@ -387,6 +416,10 @@ static void handleCommand(char *line) {
   }
 
   if (strcmp(tokens[0], "BUZ") == 0 && count >= 2) {
+    if (buzzerType != BUZZER_TYPE_ACTIVE) {
+      Serial.println(F("@ERR,BUZZER_MODE,PASSIVE"));
+      return;
+    }
     if (strcmp(tokens[1], "ON") == 0) buzzerActiveOn();
     else if (strcmp(tokens[1], "OFF") == 0) buzzerOff();
     else {
@@ -398,9 +431,24 @@ static void handleCommand(char *line) {
   }
 
   if (strcmp(tokens[0], "BEEP") == 0 && count >= 2) {
+    if (buzzerType != BUZZER_TYPE_ACTIVE) {
+      Serial.println(F("@ERR,BUZZER_MODE,PASSIVE"));
+      return;
+    }
     int durationMs = atoi(tokens[1]);
     buzzerActiveBeep((uint16_t)durationMs);
     ack(F("BEEP"));
+    return;
+  }
+
+  if (strcmp(tokens[0], "TONE") == 0 && count >= 2) {
+    if (buzzerType != BUZZER_TYPE_PASSIVE) {
+      Serial.println(F("@ERR,BUZZER_MODE,ACTIVE"));
+      return;
+    }
+    if (strcmp(tokens[1], "OFF") == 0) buzzerOff();
+    else buzzerToneOn((uint16_t)atoi(tokens[1]));
+    ack(F("TONE"));
     return;
   }
 
@@ -424,6 +472,19 @@ static void handleCommand(char *line) {
     }
     Serial.print(F("@CFG,DIGITSEL,"));
     Serial.println(invertDigitSelect ? F("INV") : F("STD"));
+    return;
+  }
+
+  if (strcmp(tokens[0], "CFG") == 0 && count >= 3 && strcmp(tokens[1], "BUZZER") == 0) {
+    buzzerOff();
+    if (strcmp(tokens[2], "ACTIVE") == 0) buzzerType = BUZZER_TYPE_ACTIVE;
+    else if (strcmp(tokens[2], "PASSIVE") == 0) buzzerType = BUZZER_TYPE_PASSIVE;
+    else {
+      Serial.println(F("@ERR,CFG,BUZZER"));
+      return;
+    }
+    Serial.print(F("@CFG,BUZZER,"));
+    Serial.println(buzzerTypeName());
     return;
   }
 
@@ -471,7 +532,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(250);
-  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.5"));
+  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.6"));
   sendInfo();
 }
 
