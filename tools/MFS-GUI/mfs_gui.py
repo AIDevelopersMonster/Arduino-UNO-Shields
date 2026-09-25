@@ -256,24 +256,20 @@ class MFSApp(tk.Tk):
     def _build_buzzer(self):
         ttk.Label(
             self.tab_buzzer,
-            text="Buzzer D3 — active buzzer primary control + PWM diagnostic",
+            text="Buzzer D3 — active buzzer",
             font=("Segoe UI", 14, "bold"),
         ).pack(pady=8)
 
-        active = ttk.LabelFrame(self.tab_buzzer, text="Active buzzer (primary)", padding=12)
-        active.pack(pady=12)
-        ttk.Button(active, text="ON", command=lambda: self.command("BUZ,ON")).pack(side="left", padx=5)
-        ttk.Button(active, text="OFF", command=lambda: self.command("BUZ,OFF")).pack(side="left", padx=5)
-        ttk.Button(active, text="BEEP 200 ms", command=lambda: self.command("BEEP,200")).pack(side="left", padx=5)
+        active = ttk.LabelFrame(self.tab_buzzer, text="Active buzzer control", padding=16)
+        active.pack(pady=20)
+        ttk.Button(active, text="ON", command=lambda: self.command("BUZ,ON")).pack(side="left", padx=8)
+        ttk.Button(active, text="OFF", command=lambda: self.command("BUZ,OFF")).pack(side="left", padx=8)
+        ttk.Button(active, text="BEEP 200 ms", command=lambda: self.command("BEEP,200")).pack(side="left", padx=8)
 
-        passive = ttk.LabelFrame(self.tab_buzzer, text="PWM / tone modulation diagnostic", padding=12)
-        passive.pack(pady=12)
-        ttk.Label(passive, text="Hz:").pack(side="left")
-        self.tone_freq = ttk.Entry(passive, width=8)
-        self.tone_freq.insert(0, "1000")
-        self.tone_freq.pack(side="left", padx=6)
-        ttk.Button(passive, text="TONE ON", command=self.tone_on).pack(side="left", padx=5)
-        ttk.Button(passive, text="TONE OFF", command=lambda: self.command("TONE,OFF")).pack(side="left", padx=5)
+        ttk.Label(
+            self.tab_buzzer,
+            text="Frequency control is intentionally disabled for this physical shield.",
+        ).pack(pady=8)
 
     def _build_system(self):
         info = ttk.Frame(self.tab_system)
@@ -335,13 +331,6 @@ class MFSApp(tk.Tk):
             return
         self.command("DISP," + value)
 
-    def tone_on(self):
-        try:
-            hz = max(30, min(5000, int(self.tone_freq.get())))
-        except ValueError:
-            hz = 1000
-        self.command(f"TONE,{hz}")
-
     def send_raw(self):
         line = self.raw_entry.get().strip()
         if line:
@@ -359,9 +348,9 @@ class MFSApp(tk.Tk):
         self.pot_stats.set(f"min {self.pot_min}   max {self.pot_max}")
 
     def _parse_state(self, line):
-        # @STATE,uptime,pot,b1,b2,b3,c1,c2,c3,l1,l2,l3,l4,buzmode,buzhz,display,test
-        parts = line.split(",", 16)
-        if len(parts) != 17:
+        # @STATE,uptime,pot,b1,b2,b3,c1,c2,c3,l1,l2,l3,l4,buzmode,display,test
+        parts = line.split(",", 15)
+        if len(parts) != 16:
             return
         try:
             self.uptime.set(parts[1] + " ms")
@@ -381,10 +370,9 @@ class MFSApp(tk.Tk):
                 self.overview_led_labels[i].configure(text=f"D{i + 1}: {'ON' if on else 'OFF'}")
 
             buz_mode = parts[13]
-            buz_hz = int(parts[14])
-            self.buzzer_state.set(f"{buz_mode} {buz_hz} Hz" if buz_hz else buz_mode)
-            self.display_state.set(parts[15])
-            self.test_state.set(parts[16])
+            self.buzzer_state.set(buz_mode)
+            self.display_state.set(parts[14])
+            self.test_state.set(parts[15])
         except (ValueError, IndexError):
             return
 
