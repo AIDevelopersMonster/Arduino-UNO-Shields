@@ -87,7 +87,6 @@ GUI: [tools/MFS-GUI](tools/MFS-GUI/)
 ## Status
 
 - **LAB-01** — W5100 + SD hardware diagnostics remain documented.
-- **LAB-02** — Multi-Function Shield bring-up and GUI integration are in bench-validation stage.
+- **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 
-Nothing in LAB-02 is marked hardware-certified until it has been checked on the
-physical shield used in this project.
+Optional IR, temperature, UART and external-GPIO interfaces remain for later stages.
