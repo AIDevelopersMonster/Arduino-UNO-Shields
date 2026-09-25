@@ -71,14 +71,16 @@ Bench-verified behavior:
 - D3 LOW -> quiet
 - frequency/PWM drive makes the buzzer much quieter
 
-For that reason frequency control is intentionally removed from the canonical
-firmware and GUI.
+For the installed part the default is therefore **ACTIVE**.
 
-Supported control:
+LAB-02 v0.6 also supports an explicitly selected **PASSIVE** mode for a future
+replacement part or another shield variant. The modes are mutually exclusive:
 
-- `BUZ,ON`
-- `BUZ,OFF`
-- `BEEP,<milliseconds>`
+- ACTIVE: `BUZ,ON`, `BUZ,OFF`, `BEEP,<milliseconds>`
+- PASSIVE: `TONE,<Hz>`, `TONE,OFF`
+
+Select with `CFG,BUZZER,ACTIVE` or `CFG,BUZZER,PASSIVE`. Switching type first
+forces the output OFF, so the two drive methods cannot overlap.
 
 ## Optional interfaces
 
