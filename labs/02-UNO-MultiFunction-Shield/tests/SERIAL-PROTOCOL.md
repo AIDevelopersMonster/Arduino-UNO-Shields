@@ -1,4 +1,4 @@
-# LAB-02 serial protocol v0.1
+# LAB-02 serial protocol v0.4
 
 Transport: USB serial, 115200 baud, ASCII, one command or event per line.
 
@@ -12,9 +12,9 @@ Transport: USB serial, 115200 baud, ASCII, one command or event per line.
 | `LED,1,ON` ... `LED,4,OFF` | control one LED |
 | `LED,ALL,ON` / `OFF` | control all four LEDs |
 | `DISP,1234` | put up to four numeric/minus characters on display |
-| `BUZ,ON` / `BUZ,OFF` | active-buzzer DC test |
-| `BEEP,200` | active-buzzer pulse, duration in ms |
-| `TONE,1000` | passive-buzzer tone test in Hz |
+| `BUZ,ON` / `BUZ,OFF` | primary active-buzzer control; D3 HIGH / LOW |
+| `BEEP,200` | primary short active-buzzer pulse, duration in ms |
+| `TONE,1000` | secondary PWM/modulation diagnostic in Hz |
 | `TONE,OFF` | stop tone |
 | `TEST,ALL` | start automated stimulus sequence |
 | `TEST,STOP` | stop automated sequence |
@@ -29,8 +29,8 @@ TONE frequency is clamped to 30..5000 Hz.
 Startup / info:
 
 ```text
-@SYS,READY,MFSHIELD,LAB02,0.1
-@SYS,MFSHIELD,LAB02,0.1,UNO,115200
+@SYS,READY,MFSHIELD,LAB02,0.4
+@SYS,MFSHIELD,LAB02,0.4,UNO,115200
 @PINS,BUZ=3,LATCH=4,CLK=7,DATA=8,LED=13/12/11/10,BTN=A1/A2/A3,POT=A0
 @CFG,DIGITSEL,STD
 ```
@@ -46,7 +46,7 @@ Where:
 - `b1..b3`: debounced pressed state, 0/1;
 - `c1..c3`: press counters;
 - `l1..l4`: commanded LED states, 0/1;
-- `buzzer_mode`: OFF, ACTIVE or TONE;
+- `buzzer_mode`: OFF, DC or TONE;
 - `display`: current four-character display buffer;
 - `test_state`: IDLE, DISPLAY, LED1..LED4, BUZZER, POT or DONE.
 
