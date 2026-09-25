@@ -77,13 +77,27 @@ digit-select polarity is wrong.
 
 ## Test 06 — buzzer
 
-Run both clone tests:
+Do **not** classify the part as active or passive from the `tone()` response
+alone.
 
-1. `BEEP,200` and `BUZ,ON` / `BUZ,OFF`
-2. `TONE,1000` / `TONE,OFF`
+Run two separate tests:
 
-Record which mode produces the intended sound. Do not infer buzzer type from the
-board family alone.
+1. DC test: `BUZ,ON` for at least 3 seconds, then `BUZ,OFF`.
+2. PWM/tone test: `TONE,500`, `TONE,1000`, `TONE,2000`, then `TONE,OFF`.
+
+Interpretation:
+
+- if a steady DC level produces a sustained tone, the assembly contains an
+  active buzzer or another self-oscillating driver stage;
+- if steady DC only clicks at transitions while `tone()` produces sustained
+  pitch, that is consistent with a passive transducer;
+- if both produce sustained sound, record both behaviours and do not infer
+  passive operation merely because the PWM/tone command changes the sound.
+
+For this physical sample the current observation is: steady DC produces a
+strong sustained sound **and** `tone()` changes the audible result. Therefore
+the buzzer remains **unclassified pending direct DC/PWM confirmation**, with
+active/self-oscillating behaviour currently more plausible.
 
 ## Test 07 — automated stimulus sequence
 
