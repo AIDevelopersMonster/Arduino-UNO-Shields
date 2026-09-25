@@ -77,27 +77,36 @@ digit-select polarity is wrong.
 
 ## Test 06 — buzzer
 
-Do **not** classify the part as active or passive from the `tone()` response
-alone.
+Current physical-sample evidence now favors an **active / self-oscillating
+buzzer path**.
 
-Run two separate tests:
+Observed on the bench:
 
-1. DC test: `BUZ,ON` for at least 3 seconds, then `BUZ,OFF`.
-2. PWM/tone test: `TONE,500`, `TONE,1000`, `TONE,2000`, then `TONE,OFF`.
+- steady DC drive produces a strong sustained sound;
+- `tone()` also changes the audible result;
+- after switching the main test to `tone()`, the apparent loudness dropped
+  by roughly a factor of three.
 
-Interpretation:
+That combination is much more consistent with an active/self-oscillating buzzer
+being PWM-gated by `tone()` than with a simple passive transducer.
 
-- if a steady DC level produces a sustained tone, the assembly contains an
-  active buzzer or another self-oscillating driver stage;
-- if steady DC only clicks at transitions while `tone()` produces sustained
-  pitch, that is consistent with a passive transducer;
-- if both produce sustained sound, record both behaviours and do not infer
-  passive operation merely because the PWM/tone command changes the sound.
+Canonical functional test:
 
-For this physical sample the current observation is: steady DC produces a
-strong sustained sound **and** `tone()` changes the audible result. Therefore
-the buzzer remains **unclassified pending direct DC/PWM confirmation**, with
-active/self-oscillating behaviour currently more plausible.
+1. `BUZ,ON`
+2. hold for about 1 second
+3. `BUZ,OFF`
+
+Expected result: strong sustained sound while ON, silence while OFF.
+
+Secondary diagnostic only:
+
+1. `TONE,500`
+2. `TONE,1000`
+3. `TONE,2000`
+4. `TONE,OFF`
+
+The tone test may change the perceived sound, but it is not used to classify this
+sample as passive.
 
 ## Test 07 — automated stimulus sequence
 
@@ -110,7 +119,7 @@ Expected order:
 3. LED D2;
 4. LED D3;
 5. LED D4;
-6. active-buzzer stimulus;
+6. active-buzzer DC stimulus;
 7. current potentiometer value on the display;
 8. `@TEST,DONE`.
 
