@@ -48,7 +48,7 @@ Optional future interfaces:
 | LM35 / DS18B20 | A4 |
 | APC220 / Bluetooth / voice UART | D0 / D1 |
 
-## Stage A — unified onboard test
+## Stage A — unified onboard test — PASS
 
 Firmware:
 
@@ -65,8 +65,8 @@ The first bench session checks:
 - independent control of D1-D4;
 - live state of S1-S3 with debounce and press counters;
 - A0 potentiometer raw range and min/max;
-- active-buzzer behavior;
-- passive-buzzer tone behavior;
+- active-buzzer behavior on the installed sample;
+- mutually exclusive ACTIVE/PASSIVE buzzer selection;
 - repeatability of the automated visual test sequence.
 
 ## Why the auto test does not print PASS automatically
@@ -94,7 +94,7 @@ physically added and tested.
 
 ## Stage B — optional interfaces
 
-After Stage A is certified, add separate test steps for:
+Stage A is bench-certified. Next, add separate test steps for:
 
 1. D2 IR receiver
 2. A4 LM35
