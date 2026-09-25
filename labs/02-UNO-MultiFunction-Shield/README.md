@@ -14,6 +14,12 @@ The same firmware can be controlled in two ways:
 The GUI is not required for the hardware to work. It is a visual front end over
 a documented serial protocol.
 
+## Video
+
+YouTube demonstration of this laboratory:
+
+https://youtu.be/0DewQsXFlpI
+
 ## Hardware
 
 - Arduino UNO compatible board
