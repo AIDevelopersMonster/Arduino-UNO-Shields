@@ -60,15 +60,27 @@ There are known shield clones with different display or digit-select polarity.
 LAB-02 therefore includes a runtime `STD / INV` digit-select diagnostic switch.
 We will keep the setting at **STD** unless the physical sample proves otherwise.
 
-## Buzzer clone note
+## Buzzer — physical-sample status
 
-Both active- and passive-buzzer variants of this shield family exist. LAB-02
-supports two explicit tests:
+The buzzer type is **not yet certified**.
 
-- active mode: D3 asserted LOW;
-- passive mode: Arduino `tone()` on D3.
+Bench observations currently show both behaviours:
 
-The physical sample determines which behavior is canonical for this repository.
+- a steady DC command can produce a strong sustained audible tone;
+- Arduino `tone()` commands also change the audible result.
+
+A purely passive transducer should not sustain a tone from a constant DC level;
+it should only react to transitions. Therefore the sustained sound under a
+steady logic level is strong evidence for either an **active buzzer** or an
+on-board self-oscillating driver stage.
+
+The fact that `tone()` changes the sound does **not by itself prove a passive
+buzzer**. PWM/tone drive can gate or modulate an active buzzer and produce a
+different perceived pitch or beat pattern.
+
+Current canonical status: **active/self-oscillating behaviour is more likely,
+but the part is left unclassified until a direct DC-vs-PWM bench test is
+recorded.**
 
 ## Optional interfaces
 
