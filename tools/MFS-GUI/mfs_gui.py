@@ -256,17 +256,17 @@ class MFSApp(tk.Tk):
     def _build_buzzer(self):
         ttk.Label(
             self.tab_buzzer,
-            text="Buzzer D3 — active and passive clone tests",
+            text="Buzzer D3 — active buzzer primary control + PWM diagnostic",
             font=("Segoe UI", 14, "bold"),
         ).pack(pady=8)
 
-        active = ttk.LabelFrame(self.tab_buzzer, text="Active-buzzer mode", padding=12)
+        active = ttk.LabelFrame(self.tab_buzzer, text="Active buzzer (primary)", padding=12)
         active.pack(pady=12)
         ttk.Button(active, text="ON", command=lambda: self.command("BUZ,ON")).pack(side="left", padx=5)
         ttk.Button(active, text="OFF", command=lambda: self.command("BUZ,OFF")).pack(side="left", padx=5)
         ttk.Button(active, text="BEEP 200 ms", command=lambda: self.command("BEEP,200")).pack(side="left", padx=5)
 
-        passive = ttk.LabelFrame(self.tab_buzzer, text="Passive-buzzer tone mode", padding=12)
+        passive = ttk.LabelFrame(self.tab_buzzer, text="PWM / tone modulation diagnostic", padding=12)
         passive.pack(pady=12)
         ttk.Label(passive, text="Hz:").pack(side="left")
         self.tone_freq = ttk.Entry(passive, width=8)
