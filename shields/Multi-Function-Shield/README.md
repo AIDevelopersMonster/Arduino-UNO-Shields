@@ -60,28 +60,25 @@ There are known shield clones with different display or digit-select polarity.
 LAB-02 therefore includes a runtime `STD / INV` digit-select diagnostic switch.
 We will keep the setting at **STD** unless the physical sample proves otherwise.
 
-## Buzzer — bench-verified behavior
+## Buzzer — bench-verified active mode
 
-The current physical sample behaves as an **active / self-oscillating buzzer
-path** for practical purposes.
+For this physical sample we use the buzzer strictly as an **active /
+self-oscillating buzzer**.
 
-Bench evidence:
+Bench-verified behavior:
 
-- D3 HIGH gives a strong sustained sound;
-- D3 LOW is quiet;
-- Arduino `tone()` changes the audible result, but the sound becomes roughly
-  three times quieter than under steady DC drive.
+- D3 HIGH -> strong sustained sound
+- D3 LOW -> quiet
+- frequency/PWM drive makes the buzzer much quieter
 
-This is not the behavior expected from a simple passive sounder driven only by
-DC. The most useful interpretation is that the board contains an active buzzer
-or equivalent self-oscillating stage, while `tone()` merely gates/modulates it.
+For that reason frequency control is intentionally removed from the canonical
+firmware and GUI.
 
-Canonical LAB-02 control is therefore:
+Supported control:
 
-- `BUZ,ON` -> D3 HIGH
-- `BUZ,OFF` -> D3 LOW
-
-The `TONE` commands are retained only as an additional modulation diagnostic.
+- `BUZ,ON`
+- `BUZ,OFF`
+- `BEEP,<milliseconds>`
 
 ## Optional interfaces
 
