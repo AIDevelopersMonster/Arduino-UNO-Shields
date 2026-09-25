@@ -77,6 +77,7 @@ class MFSApp(tk.Tk):
         self.button_count = [tk.IntVar(value=0) for _ in range(3)]
         self.led_state = [tk.BooleanVar(value=False) for _ in range(4)]
         self.buzzer_state = tk.StringVar(value="OFF")
+        self.buzzer_type = tk.StringVar(value="ACTIVE")
         self.display_state = tk.StringVar(value="0000")
         self.log_telemetry = tk.BooleanVar(value=False)
 
@@ -256,20 +257,46 @@ class MFSApp(tk.Tk):
     def _build_buzzer(self):
         ttk.Label(
             self.tab_buzzer,
-            text="Buzzer D3 — active buzzer",
+            text="Buzzer D3 — choose installed type",
             font=("Segoe UI", 14, "bold"),
         ).pack(pady=8)
 
-        active = ttk.LabelFrame(self.tab_buzzer, text="Active buzzer control", padding=16)
-        active.pack(pady=20)
-        ttk.Button(active, text="ON", command=lambda: self.command("BUZ,ON")).pack(side="left", padx=8)
-        ttk.Button(active, text="OFF", command=lambda: self.command("BUZ,OFF")).pack(side="left", padx=8)
-        ttk.Button(active, text="BEEP 200 ms", command=lambda: self.command("BEEP,200")).pack(side="left", padx=8)
+        selector = ttk.LabelFrame(self.tab_buzzer, text="Installed buzzer type", padding=12)
+        selector.pack(pady=10)
+        ttk.Radiobutton(
+            selector, text="ACTIVE", value="ACTIVE",
+            variable=self.buzzer_type, command=self.set_buzzer_type
+        ).pack(side="left", padx=12)
+        ttk.Radiobutton(
+            selector, text="PASSIVE", value="PASSIVE",
+            variable=self.buzzer_type, command=self.set_buzzer_type
+        ).pack(side="left", padx=12)
+
+        self.active_box = ttk.LabelFrame(self.tab_buzzer, text="Active buzzer", padding=14)
+        self.active_box.pack(pady=10)
+        self.active_on = ttk.Button(self.active_box, text="ON", command=lambda: self.command("BUZ,ON"))
+        self.active_on.pack(side="left", padx=6)
+        self.active_off = ttk.Button(self.active_box, text="OFF", command=lambda: self.command("BUZ,OFF"))
+        self.active_off.pack(side="left", padx=6)
+        self.active_beep = ttk.Button(self.active_box, text="BEEP 200 ms", command=lambda: self.command("BEEP,200"))
+        self.active_beep.pack(side="left", padx=6)
+
+        self.passive_box = ttk.LabelFrame(self.tab_buzzer, text="Passive buzzer", padding=14)
+        self.passive_box.pack(pady=10)
+        ttk.Label(self.passive_box, text="Frequency, Hz:").pack(side="left")
+        self.tone_freq = ttk.Entry(self.passive_box, width=8)
+        self.tone_freq.insert(0, "1000")
+        self.tone_freq.pack(side="left", padx=6)
+        self.tone_on_btn = ttk.Button(self.passive_box, text="TONE ON", command=self.tone_on)
+        self.tone_on_btn.pack(side="left", padx=6)
+        self.tone_off_btn = ttk.Button(self.passive_box, text="TONE OFF", command=lambda: self.command("TONE,OFF"))
+        self.tone_off_btn.pack(side="left", padx=6)
 
         ttk.Label(
             self.tab_buzzer,
-            text="Frequency control is intentionally disabled for this physical shield.",
+            text="Modes are mutually exclusive: ACTIVE commands cannot drive PASSIVE mode and vice versa.",
         ).pack(pady=8)
+        self.update_buzzer_controls()
 
     def _build_system(self):
         info = ttk.Frame(self.tab_system)
@@ -331,6 +358,26 @@ class MFSApp(tk.Tk):
             return
         self.command("DISP," + value)
 
+    def set_buzzer_type(self):
+        mode = self.buzzer_type.get()
+        self.command(f"CFG,BUZZER,{mode}")
+        self.update_buzzer_controls()
+
+    def update_buzzer_controls(self):
+        active = self.buzzer_type.get() == "ACTIVE"
+        for widget in (self.active_on, self.active_off, self.active_beep):
+            widget.configure(state="normal" if active else "disabled")
+        self.tone_freq.configure(state="disabled" if active else "normal")
+        self.tone_on_btn.configure(state="disabled" if active else "normal")
+        self.tone_off_btn.configure(state="disabled" if active else "normal")
+
+    def tone_on(self):
+        try:
+            hz = max(30, min(5000, int(self.tone_freq.get())))
+        except ValueError:
+            hz = 1000
+        self.command(f"TONE,{hz}")
+
     def send_raw(self):
         line = self.raw_entry.get().strip()
         if line:
@@ -391,6 +438,11 @@ class MFSApp(tk.Tk):
                     if self.log_telemetry.get():
                         self._add_log("< " + line)
                 else:
+                    if line.startswith("@CFG,BUZZER,"):
+                        mode = line.rsplit(",", 1)[-1]
+                        if mode in ("ACTIVE", "PASSIVE"):
+                            self.buzzer_type.set(mode)
+                            self.update_buzzer_controls()
                     self._add_log("< " + line)
                 if line.startswith("@LOCALERR,"):
                     self.status.set("SERIAL ERROR")
