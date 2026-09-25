@@ -60,27 +60,28 @@ There are known shield clones with different display or digit-select polarity.
 LAB-02 therefore includes a runtime `STD / INV` digit-select diagnostic switch.
 We will keep the setting at **STD** unless the physical sample proves otherwise.
 
-## Buzzer — physical-sample status
+## Buzzer — bench-verified behavior
 
-The buzzer type is **not yet certified**.
+The current physical sample behaves as an **active / self-oscillating buzzer
+path** for practical purposes.
 
-Bench observations currently show both behaviours:
+Bench evidence:
 
-- a steady DC command can produce a strong sustained audible tone;
-- Arduino `tone()` commands also change the audible result.
+- D3 HIGH gives a strong sustained sound;
+- D3 LOW is quiet;
+- Arduino `tone()` changes the audible result, but the sound becomes roughly
+  three times quieter than under steady DC drive.
 
-A purely passive transducer should not sustain a tone from a constant DC level;
-it should only react to transitions. Therefore the sustained sound under a
-steady logic level is strong evidence for either an **active buzzer** or an
-on-board self-oscillating driver stage.
+This is not the behavior expected from a simple passive sounder driven only by
+DC. The most useful interpretation is that the board contains an active buzzer
+or equivalent self-oscillating stage, while `tone()` merely gates/modulates it.
 
-The fact that `tone()` changes the sound does **not by itself prove a passive
-buzzer**. PWM/tone drive can gate or modulate an active buzzer and produce a
-different perceived pitch or beat pattern.
+Canonical LAB-02 control is therefore:
 
-Current canonical status: **active/self-oscillating behaviour is more likely,
-but the part is left unclassified until a direct DC-vs-PWM bench test is
-recorded.**
+- `BUZ,ON` -> D3 HIGH
+- `BUZ,OFF` -> D3 LOW
+
+The `TONE` commands are retained only as an additional modulation diagnostic.
 
 ## Optional interfaces
 
