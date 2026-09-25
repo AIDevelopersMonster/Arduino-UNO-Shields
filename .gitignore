@@ -6,6 +6,11 @@ build/
 *.map
 *.bin
 
+# Python test tools
+__pycache__/
+*.py[cod]
+.venv/
+
 # IDE / OS temporary files
 .arduinoIDE/
 .DS_Store
