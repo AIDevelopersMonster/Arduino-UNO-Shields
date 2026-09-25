@@ -75,6 +75,8 @@ See: [labs/02-UNO-MultiFunction-Shield](labs/02-UNO-MultiFunction-Shield/)
 
 GUI: [tools/MFS-GUI](tools/MFS-GUI/)
 
+Video: https://youtu.be/0DewQsXFlpI
+
 ## Project structure
 
 - `boards/` — Arduino UNO boards and hardware notes
