@@ -233,7 +233,7 @@ static void serviceInputs() {
 }
 
 static void sendInfo() {
-  Serial.println(F("@SYS,MFSHIELD,LAB02,0.2,UNO,115200"));
+  Serial.println(F("@SYS,MFSHIELD,LAB02,0.3,UNO,115200"));
   Serial.println(F("@PINS,BUZ=3,LATCH=4,CLK=7,DATA=8,LED=13/12/11/10,BTN=A1/A2/A3,POT=A0"));
   Serial.print(F("@CFG,DIGITSEL,"));
   Serial.println(invertDigitSelect ? F("INV") : F("STD"));
@@ -492,7 +492,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(250);
-  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.2"));
+  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.3"));
   sendInfo();
 }
 
