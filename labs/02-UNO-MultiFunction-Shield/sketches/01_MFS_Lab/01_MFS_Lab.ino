@@ -233,7 +233,7 @@ static void serviceInputs() {
 }
 
 static void sendInfo() {
-  Serial.println(F("@SYS,MFSHIELD,LAB02,0.3,UNO,115200"));
+  Serial.println(F("@SYS,MFSHIELD,LAB02,0.4,UNO,115200"));
   Serial.println(F("@PINS,BUZ=3,LATCH=4,CLK=7,DATA=8,LED=13/12/11/10,BTN=A1/A2/A3,POT=A0"));
   Serial.print(F("@CFG,DIGITSEL,"));
   Serial.println(invertDigitSelect ? F("INV") : F("STD"));
@@ -307,14 +307,15 @@ static void serviceAutoTest() {
 
     case TEST_LED4:
       setAllLeds(false);
-      // Our physical sample changes pitch with tone(), which strongly indicates
-      // a passive transducer. Use a 1 kHz tone as the canonical auto-test.
-      buzzerToneOn(1000);
-      buzzerStopAtMs = now + 250UL;
+      // Bench result: steady DC drive is much louder than tone() PWM on this
+      // physical sample. Treat the buzzer as active/self-oscillating for the
+      // canonical functional test. tone() remains available as a diagnostic.
+      buzzerActiveOn();
+      buzzerStopAtMs = now + 500UL;
       setDisplayText("0000");
       testStep = TEST_BUZZER;
-      testDeadlineMs = now + 350UL;
-      Serial.println(F("@TEST,BUZZER,TONE,1000"));
+      testDeadlineMs = now + 600UL;
+      Serial.println(F("@TEST,BUZZER,ACTIVE"));
       break;
 
     case TEST_BUZZER:
@@ -492,7 +493,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(250);
-  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.3"));
+  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.4"));
   sendInfo();
 }
 
