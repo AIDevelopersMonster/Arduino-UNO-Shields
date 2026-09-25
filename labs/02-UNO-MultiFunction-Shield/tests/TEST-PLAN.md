@@ -77,36 +77,26 @@ digit-select polarity is wrong.
 
 ## Test 06 — buzzer
 
-Current physical-sample evidence now favors an **active / self-oscillating
-buzzer path**.
+The physical sample is treated as an **active / self-oscillating buzzer**.
 
-Observed on the bench:
+Bench result:
 
-- steady DC drive produces a strong sustained sound;
-- `tone()` also changes the audible result;
-- after switching the main test to `tone()`, the apparent loudness dropped
-  by roughly a factor of three.
+- D3 HIGH gives a strong sustained sound;
+- D3 LOW is quiet;
+- applying frequency/PWM control caused a large drop in loudness.
 
-That combination is much more consistent with an active/self-oscillating buzzer
-being PWM-gated by `tone()` than with a simple passive transducer.
+Therefore frequency control has been removed from both the firmware protocol and
+the GUI for this shield.
 
-Canonical functional test:
+Canonical test:
 
 1. `BUZ,ON`
 2. hold for about 1 second
 3. `BUZ,OFF`
+4. `BEEP,200`
 
-Expected result: strong sustained sound while ON, silence while OFF.
-
-Secondary diagnostic only:
-
-1. `TONE,500`
-2. `TONE,1000`
-3. `TONE,2000`
-4. `TONE,OFF`
-
-The tone test may change the perceived sound, but it is not used to classify this
-sample as passive.
+Pass condition: strong sustained sound while ON, silence while OFF, and a clear
+short beep from `BEEP,200`.
 
 ## Test 07 — automated stimulus sequence
 
