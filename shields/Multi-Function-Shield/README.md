@@ -82,6 +82,74 @@ replacement part or another shield variant. The modes are mutually exclusive:
 Select with `CFG,BUZZER,ACTIVE` or `CFG,BUZZER,PASSIVE`. Switching type first
 forces the output OFF, so the two drive methods cannot overlap.
 
+## APC220 / Bluetooth / Voice Recognition header
+
+The 7-pin header marked for APC220 / Bluetooth / Voice Recognition is not a
+separate bus. On the classic Funduino-style shield it exposes the Arduino UNO
+hardware UART together with power.
+
+Common family-level pinout, numbered as documented for the Funduino version:
+
+| Header pin | Signal |
+| ---: | --- |
+| 1 | GND |
+| 2 | +5 V |
+| 3 | NC |
+| 4 | Arduino D1 / TX |
+| 5 | Arduino D0 / RX |
+| 6 | NC |
+| 7 | NC |
+
+For a generic TTL-UART module the signal connection is crossed in the usual
+way: Arduino TX (D1) -> module RX, Arduino RX (D0) <- module TX, and GND must be
+common.
+
+Important: D0/D1 are the same hardware UART used by the UNO USB-serial path.
+External devices on this header can therefore interfere with upload, Serial
+Monitor, the LAB-02 GUI, or other USB serial diagnostics. Disconnect the
+external UART module during upload unless its interface is known not to drive
+the lines.
+
+The exact physical orientation of pin 1 on a clone must be confirmed from
+silkscreen/continuity before applying power.
+
+## Jumpers J1 and J2
+
+For the common Funduino-style schematic:
+
+- **J1** connects a 10 kOhm pull-up resistor from +5 V to **A4**, the signal pin
+  of the U5 `18B20 / LM35` header.
+- **J2** connects 10 kOhm pull-up resistors to the three button inputs
+  **A1 / A2 / A3**.
+
+Practical use:
+
+- **DS18B20 on A4:** J1 closed is useful because the 1-Wire data line needs a
+  pull-up.
+- **LM35 on A4:** J1 should normally be open/removed because the analog LM35
+  output should not be biased by that pull-up.
+- **Buttons S1-S3:** with J2 closed, the shield provides external pull-ups and a
+  pressed button reads LOW.
+- LAB-02 firmware uses Arduino `INPUT_PULLUP` for A1-A3, so the buttons can
+  still work with J2 open; J2 is therefore not required by our firmware.
+
+### Clone/revision warning
+
+At least one published clone description swaps the **J1/J2 designators** while
+describing the same two functions. Therefore the labels must not be treated as
+universal across every Multi-Function Shield revision.
+
+For this repository the common Funduino convention is used as the working
+reference:
+
+```text
+J1 -> A4 10 kOhm pull-up (DS18B20 / LM35 header)
+J2 -> A1/A2/A3 button pull-ups
+```
+
+The exact mapping on our physical sample should be promoted to bench-verified
+only after continuity measurement.
+
 ## Optional interfaces
 
 The first LAB-02 stage intentionally leaves these disconnected:
@@ -101,6 +169,8 @@ They will be added only after the onboard hardware path is verified.
   https://blog.jeronimus.net/2017/04/arduino-multi-function-shield.html
 - ArduinoGetStarted — Multi-Function Shield:
   https://arduinogetstarted.com/tutorials/arduino-multi-function-shield
+- FyzKAB — Funduino Multi-function Shield description and corrected pin map:
+  https://kabinet.fyzika.net/dilna/ARDUINO/funduino-popis.php
 
 External references establish the family-level map. Repository results establish
 what is actually true for our physical sample.
