@@ -6,6 +6,10 @@ Video-friendly desktop GUI for
 The GUI is intentionally thin. Hardware logic remains in the Arduino firmware
 and all control uses the documented ASCII serial protocol.
 
+For the physical LAB-02 shield, buzzer frequency control is intentionally not
+exposed because PWM/tone drive sharply reduces loudness; the buzzer is used as
+active ON/OFF only.
+
 ## Requirements
 
 - Windows 10 or another desktop OS with Python 3
@@ -38,7 +42,7 @@ Or:
 - BUTTONS — live state plus press counters
 - POT A0 — raw ADC, percentage and observed min/max
 - DISPLAY — direct values and digit-select clone diagnostic
-- BUZZER — separate active and passive-clone tests
+- BUZZER — active buzzer ON/OFF and short beep
 - SYSTEM — protocol log and raw command entry
 
 ## First connection
