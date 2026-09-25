@@ -67,12 +67,10 @@ static uint8_t serialLineLen = 0;
 
 enum BuzzerMode : uint8_t {
   BUZZER_OFF = 0,
-  BUZZER_ACTIVE = 1,
-  BUZZER_TONE = 2
+  BUZZER_ACTIVE = 1
 };
 
 static BuzzerMode buzzerMode = BUZZER_OFF;
-static uint16_t buzzerHz = 0;
 static unsigned long buzzerStopAtMs = 0;
 
 enum TestStep : uint8_t {
@@ -96,8 +94,7 @@ static bool deadlineReached(unsigned long now, unsigned long deadline) {
 
 static const __FlashStringHelper *buzzerModeName() {
   switch (buzzerMode) {
-    case BUZZER_ACTIVE: return F("DC");
-    case BUZZER_TONE: return F("TONE");
+    case BUZZER_ACTIVE: return F("ACTIVE");
     default: return F("OFF");
   }
 }
@@ -178,7 +175,6 @@ static void buzzerOff() {
   // Bench-verified on our physical shield: D3 LOW = buzzer OFF.
   digitalWrite(PIN_BUZZER, LOW);
   buzzerMode = BUZZER_OFF;
-  buzzerHz = 0;
   buzzerStopAtMs = 0;
 }
 
@@ -188,15 +184,6 @@ static void buzzerActiveOn() {
   digitalWrite(PIN_BUZZER, HIGH);
   buzzerMode = BUZZER_ACTIVE;
   buzzerHz = 0;
-  buzzerStopAtMs = 0;
-}
-
-static void buzzerToneOn(uint16_t hz) {
-  if (hz < 30) hz = 30;
-  if (hz > 5000) hz = 5000;
-  tone(PIN_BUZZER, hz);
-  buzzerMode = BUZZER_TONE;
-  buzzerHz = hz;
   buzzerStopAtMs = 0;
 }
 
@@ -233,7 +220,7 @@ static void serviceInputs() {
 }
 
 static void sendInfo() {
-  Serial.println(F("@SYS,MFSHIELD,LAB02,0.4,UNO,115200"));
+  Serial.println(F("@SYS,MFSHIELD,LAB02,0.5,UNO,115200"));
   Serial.println(F("@PINS,BUZ=3,LATCH=4,CLK=7,DATA=8,LED=13/12/11/10,BTN=A1/A2/A3,POT=A0"));
   Serial.print(F("@CFG,DIGITSEL,"));
   Serial.println(invertDigitSelect ? F("INV") : F("STD"));
@@ -255,7 +242,6 @@ static void sendState() {
   }
 
   Serial.print(buzzerModeName()); Serial.print(',');
-  Serial.print(buzzerHz); Serial.print(',');
   Serial.print(displayText); Serial.print(',');
   Serial.println(testStepName());
 }
@@ -307,9 +293,8 @@ static void serviceAutoTest() {
 
     case TEST_LED4:
       setAllLeds(false);
-      // Bench result: steady DC drive is much louder than tone() PWM on this
-      // physical sample. Treat the buzzer as active/self-oscillating for the
-      // canonical functional test. tone() remains available as a diagnostic.
+      // Bench-verified behavior: this physical sample is used as an active
+      // buzzer only. Frequency/PWM control is intentionally not supported.
       buzzerActiveOn();
       buzzerStopAtMs = now + 500UL;
       setDisplayText("0000");
@@ -419,13 +404,6 @@ static void handleCommand(char *line) {
     return;
   }
 
-  if (strcmp(tokens[0], "TONE") == 0 && count >= 2) {
-    if (strcmp(tokens[1], "OFF") == 0) buzzerOff();
-    else buzzerToneOn((uint16_t)atoi(tokens[1]));
-    ack(F("TONE"));
-    return;
-  }
-
   if (strcmp(tokens[0], "TEST") == 0 && count >= 2) {
     if (strcmp(tokens[1], "ALL") == 0) {
       startAutoTest();
@@ -493,7 +471,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(250);
-  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.4"));
+  Serial.println(F("@SYS,READY,MFSHIELD,LAB02,0.5"));
   sendInfo();
 }
 
