@@ -17,8 +17,8 @@ Record at minimum:
 | VR / A0 min-max | PENDING | |
 | Display digit order | PENDING | |
 | Display digit-select STD/INV | PENDING | |
-| Buzzer active mode | PENDING | |
-| Buzzer tone mode | PENDING | |
+| Buzzer DC behaviour | OBSERVED | Steady DC command produces strong sustained sound; this argues against a purely passive transducer. |
+| Buzzer tone/PWM behaviour | OBSERVED | Changing tone() frequency changes the audible result, but this alone does not prove a passive buzzer. |
 | Full stimulus sequence | PENDING | |
 
 Do not replace PENDING with PASS until the observed physical result is recorded.
