@@ -13,7 +13,7 @@
 1. Upload `01_MFS_Lab.ino`.
 2. Open a 115200-baud terminal.
 3. Reset the UNO.
-4. Confirm `@SYS,READY,MFSHIELD,LAB02,0.1`.
+4. Confirm `@SYS,READY,MFSHIELD,LAB02,0.6`.
 5. Send `PING`; expect `@PONG`.
 6. Send `INFO`; record the reported configuration.
 
@@ -77,26 +77,25 @@ digit-select polarity is wrong.
 
 ## Test 06 — buzzer
 
-The physical sample is treated as an **active / self-oscillating buzzer**.
+The current physical sample is active/self-oscillating, so use:
 
-Bench result:
-
-- D3 HIGH gives a strong sustained sound;
-- D3 LOW is quiet;
-- applying frequency/PWM control caused a large drop in loudness.
-
-Therefore frequency control has been removed from both the firmware protocol and
-the GUI for this shield.
-
-Canonical test:
-
-1. `BUZ,ON`
-2. hold for about 1 second
+1. `CFG,BUZZER,ACTIVE`
+2. `BUZ,ON`
 3. `BUZ,OFF`
 4. `BEEP,200`
 
 Pass condition: strong sustained sound while ON, silence while OFF, and a clear
-short beep from `BEEP,200`.
+short beep.
+
+For a future passive replacement or shield variant, switch explicitly:
+
+1. `CFG,BUZZER,PASSIVE`
+2. `TONE,500`
+3. `TONE,1000`
+4. `TONE,2000`
+5. `TONE,OFF`
+
+The firmware prevents ACTIVE and PASSIVE drive commands from overlapping.
 
 ## Test 07 — automated stimulus sequence
 
