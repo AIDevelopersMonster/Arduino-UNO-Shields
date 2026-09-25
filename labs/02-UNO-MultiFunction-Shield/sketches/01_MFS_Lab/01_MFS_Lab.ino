@@ -175,7 +175,8 @@ static void serviceDisplay() {
 
 static void buzzerOff() {
   noTone(PIN_BUZZER);
-  digitalWrite(PIN_BUZZER, HIGH);
+  // Bench-verified on our physical shield: D3 LOW = buzzer OFF.
+  digitalWrite(PIN_BUZZER, LOW);
   buzzerMode = BUZZER_OFF;
   buzzerHz = 0;
   buzzerStopAtMs = 0;
@@ -183,7 +184,8 @@ static void buzzerOff() {
 
 static void buzzerActiveOn() {
   noTone(PIN_BUZZER);
-  digitalWrite(PIN_BUZZER, LOW);
+  // Bench-verified on our physical shield: D3 HIGH = buzzer ON.
+  digitalWrite(PIN_BUZZER, HIGH);
   buzzerMode = BUZZER_ACTIVE;
   buzzerHz = 0;
   buzzerStopAtMs = 0;
@@ -472,8 +474,9 @@ void setup() {
   pinMode(PIN_CLOCK, OUTPUT);
   pinMode(PIN_DATA, OUTPUT);
 
-  // Set buzzer OFF before switching the pin to output to avoid a startup chirp.
-  digitalWrite(PIN_BUZZER, HIGH);
+  // Bench-verified polarity for this physical shield: LOW = OFF, HIGH = ON.
+  // Set OFF before switching the pin to output to avoid a startup chirp.
+  digitalWrite(PIN_BUZZER, LOW);
   pinMode(PIN_BUZZER, OUTPUT);
 
   for (uint8_t i = 0; i < 4; ++i) {
