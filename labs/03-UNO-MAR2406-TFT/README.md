@@ -106,6 +106,24 @@ Procedure:
 
 `tests/TEST-04B-RAW-TOUCH-ALTERNATE.md`
 
+## TEST-04C — guided touch capture — READY FOR BENCH
+
+TEST-04C replaces the continuous stream with a human-guided five-point capture.
+
+Touch mapping returns to:
+
+`XP=D8, XM=A2, YP=A3, YM=D9`
+
+The operator holds the stylus and sends one digit; the firmware prints one median X/Y/Z result. No idle values are streamed.
+
+Firmware:
+
+`sketches/04C_Guided_Touch_Capture/04C_Guided_Touch_Capture.ino`
+
+Procedure:
+
+`tests/TEST-04C-GUIDED-TOUCH.md`
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -122,4 +140,4 @@ Procedure:
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is TEST-04B bench confirmation of two independent touch axes.
+The next certification event is the five-point TEST-04C guided capture.
