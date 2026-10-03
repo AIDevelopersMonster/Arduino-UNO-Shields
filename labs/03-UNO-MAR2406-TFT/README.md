@@ -86,6 +86,26 @@ TEST-04 starts from the likely shared-pin arrangement `XP=D8, XM=A2, YP=A3, YM=D
 
 No calibration constants are assumed in this stage.
 
+## TEST-04A — raw touch candidate A — INCONCLUSIVE
+
+Bench data showed only one useful changing axis. Candidate A `XP=D8, XM=A2, YP=A3, YM=D9` is rejected for calibration.
+
+Result: `results/TEST-04A-RAW-TOUCH.md`
+
+## TEST-04B — alternate raw touch mapping — READY FOR BENCH
+
+Candidate B:
+
+`XP=D9, YP=A2, XM=A3, YM=D8`
+
+Firmware:
+
+`sketches/04B_Raw_Touch_Alternate/04B_Raw_Touch_Alternate.ino`
+
+Procedure:
+
+`tests/TEST-04B-RAW-TOUCH-ALTERNATE.md`
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -102,4 +122,4 @@ No calibration constants are assumed in this stage.
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is bench confirmation of the TEST-04 touch wiring and raw ADC ranges.
+The next certification event is TEST-04B bench confirmation of two independent touch axes.
