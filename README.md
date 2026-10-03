@@ -55,7 +55,7 @@ See: [shields/Multi-Function-Shield](shields/Multi-Function-Shield/)
 ### Shield 03 — MAR2406 2.4-inch TFT Touch
 
 - 240 x 320 TFT
-- package marking: ILI9341
+- ILI9341 controller (bench-confirmed in LAB-03)
 - 8-bit parallel LCD bus
 - resistive touch panel
 - microSD slot
@@ -107,6 +107,6 @@ See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 
 - **LAB-01** — W5100 + SD hardware diagnostics remain documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
-- **LAB-03** — MAR2406 TFT Touch laboratory started; hardware documentation and initial test plan added.
+- **LAB-03** — MAR2406 TFT Touch: TEST-01 PASS, physical ILI9341 controller confirmed; TEST-02 graphics smoke test ready.
 
 Optional IR, temperature, UART and external-GPIO interfaces for LAB-02 remain for later stages.
