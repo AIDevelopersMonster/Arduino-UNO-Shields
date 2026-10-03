@@ -13,8 +13,8 @@ It is not just another synthetic hardware check. The sketch implements a complet
 - append-only game log;
 - history rebuilt after reset or power loss;
 - complete move sequence stored for every finished game;
-- CRC-8 on every record;
-- damaged or truncated records are ignored during history reconstruction;
+- compact append-only text records sized for Arduino UNO flash limits;
+- malformed or truncated records are ignored during history reconstruction;
 - no Arduino `String` objects are used;
 - fixed-size buffers are used to keep SRAM consumption predictable on the ATmega328P.
 
@@ -63,22 +63,20 @@ The file is append-only during normal gameplay.
 Record format:
 
 ```text
-G,<game>,<result>,<moves>,<sequence>,<crc8>
+<result>,<sequence>
 ```
 
 Example:
 
 ```text
-G,12,X,5,0-3-1-4-2,6A
+X,03142
 ```
 
 Where:
 
-- `game` is the persistent game number;
 - `result` is `X`, `O`, or `D` for draw;
-- `moves` is the number of moves;
-- `sequence` stores board cells 0..8 in played order;
-- `crc8` protects the record payload.
+- `sequence` stores board cells `0..8` in played order;
+- the game number is reconstructed by counting valid completed records.
 
 ## Startup behavior
 
@@ -137,6 +135,19 @@ The test is considered passed only after all of the following are physically ver
 7. a finished game is appended to `XOLOG.CSV`;
 8. the saved record contains the complete move sequence;
 9. after power cycling the UNO, the previous statistics and last result are restored;
-10. a deliberately damaged record is ignored rather than corrupting the reconstructed history.
+10. a deliberately malformed or truncated record is ignored rather than corrupting the reconstructed history.
 
 Passing TEST-08 demonstrates a complete persistent application using LCD + touch + microSD on the tested Arduino UNO + MAR2406 combination.
+
+
+## Verified build size
+
+Bench build on Arduino AVR core 1.8.8:
+
+```text
+Program storage: 30746 / 32256 bytes (95%)
+Global variables: 1106 / 2048 bytes (54%)
+Free SRAM reported by linker: 942 bytes
+```
+
+The optimized TEST-08 therefore fits the Arduino UNO. Flash headroom is 1510 bytes, so this sketch is treated as a feature-complete bench demonstrator rather than a base for substantial additional features.
