@@ -81,3 +81,12 @@ Reference implementation reviewed during the LAB-03 work:
 - Upstream source repository by Aditya Agarwal: https://github.com/Aditya-A-garwal/Arduino-TFT-LCD-3-5-Tic-Tac-Toe
 
 The external implementation targets different hardware (ILI9486 / 320x480 and different touch wiring), so it is kept only as a reference link and is not copied into this repository.
+
+
+## Example — Tic-Tac-Toe vs Arduino
+
+Adapted MAR2406 version of the Player-vs-Arduino Tic-Tac-Toe concept:
+
+`examples/TicTacToe_vs_Arduino/TicTacToe_vs_Arduino.ino`
+
+The implementation is original for this repository and uses the verified MAR2406 ILI9341 / 320x240 / D6-A2-A1-D7 touch configuration. The external Dumblebots / Aditya Agarwal project remains linked only as a reference.
