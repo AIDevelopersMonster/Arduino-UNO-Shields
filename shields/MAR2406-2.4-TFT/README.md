@@ -48,3 +48,28 @@ Continuity testing is **not** a prerequisite. It will be used only when software
 ## Related laboratory
 
 See [LAB-03 — Arduino UNO + MAR2406 2.4-inch TFT Touch Shield](../../labs/03-UNO-MAR2406-TFT/).
+
+## Touch revision warning
+
+Do not assume that all visually similar MAR2406 / 2.4-inch UNO TFT shields use the same resistive-touch wiring.
+
+For the batch tested in LAB-03, the working touch assignment is:
+
+```text
+XP = D6
+XM = A2
+YP = A1
+YM = D7
+```
+
+Tested calibration values for that sample:
+
+```text
+TS_LEFT = 167
+TS_RT   = 931
+TS_TOP  = 964
+TS_BOT  = 190
+```
+
+Other batches / revisions may differ in pin sharing and calibration direction/range. Treat these values as verified for the current tested batch, not as universal MAR2406 constants.
+
