@@ -239,3 +239,21 @@ These values are **batch/sample-specific certification data**, not universal con
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
 The current LAB-03 touch implementation is certified for the tested batch using XP=D6, XM=A2, YP=A1, YM=D7 with the recorded calibration values above.
+
+## TEST-05 — Touch Paint / canonical landscape HMI — READY FOR BENCH
+
+Inspired by the useful interaction pattern in the factory `Example_11_touch_pen`, but rewritten for the verified current-batch touch wiring and calibration.
+
+TEST-05 runs the LCD in the project canonical **ROT1 / 320x240** orientation and transforms the certified ROT0 touch coordinates into the same HMI coordinate system.
+
+Features:
+
+- six selectable colors;
+- three pen sizes;
+- CLEAR button;
+- full drawing canvas;
+- corner/center reference marks for dead-zone and geometry checks.
+
+Firmware: `sketches/05_Touch_Paint/05_Touch_Paint.ino`
+
+Procedure: `tests/TEST-05-TOUCH-PAINT.md`
