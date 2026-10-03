@@ -193,14 +193,16 @@ YP = A1
 YM = D7
 ```
 
-The calibrated raw limits for the tested sample are:
+The final interactive calibration for the tested sample is:
 
 ```text
-TS_LEFT = 167
-TS_RT   = 931
-TS_TOP  = 964
-TS_BOT  = 190
+TS_LEFT = 153
+TS_RT   = 930
+TS_TOP  = 962
+TS_BOT  = 168
 ```
+
+All five verification targets passed within +/-4 px. Result: `results/TEST-04-TOUCH-CERTIFICATION.md`.
 
 Pressure window used for valid contact detection:
 
@@ -223,7 +225,10 @@ These values are **batch/sample-specific certification data**, not universal con
 - TEST-02 direct graphics smoke test: **PASS**;
 - RGB565 pixel writes and address windows: **verified**;
 - orientation observation: portrait logical frame is rotated relative to the board's normal landscape viewing position;
-- TEST-03 rotation/geometry/text: **PASS**; canonical landscape fixed at **ROT 1 / MADCTL 0x28 / 320 x 240**.
+- TEST-03 rotation/geometry/text: **PASS**; canonical landscape fixed at **ROT 1 / MADCTL 0x28 / 320 x 240**;
+- TEST-04 resistive touch calibration: **PASS**;
+- verified current-batch touch wiring: **XP=D6, XM=A2, YP=A1, YM=D7**;
+- final ROT0 calibration: **LEFT=153, RIGHT=930, TOP=962, BOTTOM=168**.
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
