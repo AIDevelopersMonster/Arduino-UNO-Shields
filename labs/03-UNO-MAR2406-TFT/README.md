@@ -72,6 +72,20 @@ Result: `results/TEST-03-ROTATION-GEOMETRY-TEXT.md`
 
 This 320 x 240 coordinate system is now the project default for HMI and touch calibration.
 
+## TEST-04 — raw resistive touch — READY FOR BENCH
+
+Firmware:
+
+`sketches/04_Raw_Touch/04_Raw_Touch.ino`
+
+Procedure:
+
+`tests/TEST-04-RAW-TOUCH.md`
+
+TEST-04 starts from the likely shared-pin arrangement `XP=D8, XM=A2, YP=A3, YM=D9`, but treats it only as a candidate until the physical shield produces position-dependent raw X/Y data and a clear press/release response.
+
+No calibration constants are assumed in this stage.
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -88,4 +102,4 @@ This 320 x 240 coordinate system is now the project default for HMI and touch ca
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is TEST-04: raw resistive-touch diagnostics in the fixed 320 x 240 landscape coordinate system.
+The next certification event is bench confirmation of the TEST-04 touch wiring and raw ADC ranges.
