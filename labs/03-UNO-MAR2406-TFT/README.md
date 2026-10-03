@@ -124,6 +124,18 @@ Procedure:
 
 `tests/TEST-04C-GUIDED-TOUCH.md`
 
+## TEST-04D — event-driven raw matrix — READY FOR BENCH
+
+The library-based TEST-04C did not react on the physical sample, while the earlier direct raw test did. TEST-04D therefore returns to direct GPIO/ADC probing and prints one measurement block only when a touch is detected.
+
+Firmware:
+
+`sketches/04D_Touch_Matrix/04D_Touch_Matrix.ino`
+
+Procedure:
+
+`tests/TEST-04D-TOUCH-MATRIX.md`
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -140,4 +152,4 @@ Procedure:
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is the five-point TEST-04C guided capture.
+The next certification event is five event-driven TEST-04D touch blocks (TL, TR, BL, BR, CENTER).
