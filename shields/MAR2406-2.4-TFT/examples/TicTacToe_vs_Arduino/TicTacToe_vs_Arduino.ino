@@ -16,7 +16,9 @@
     - player chooses X or O;
     - X always starts;
     - Arduino uses the opposite piece;
-    - Arduino chooses a random free cell;
+    - Arduino uses minimax with alpha-beta pruning;
+    - with legal play, the human cannot beat Arduino;
+    - winning three marks blink and finish in red;
     - touch after GAME OVER returns to the piece-selection menu.
 
   This example intentionally does NOT use microSD so it remains much smaller
@@ -79,7 +81,6 @@ uint8_t moves = 0;
 uint8_t screenState = SCREEN_MENU;
 
 bool touchArmed = true;
-bool rngSeeded = false;
 unsigned long aiReadyAt = 0;
 
 static void restoreSharedPins() {
@@ -201,36 +202,79 @@ static void drawGame() {
   drawSide();
 }
 
-static void drawMark(uint8_t cell, uint8_t piece) {
+static uint16_t pieceColor(uint8_t piece) {
+  return piece == PIECE_X ? CYAN : YELLOW;
+}
+
+static void drawMarkColor(uint8_t cell, uint8_t piece, uint16_t color) {
   uint8_t row = cell / 3;
   uint8_t col = cell % 3;
   int16_t x0 = BX + col * CELL;
   int16_t y0 = BY + row * CELL;
 
   if (piece == PIECE_X) {
-    tft.drawLine(x0 + 13, y0 + 13, x0 + 48, y0 + 48, CYAN);
-    tft.drawLine(x0 + 14, y0 + 13, x0 + 49, y0 + 48, CYAN);
-    tft.drawLine(x0 + 48, y0 + 13, x0 + 13, y0 + 48, CYAN);
-    tft.drawLine(x0 + 49, y0 + 13, x0 + 14, y0 + 48, CYAN);
+    tft.drawLine(x0 + 13, y0 + 13, x0 + 48, y0 + 48, color);
+    tft.drawLine(x0 + 14, y0 + 13, x0 + 49, y0 + 48, color);
+    tft.drawLine(x0 + 48, y0 + 13, x0 + 13, y0 + 48, color);
+    tft.drawLine(x0 + 49, y0 + 13, x0 + 14, y0 + 48, color);
   } else {
-    tft.drawCircle(x0 + 31, y0 + 31, 20, YELLOW);
-    tft.drawCircle(x0 + 31, y0 + 31, 19, YELLOW);
+    tft.drawCircle(x0 + 31, y0 + 31, 20, color);
+    tft.drawCircle(x0 + 31, y0 + 31, 19, color);
   }
 }
 
-static uint8_t winner() {
-  if (board[0] && board[0] == board[1] && board[0] == board[2]) return board[0];
-  if (board[3] && board[3] == board[4] && board[3] == board[5]) return board[3];
-  if (board[6] && board[6] == board[7] && board[6] == board[8]) return board[6];
+static void drawMark(uint8_t cell, uint8_t piece) {
+  drawMarkColor(cell, piece, pieceColor(piece));
+}
 
-  if (board[0] && board[0] == board[3] && board[0] == board[6]) return board[0];
-  if (board[1] && board[1] == board[4] && board[1] == board[7]) return board[1];
-  if (board[2] && board[2] == board[5] && board[2] == board[8]) return board[2];
+static uint8_t winnerLine(uint8_t &a, uint8_t &b, uint8_t &c) {
+  if (board[0] && board[0] == board[1] && board[0] == board[2]) { a=0; b=1; c=2; return board[0]; }
+  if (board[3] && board[3] == board[4] && board[3] == board[5]) { a=3; b=4; c=5; return board[3]; }
+  if (board[6] && board[6] == board[7] && board[6] == board[8]) { a=6; b=7; c=8; return board[6]; }
 
-  if (board[0] && board[0] == board[4] && board[0] == board[8]) return board[0];
-  if (board[2] && board[2] == board[4] && board[2] == board[6]) return board[2];
+  if (board[0] && board[0] == board[3] && board[0] == board[6]) { a=0; b=3; c=6; return board[0]; }
+  if (board[1] && board[1] == board[4] && board[1] == board[7]) { a=1; b=4; c=7; return board[1]; }
+  if (board[2] && board[2] == board[5] && board[2] == board[8]) { a=2; b=5; c=8; return board[2]; }
+
+  if (board[0] && board[0] == board[4] && board[0] == board[8]) { a=0; b=4; c=8; return board[0]; }
+  if (board[2] && board[2] == board[4] && board[2] == board[6]) { a=2; b=4; c=6; return board[2]; }
 
   return EMPTY;
+}
+
+static uint8_t winner() {
+  uint8_t a, b, c;
+  return winnerLine(a, b, c);
+}
+
+static bool boardFull() {
+  for (uint8_t i = 0; i < 9; ++i) {
+    if (board[i] == EMPTY) return false;
+  }
+  return true;
+}
+
+static void blinkWinner(uint8_t piece) {
+  uint8_t a, b, c;
+  if (winnerLine(a, b, c) == EMPTY) return;
+
+  uint16_t normal = pieceColor(piece);
+
+  for (uint8_t i = 0; i < 3; ++i) {
+    drawMarkColor(a, piece, RED);
+    drawMarkColor(b, piece, RED);
+    drawMarkColor(c, piece, RED);
+    delay(220);
+
+    drawMarkColor(a, piece, normal);
+    drawMarkColor(b, piece, normal);
+    drawMarkColor(c, piece, normal);
+    delay(140);
+  }
+
+  drawMarkColor(a, piece, RED);
+  drawMarkColor(b, piece, RED);
+  drawMarkColor(c, piece, RED);
 }
 
 static int8_t hitCell(int16_t x, int16_t y) {
@@ -277,6 +321,7 @@ static bool placeMove(uint8_t cell, uint8_t piece) {
 
   uint8_t w = winner();
   if (w != EMPTY) {
+    blinkWinner(w);
     showGameOver(w);
     return true;
   }
@@ -293,29 +338,77 @@ static bool placeMove(uint8_t cell, uint8_t piece) {
   return true;
 }
 
-static uint8_t randomFreeCell() {
-  uint8_t freeCount = 0;
+static int8_t minimax(uint8_t depth, bool aiTurn, int8_t alpha, int8_t beta) {
+  uint8_t w = winner();
 
-  for (uint8_t i = 0; i < 9; ++i) {
-    if (board[i] == EMPTY) ++freeCount;
+  if (w == arduinoPiece) return (int8_t)(10 - depth);
+  if (w == playerPiece) return (int8_t)(depth - 10);
+  if (boardFull()) return 0;
+
+  if (aiTurn) {
+    int8_t best = -100;
+
+    for (uint8_t i = 0; i < 9; ++i) {
+      if (board[i] != EMPTY) continue;
+
+      board[i] = arduinoPiece;
+      int8_t score = minimax(depth + 1, false, alpha, beta);
+      board[i] = EMPTY;
+
+      if (score > best) best = score;
+      if (best > alpha) alpha = best;
+      if (beta <= alpha) break;
+    }
+
+    return best;
   }
 
-  if (!freeCount) return 0;
-
-  uint8_t pick = (uint8_t)random(freeCount);
+  int8_t best = 100;
 
   for (uint8_t i = 0; i < 9; ++i) {
     if (board[i] != EMPTY) continue;
-    if (pick == 0) return i;
-    --pick;
+
+    board[i] = playerPiece;
+    int8_t score = minimax(depth + 1, true, alpha, beta);
+    board[i] = EMPTY;
+
+    if (score < best) best = score;
+    if (best < beta) beta = best;
+    if (beta <= alpha) break;
   }
 
-  return 0;
+  return best;
+}
+
+static uint8_t bestArduinoMove() {
+  int8_t bestScore = -100;
+  uint8_t bestCell = 0;
+
+  for (uint8_t i = 0; i < 9; ++i) {
+    if (board[i] != EMPTY) continue;
+
+    board[i] = arduinoPiece;
+    int8_t score = minimax(1, false, -100, 100);
+    board[i] = EMPTY;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestCell = i;
+    }
+  }
+
+  return bestCell;
 }
 
 static void arduinoMove() {
   if (screenState != SCREEN_PLAY || turn != arduinoPiece) return;
-  placeMove(randomFreeCell(), arduinoPiece);
+
+  uint8_t cell = bestArduinoMove();
+
+  Serial.print(F("AI MOVE="));
+  Serial.println(cell);
+
+  placeMove(cell, arduinoPiece);
 }
 
 static void startGame(uint8_t chosenPiece) {
@@ -327,11 +420,6 @@ static void startGame(uint8_t chosenPiece) {
   moves = 0;
   turn = PIECE_X;
   screenState = SCREEN_PLAY;
-
-  if (!rngSeeded) {
-    randomSeed(micros());
-    rngSeeded = true;
-  }
 
   drawGame();
 
@@ -365,6 +453,7 @@ void setup() {
   Serial.println(id, HEX);
   Serial.println(F("LCD ROT1 320x240"));
   Serial.println(F("TOUCH XP=D6 XM=A2 YP=A1 YM=D7"));
+  Serial.println(F("AI=MINIMAX ALPHA-BETA"));
 
   drawMenu();
 }
