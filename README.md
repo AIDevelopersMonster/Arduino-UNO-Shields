@@ -55,10 +55,12 @@ See: [shields/Multi-Function-Shield](shields/Multi-Function-Shield/)
 ### Shield 03 — MAR2406 2.4-inch TFT Touch
 
 - 240 x 320 TFT
-- ILI9341 controller (bench-confirmed in LAB-03)
+- ILI9341 controller, bench-confirmed
 - 8-bit parallel LCD bus
-- resistive touch panel
+- calibrated resistive touch panel
 - microSD slot
+- completed LCD + Touch + SD integration test
+- final touch-controlled Tic-Tac-Toe demonstrator with persistent SD history
 
 See: [shields/MAR2406-2.4-TFT](shields/MAR2406-2.4-TFT/)
 
@@ -87,8 +89,14 @@ GUI: [tools/MFS-GUI](tools/MFS-GUI/)
 
 ### LAB-03 — Arduino UNO + MAR2406 2.4-inch TFT Touch Shield
 
-New laboratory for the 240 x 320 parallel TFT shield: controller identification,
-display graphics, resistive touch calibration, microSD testing and a small HMI.
+Completed laboratory for the MAR2406 TFT shield:
+
+- ILI9341 identified and verified;
+- canonical ROT1 / 320x240 landscape established;
+- resistive touch wiring and calibration certified;
+- microSD read/write verified;
+- LCD + Touch + SD integration passed;
+- final Tic-Tac-Toe application demonstrator completed for the UNO memory envelope.
 
 Intro video: https://youtube.com/shorts/TexEwx2-TlQ
 
@@ -105,8 +113,8 @@ See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 
 ## Status
 
-- **LAB-01** — W5100 + SD hardware diagnostics remain documented.
+- **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
-- **LAB-03** — MAR2406 TFT Touch: TEST-01 PASS (ILI9341 confirmed); TEST-02 PASS (RGB565 graphics verified); TEST-03 PASS (ROT 1 / MADCTL 0x28 selected as canonical 320 x 240 landscape); touch diagnostics next.
+- **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
 
-Optional IR, temperature, UART and external-GPIO interfaces for LAB-02 remain for later stages.
+Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
