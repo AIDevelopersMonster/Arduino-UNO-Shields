@@ -278,9 +278,21 @@ Features:
 - persistent statistics stored on microSD;
 - append-only `XOLOG.CSV` history;
 - complete move sequence stored for every game;
-- CRC-8 validation for each log record;
 - statistics rebuilt after reset or power loss;
-- damaged/truncated records ignored;
+- malformed/truncated records ignored;
 - fixed-size buffers and no Arduino `String` objects to keep SRAM use predictable on the UNO.
 
 The test passes only after gameplay, SD append, power-cycle restoration, and damaged-record rejection are all physically verified.
+
+
+### TEST-08 build status
+
+Optimized Arduino UNO build: **PASS**.
+
+```text
+Flash: 30746 / 32256 bytes (95%)
+SRAM globals: 1106 / 2048 bytes (54%)
+Linker-reported SRAM remaining: 942 bytes
+```
+
+The sketch fits the ATmega328P, but the remaining flash margin is intentionally reserved for fixes rather than new features.
