@@ -180,6 +180,37 @@ Procedure:
 
 `tests/TEST-04F-RAW-TOUCH-D6-D7-A1-A2.md`
 
+## Touch implementation note
+
+Different physical revisions / batches of these 2.4-inch UNO TFT shields may use different resistive-touch pin assignments and calibration constants, even when the LCD controller and general shield layout look similar.
+
+For the **current batch physically tested in LAB-03**, the verified working touch wiring is:
+
+```text
+XP = D6
+XM = A2
+YP = A1
+YM = D7
+```
+
+The calibrated raw limits for the tested sample are:
+
+```text
+TS_LEFT = 167
+TS_RT   = 931
+TS_TOP  = 964
+TS_BOT  = 190
+```
+
+Pressure window used for valid contact detection:
+
+```text
+MINPRESSURE = 40
+MAXPRESSURE = 2000
+```
+
+These values are **batch/sample-specific certification data**, not universal constants for every MAR2406-like shield. Other revisions may use different shared pins and different calibration directions/ranges. When adapting the software to another batch, verify the actual touch response before reusing these constants.
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -196,4 +227,4 @@ Procedure:
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is TEST-04F: direct resistance identification of the two resistive-sheet electrode pairs.
+The current LAB-03 touch implementation is certified for the tested batch using XP=D6, XM=A2, YP=A1, YM=D7 with the recorded calibration values above.
