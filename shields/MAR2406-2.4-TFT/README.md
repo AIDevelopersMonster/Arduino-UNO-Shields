@@ -41,7 +41,7 @@ Power pins available on the shield include 5 V, 3.3 V and GND.
 
 ## Verification policy
 
-The package identifies the LCD controller as ILI9341. The laboratory will still read/probe the controller before treating that identification as experimentally verified.
+The package identifies the LCD controller as ILI9341. TEST-01 on the physical shield returned `0xD3 -> 00 00 93 41`, so this sample is now **experimentally verified as ILI9341**.
 
 Continuity testing is **not** a prerequisite. It will be used only when software diagnostics leave a specific signal or connection uncertain.
 
