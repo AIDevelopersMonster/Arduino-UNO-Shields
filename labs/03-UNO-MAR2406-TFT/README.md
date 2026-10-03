@@ -62,6 +62,16 @@ Result: `results/TEST-02-GRAPHICS.md`
 
 Next: TEST-03 will fix the project display orientation and add geometry/text diagnostics.
 
+## TEST-03 — rotation, geometry and text — PASS
+
+Physical display result on 2026-10-03 selected **ROT 1 / MADCTL 0x28 / 320 x 240** as the canonical landscape orientation.
+
+The photographed result shows upright `ROT 1`, correct `TL/TR/BL/BR` corner placement, complete borders, diagonals, center cross and readable text.
+
+Result: `results/TEST-03-ROTATION-GEOMETRY-TEXT.md`
+
+This 320 x 240 coordinate system is now the project default for HMI and touch calibration.
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -74,8 +84,8 @@ Next: TEST-03 will fix the project display orientation and add geometry/text dia
 - TEST-02 direct graphics smoke test: **PASS**;
 - RGB565 pixel writes and address windows: **verified**;
 - orientation observation: portrait logical frame is rotated relative to the board's normal landscape viewing position;
-- TEST-03 rotation/geometry/text firmware prepared and **READY FOR BENCH**.
+- TEST-03 rotation/geometry/text: **PASS**; canonical landscape fixed at **ROT 1 / MADCTL 0x28 / 320 x 240**.
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is selection of the canonical 320 x 240 landscape orientation in TEST-03.
+The next certification event is TEST-04: raw resistive-touch diagnostics in the fixed 320 x 240 landscape coordinate system.
