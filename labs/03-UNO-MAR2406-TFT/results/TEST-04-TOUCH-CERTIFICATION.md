@@ -66,3 +66,9 @@ The BL point required one refinement step before passing.
 - final calibrated constants are recorded above.
 
 These constants are certified for the tested physical sample / current batch and must not be treated as universal for all visually similar MAR2406 shields.
+
+## Video
+
+Calibration test video:
+
+**YouTube:** https://youtu.be/0ftVpnH3YtU
