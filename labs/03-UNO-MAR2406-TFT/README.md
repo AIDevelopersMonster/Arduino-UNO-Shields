@@ -74,6 +74,8 @@ Next: TEST-03 will fix the project display orientation and add geometry/text dia
 - TEST-02 direct graphics smoke test: **PASS**;
 - RGB565 pixel writes and address windows: **verified**;
 - orientation observation: portrait logical frame is rotated relative to the board's normal landscape viewing position;
-- TEST-03 rotation/geometry/text plan added.
+- TEST-03 rotation/geometry/text firmware prepared and **READY FOR BENCH**.
+
+TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
 The next certification event is selection of the canonical 320 x 240 landscape orientation in TEST-03.
