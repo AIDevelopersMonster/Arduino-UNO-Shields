@@ -220,6 +220,19 @@ void setup() {
   tft.begin(id);
   tft.setRotation(1);  // Project canonical HMI orientation: 320x240
 
+  // Explicit TEST-05 splash so it is obvious that no calibration wizard is running.
+  tft.fillScreen(BLACK);
+  tft.setTextColor(WHITE);
+  tft.setTextSize(2);
+  tft.setCursor(42, 78);
+  tft.println(F("TEST-05"));
+  tft.setCursor(28, 106);
+  tft.println(F("TOUCH PAINT"));
+  tft.setTextSize(1);
+  tft.setCursor(56, 138);
+  tft.println(F("NO CALIBRATION"));
+  delay(1000);
+
   tft.fillScreen(BLACK);
   clearCanvas();
   drawToolbar();
