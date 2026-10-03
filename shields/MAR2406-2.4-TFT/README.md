@@ -65,10 +65,10 @@ YM = D7
 Tested calibration values for that sample:
 
 ```text
-TS_LEFT = 167
-TS_RT   = 931
-TS_TOP  = 964
-TS_BOT  = 190
+TS_LEFT = 153
+TS_RT   = 930
+TS_TOP  = 962
+TS_BOT  = 168
 ```
 
 Other batches / revisions may differ in pin sharing and calibration direction/range. Treat these values as verified for the current tested batch, not as universal MAR2406 constants.
