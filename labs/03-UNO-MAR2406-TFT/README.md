@@ -136,6 +136,20 @@ Procedure:
 
 `tests/TEST-04D-TOUCH-MATRIX.md`
 
+## TEST-04E — exact raw engine / one-shot — READY FOR BENCH
+
+TEST-04E returns byte-for-byte in measurement logic to the original direct raw method that physically reacted to touch. Only the reporting behavior is changed: idle data are suppressed and one averaged record is printed per press.
+
+No external touch library is used.
+
+Firmware:
+
+`sketches/04E_Exact_Raw_OneShot/04E_Exact_Raw_OneShot.ino`
+
+Procedure:
+
+`tests/TEST-04E-EXACT-RAW-ONESHOT.md`
+
 ## Status
 
 **STARTED — 2026-10-03**
