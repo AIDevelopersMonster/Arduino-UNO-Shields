@@ -11,10 +11,10 @@
     YM = D7
 
   Seed calibration:
-    TS_LEFT = 167
-    TS_RT   = 931
-    TS_TOP  = 964
-    TS_BOT  = 190
+    TS_LEFT = 153
+    TS_RT   = 930
+    TS_TOP  = 962
+    TS_BOT  = 168
 
   The wizard keeps five fixed targets safely inside the display.
   It first collects one touch at each target, computes a new affine
@@ -52,10 +52,10 @@ const int YM = 7;
 
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
-static int16_t calLeft   = 167;
-static int16_t calRight  = 931;
-static int16_t calTop    = 964;
-static int16_t calBottom = 190;
+static int16_t calLeft   = 153;
+static int16_t calRight  = 930;
+static int16_t calTop    = 962;
+static int16_t calBottom = 168;
 
 static const int16_t TARGET_R = 10;
 static const int16_t MARK_R   = 2;
@@ -271,7 +271,7 @@ void setup() {
   Serial.print(F("LCD ID=0x"));
   Serial.println(id, HEX);
   Serial.println(F("Touch: XP=D6 XM=A2 YP=A1 YM=D7"));
-  Serial.println(F("Seed calibration: LEFT=167 RIGHT=931 TOP=964 BOTTOM=190"));
+  Serial.println(F("Seed calibration: LEFT=153 RIGHT=930 TOP=962 BOTTOM=168"));
   Serial.println(F("Tolerance: +/-4 px"));
   Serial.println(F("Phase 1: TL -> TR -> BL -> BR -> CENTER"));
   Serial.println(F("Phase 2: same targets; failed target is repeated after immediate recalibration."));
