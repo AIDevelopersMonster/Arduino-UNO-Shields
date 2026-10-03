@@ -166,6 +166,20 @@ Procedure:
 
 `tests/TEST-04F-ELECTRODE-RESISTANCE.md`
 
+## TEST-04F — revised D6/D7/A1/A2 candidate — READY FOR BENCH
+
+The previous D8/D9/A2/A3 mapping detected touch but failed to produce two coordinate axes. Based on the physical shield layout, the next candidate is:
+
+`XP=D6, XM=A2, YP=A1, YM=D7`
+
+Firmware:
+
+`sketches/04F_Raw_Touch_D6_D7_A1_A2/04F_Raw_Touch_D6_D7_A1_A2.ino`
+
+Procedure:
+
+`tests/TEST-04F-RAW-TOUCH-D6-D7-A1-A2.md`
+
 ## Status
 
 **STARTED — 2026-10-03**
