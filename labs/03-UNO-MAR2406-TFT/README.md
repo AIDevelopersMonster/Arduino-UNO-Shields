@@ -150,6 +150,22 @@ Procedure:
 
 `tests/TEST-04E-EXACT-RAW-ONESHOT.md`
 
+## TEST-04E — exact raw engine result — TOUCH DETECTED / AXIS NOT VERIFIED
+
+Five landscape-position captures confirmed real electrical touch response, but X remained nearly fixed (765..772) and Y was not monotonic enough for two-axis calibration.
+
+Result:
+
+`results/TEST-04E-EXACT-RAW-ONESHOT.md`
+
+## TEST-04F — targeted electrode resistance check — NEXT
+
+Further arbitrary software pin permutations are paused. The next step is a six-pair resistance matrix on D8, D9, A2 and A3 with the shield unpowered.
+
+Procedure:
+
+`tests/TEST-04F-ELECTRODE-RESISTANCE.md`
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -166,4 +182,4 @@ Procedure:
 
 TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
 
-The next certification event is five event-driven TEST-04D touch blocks (TL, TR, BL, BR, CENTER).
+The next certification event is TEST-04F: direct resistance identification of the two resistive-sheet electrode pairs.
