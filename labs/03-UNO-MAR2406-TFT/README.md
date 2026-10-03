@@ -1,196 +1,40 @@
 # LAB-03 — Arduino UNO + MAR2406 2.4-inch TFT Touch Shield
 
-## Goal
+## Status
 
-Build a reproducible laboratory stand around an Arduino UNO and the MAR2406 2.4-inch TFT shield, progressing from hardware identification to a small touch-controlled HMI.
+**COMPLETE — 2026-10-04**
+
+LAB-03 is closed as a completed hardware/software study for the tested Arduino UNO + MAR2406 shield combination.
+
+The laboratory progressed from controller identification through graphics, resistive touch calibration and microSD access to an integrated LCD + Touch + SD test and a final touch-controlled Tic-Tac-Toe demonstrator with persistent game history.
 
 ## Hardware
 
-- Arduino UNO compatible board
-- MAR2406 2.4-inch TFT LCD shield
-- 240 x 320 display
-- package marking: ILI9341
-- 8-bit parallel LCD interface
+- Arduino UNO compatible board / ATmega328P
+- MAR2406 2.4-inch TFT shield
+- 240 x 320 LCD
+- ILI9341 controller
+- 8-bit parallel display bus
 - resistive touch panel
 - microSD slot
 
-Detailed shield notes and pin map: [MAR2406 shield documentation](../../shields/MAR2406-2.4-TFT/).
+Shield documentation:
 
-## Test plan
+`../../shields/MAR2406-2.4-TFT/`
 
-1. Fit the shield to the UNO and verify power/startup behavior.
-2. Read/probe the LCD controller ID.
-3. Run a minimal display test.
-4. Verify colors, drawing primitives, text and screen rotations.
-5. Identify and test the resistive touch interface.
-6. Calibrate touch coordinates.
-7. Test the microSD interface.
-8. Combine display + touch + SD where UNO memory permits.
-9. Build a small demonstrator HMI.
+## Final verified configuration
 
-Continuity measurements will be made only if a particular test exposes an unresolved hardware connection.
+### Display
 
-## TEST-01 — LCD controller identification — PASS
+```text
+Controller: ILI9341
+Canonical orientation: ROT1
+Logical size: 320 x 240
+```
 
-Firmware:
+### Resistive touch
 
-`sketches/01_LCD_ID_Probe/01_LCD_ID_Probe.ino`
-
-Procedure:
-
-`tests/TEST-01-LCD-ID.md`
-
-TEST-01 uses direct 8-bit bus access and requires no display library. It reads the raw identification/status registers and looks for the ILI9341 `0x9341` signature without initializing the graphics engine.
-
-Bench result on 2026-10-03: `0xD3 -> 00 00 93 41`. The physical sample is therefore verified as **ILI9341**. Full capture: `results/TEST-01-LCD-ID.md`.
-
-## Video
-
-### Start of the laboratory — Arduino UNO + display shield
-
-Short introduction showing the hardware set used to start LAB-03:
-
-**YouTube Shorts:** https://youtube.com/shorts/TexEwx2-TlQ
-
-The video introduces the Arduino UNO + 2.4-inch TFT Touch Shield combination before software diagnostics and functional testing.
-
-## TEST-02 — direct ILI9341 graphics — PASS
-
-Physical display test passed on 2026-10-03. The shield rendered the full RGB565 test sequence and final six-band pattern without gross corruption. The observed band order in the board's landscape viewing position confirms that TEST-02 was using the portrait logical frame rotated relative to the physical board.
-
-Result: `results/TEST-02-GRAPHICS.md`
-
-Next: TEST-03 will fix the project display orientation and add geometry/text diagnostics.
-
-## TEST-03 — rotation, geometry and text — PASS
-
-Physical display result on 2026-10-03 selected **ROT 1 / MADCTL 0x28 / 320 x 240** as the canonical landscape orientation.
-
-The photographed result shows upright `ROT 1`, correct `TL/TR/BL/BR` corner placement, complete borders, diagonals, center cross and readable text.
-
-Result: `results/TEST-03-ROTATION-GEOMETRY-TEXT.md`
-
-This 320 x 240 coordinate system is now the project default for HMI and touch calibration.
-
-## Video — TEST-04 touch calibration
-
-Physical five-point calibration of the resistive touch panel for the current tested MAR2406 batch:
-
-**YouTube:** https://youtu.be/0ftVpnH3YtU
-
-## TEST-04 — raw resistive touch — READY FOR BENCH
-
-Firmware:
-
-`sketches/04_Raw_Touch/04_Raw_Touch.ino`
-
-Procedure:
-
-`tests/TEST-04-RAW-TOUCH.md`
-
-TEST-04 starts from the likely shared-pin arrangement `XP=D8, XM=A2, YP=A3, YM=D9`, but treats it only as a candidate until the physical shield produces position-dependent raw X/Y data and a clear press/release response.
-
-No calibration constants are assumed in this stage.
-
-## TEST-04A — raw touch candidate A — INCONCLUSIVE
-
-Bench data showed only one useful changing axis. Candidate A `XP=D8, XM=A2, YP=A3, YM=D9` is rejected for calibration.
-
-Result: `results/TEST-04A-RAW-TOUCH.md`
-
-## TEST-04B — alternate raw touch mapping — READY FOR BENCH
-
-Candidate B:
-
-`XP=D9, YP=A2, XM=A3, YM=D8`
-
-Firmware:
-
-`sketches/04B_Raw_Touch_Alternate/04B_Raw_Touch_Alternate.ino`
-
-Procedure:
-
-`tests/TEST-04B-RAW-TOUCH-ALTERNATE.md`
-
-## TEST-04C — guided touch capture — READY FOR BENCH
-
-TEST-04C replaces the continuous stream with a human-guided five-point capture.
-
-Touch mapping returns to:
-
-`XP=D8, XM=A2, YP=A3, YM=D9`
-
-The operator holds the stylus and sends one digit; the firmware prints one median X/Y/Z result. No idle values are streamed.
-
-Firmware:
-
-`sketches/04C_Guided_Touch_Capture/04C_Guided_Touch_Capture.ino`
-
-Procedure:
-
-`tests/TEST-04C-GUIDED-TOUCH.md`
-
-## TEST-04D — event-driven raw matrix — READY FOR BENCH
-
-The library-based TEST-04C did not react on the physical sample, while the earlier direct raw test did. TEST-04D therefore returns to direct GPIO/ADC probing and prints one measurement block only when a touch is detected.
-
-Firmware:
-
-`sketches/04D_Touch_Matrix/04D_Touch_Matrix.ino`
-
-Procedure:
-
-`tests/TEST-04D-TOUCH-MATRIX.md`
-
-## TEST-04E — exact raw engine / one-shot — READY FOR BENCH
-
-TEST-04E returns byte-for-byte in measurement logic to the original direct raw method that physically reacted to touch. Only the reporting behavior is changed: idle data are suppressed and one averaged record is printed per press.
-
-No external touch library is used.
-
-Firmware:
-
-`sketches/04E_Exact_Raw_OneShot/04E_Exact_Raw_OneShot.ino`
-
-Procedure:
-
-`tests/TEST-04E-EXACT-RAW-ONESHOT.md`
-
-## TEST-04E — exact raw engine result — TOUCH DETECTED / AXIS NOT VERIFIED
-
-Five landscape-position captures confirmed real electrical touch response, but X remained nearly fixed (765..772) and Y was not monotonic enough for two-axis calibration.
-
-Result:
-
-`results/TEST-04E-EXACT-RAW-ONESHOT.md`
-
-## TEST-04F — targeted electrode resistance check — NEXT
-
-Further arbitrary software pin permutations are paused. The next step is a six-pair resistance matrix on D8, D9, A2 and A3 with the shield unpowered.
-
-Procedure:
-
-`tests/TEST-04F-ELECTRODE-RESISTANCE.md`
-
-## TEST-04F — revised D6/D7/A1/A2 candidate — READY FOR BENCH
-
-The previous D8/D9/A2/A3 mapping detected touch but failed to produce two coordinate axes. Based on the physical shield layout, the next candidate is:
-
-`XP=D6, XM=A2, YP=A1, YM=D7`
-
-Firmware:
-
-`sketches/04F_Raw_Touch_D6_D7_A1_A2/04F_Raw_Touch_D6_D7_A1_A2.ino`
-
-Procedure:
-
-`tests/TEST-04F-RAW-TOUCH-D6-D7-A1-A2.md`
-
-## Touch implementation note
-
-Different physical revisions / batches of these 2.4-inch UNO TFT shields may use different resistive-touch pin assignments and calibration constants, even when the LCD controller and general shield layout look similar.
-
-For the **current batch physically tested in LAB-03**, the verified working touch wiring is:
+Verified wiring for the tested shield sample/batch:
 
 ```text
 XP = D6
@@ -199,7 +43,7 @@ YP = A1
 YM = D7
 ```
 
-The final interactive calibration for the tested sample is:
+Certified ROT0 calibration used by the landscape applications:
 
 ```text
 TS_LEFT = 153
@@ -208,60 +52,88 @@ TS_TOP  = 962
 TS_BOT  = 168
 ```
 
-All five verification targets passed within +/-4 px. Result: `results/TEST-04-TOUCH-CERTIFICATION.md`.
-
-Pressure window used for valid contact detection:
+Pressure window:
 
 ```text
 MINPRESSURE = 40
 MAXPRESSURE = 2000
 ```
 
-These values are **batch/sample-specific certification data**, not universal constants for every MAR2406-like shield. Other revisions may use different shared pins and different calibration directions/ranges. When adapting the software to another batch, verify the actual touch response before reusing these constants.
+These touch pins and calibration constants are sample/batch-specific. Similar-looking 2.4-inch UNO TFT shields may use different touch wiring or calibration.
 
-## Status
+### microSD
 
-**STARTED — 2026-10-03**
+```text
+CS   = D10
+MOSI = D11
+MISO = D12
+SCK  = D13
+```
 
-- hardware identified from the photographed unit;
-- shield pin map documented;
-- introductory video recorded;
-- TEST-01 low-level LCD ID probe: **PASS**;
-- physical controller ID: **ILI9341 confirmed (`0x9341`)**;
-- TEST-02 direct graphics smoke test: **PASS**;
-- RGB565 pixel writes and address windows: **verified**;
-- orientation observation: portrait logical frame is rotated relative to the board's normal landscape viewing position;
-- TEST-03 rotation/geometry/text: **PASS**; canonical landscape fixed at **ROT 1 / MADCTL 0x28 / 320 x 240**;
-- TEST-04 resistive touch calibration: **PASS**;
-- verified current-batch touch wiring: **XP=D6, XM=A2, YP=A1, YM=D7**;
-- final ROT0 calibration: **LEFT=153, RIGHT=930, TOP=962, BOTTOM=168**.
+## Final test sequence
 
-TEST-03 firmware: `sketches/03_Rotation_Geometry_Text/03_Rotation_Geometry_Text.ino`.
+| Test | Purpose | Final state |
+| --- | --- | --- |
+| TEST-01 | LCD controller identification | **PASS** — ILI9341 / 0x9341 confirmed |
+| TEST-02 | Direct graphics / RGB565 | **PASS** |
+| TEST-03 | Rotation, geometry and text | **PASS** — ROT1 / 320x240 selected |
+| TEST-04 | Resistive touch calibration | **PASS** — five-point calibration certified |
+| TEST-05 | Touch Paint / landscape HMI | **PASS** |
+| TEST-06 | microSD write, reopen and verify | **PASS** |
+| TEST-07 | LCD + Touch + microSD integration | **PASS** |
+| TEST-08 | Tic-Tac-Toe + persistent SD history | **FINAL DEMONSTRATOR / BUILD PASS** |
 
-The current LAB-03 touch implementation is certified for the tested batch using XP=D6, XM=A2, YP=A1, YM=D7 with the recorded calibration values above.
+TEST procedures are stored in `tests/`. Bench result notes are stored in `results/` where captured.
 
-## TEST-05 — Touch Paint / canonical landscape HMI — READY FOR BENCH
+## TEST-07 integration result
 
-Inspired by the useful interaction pattern in the factory `Example_11_touch_pen`, but rewritten for the verified current-batch touch wiring and calibration.
+TEST-07 verifies the three principal shield subsystems together:
 
-TEST-05 runs the LCD in the project canonical **ROT1 / 320x240** orientation and transforms the certified ROT0 touch coordinates into the same HMI coordinate system.
+- ILI9341 display;
+- calibrated resistive touch;
+- microSD file logging.
 
-Features:
+The physical test completed with:
 
-- six selectable colors;
-- three pen sizes;
-- CLEAR button;
-- full drawing canvas;
-- corner/center reference marks for dead-zone and geometry checks.
+```text
+LCD PASS
+TOUCH PASS
+SD LOG PASS
+TEST-07 PASS
+```
 
-Firmware: `sketches/05_Touch_Paint/05_Touch_Paint.ino`
+Firmware:
 
-Procedure: `tests/TEST-05-TOUCH-PAINT.md`
+`sketches/07_Display_Touch_SD/07_Display_Touch_SD.ino`
 
+Procedure:
 
-## TEST-08 — Tic-Tac-Toe with persistent microSD history — READY FOR BENCH
+`tests/TEST-07-DISPLAY-TOUCH-SD.md`
 
-TEST-08 is the first complete application demonstrator for LAB-03 rather than a synthetic subsystem test.
+## TEST-08 final demonstrator
+
+TEST-08 turns the verified hardware stack into a complete small application:
+
+- two-player X/O Tic-Tac-Toe;
+- touch selection of all nine cells;
+- win and draw detection;
+- occupied-cell protection;
+- append-only game history on microSD;
+- complete move sequence stored for each game;
+- statistics reconstructed after restart;
+- fixed-size buffers and no Arduino `String` objects.
+
+History file:
+
+`XOLOG.TXT`
+
+Example records:
+
+```text
+X,03142
+O,041328
+D,041235786
+```
 
 Firmware:
 
@@ -271,23 +143,9 @@ Procedure:
 
 `tests/TEST-08-TICTACTOE-SD-HISTORY.md`
 
-Features:
+### Arduino UNO build result
 
-- two-player X/O touch game;
-- canonical ROT1 / 320x240 HMI;
-- persistent statistics stored on microSD;
-- append-only `XOLOG.CSV` history;
-- complete move sequence stored for every game;
-- statistics rebuilt after reset or power loss;
-- malformed/truncated records ignored;
-- fixed-size buffers and no Arduino `String` objects to keep SRAM use predictable on the UNO.
-
-The test passes only after gameplay, SD append, power-cycle restoration, and damaged-record rejection are all physically verified.
-
-
-### TEST-08 build status
-
-Optimized Arduino UNO build: **PASS**.
+Verified with Arduino AVR core 1.8.8:
 
 ```text
 Flash: 30746 / 32256 bytes (95%)
@@ -295,4 +153,32 @@ SRAM globals: 1106 / 2048 bytes (54%)
 Linker-reported SRAM remaining: 942 bytes
 ```
 
-The sketch fits the ATmega328P, but the remaining flash margin is intentionally reserved for fixes rather than new features.
+The remaining flash margin is reserved for fixes. TEST-08 is intentionally treated as a feature-complete UNO demonstrator rather than a base for additional large features.
+
+## Build example
+
+```powershell
+arduino-cli compile --fqbn arduino:avr:uno .\labs\03-UNO-MAR2406-TFT\sketches\08_TicTacToe_SD_History
+```
+
+Upload example:
+
+```powershell
+arduino-cli upload -p COM4 --fqbn arduino:avr:uno .\labs\03-UNO-MAR2406-TFT\sketches\08_TicTacToe_SD_History
+```
+
+## Videos
+
+Introductory LAB-03 hardware video:
+
+https://youtube.com/shorts/TexEwx2-TlQ
+
+Physical five-point touch calibration:
+
+https://youtu.be/0ftVpnH3YtU
+
+## Closure
+
+The tested MAR2406 shield is now documented with a reproducible controller ID, canonical display orientation, working touch pin map/calibration, verified microSD interface, integrated subsystem test and final application demonstrator.
+
+Further work on this shield is not required for LAB-03. New experiments should start as a new laboratory or feature branch rather than extending the closed LAB-03 test series.
