@@ -257,3 +257,30 @@ Features:
 Firmware: `sketches/05_Touch_Paint/05_Touch_Paint.ino`
 
 Procedure: `tests/TEST-05-TOUCH-PAINT.md`
+
+
+## TEST-08 — Tic-Tac-Toe with persistent microSD history — READY FOR BENCH
+
+TEST-08 is the first complete application demonstrator for LAB-03 rather than a synthetic subsystem test.
+
+Firmware:
+
+`sketches/08_TicTacToe_SD_History/08_TicTacToe_SD_History.ino`
+
+Procedure:
+
+`tests/TEST-08-TICTACTOE-SD-HISTORY.md`
+
+Features:
+
+- two-player X/O touch game;
+- canonical ROT1 / 320x240 HMI;
+- persistent statistics stored on microSD;
+- append-only `XOLOG.CSV` history;
+- complete move sequence stored for every game;
+- CRC-8 validation for each log record;
+- statistics rebuilt after reset or power loss;
+- damaged/truncated records ignored;
+- fixed-size buffers and no Arduino `String` objects to keep SRAM use predictable on the UNO.
+
+The test passes only after gameplay, SD append, power-cycle restoration, and damaged-record rejection are all physically verified.
