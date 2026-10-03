@@ -54,6 +54,14 @@ Short introduction showing the hardware set used to start LAB-03:
 
 The video introduces the Arduino UNO + 2.4-inch TFT Touch Shield combination before software diagnostics and functional testing.
 
+## TEST-02 — direct ILI9341 graphics — PASS
+
+Physical display test passed on 2026-10-03. The shield rendered the full RGB565 test sequence and final six-band pattern without gross corruption. The observed band order in the board's landscape viewing position confirms that TEST-02 was using the portrait logical frame rotated relative to the physical board.
+
+Result: `results/TEST-02-GRAPHICS.md`
+
+Next: TEST-03 will fix the project display orientation and add geometry/text diagnostics.
+
 ## Status
 
 **STARTED — 2026-10-03**
@@ -63,6 +71,9 @@ The video introduces the Arduino UNO + 2.4-inch TFT Touch Shield combination bef
 - introductory video recorded;
 - TEST-01 low-level LCD ID probe: **PASS**;
 - physical controller ID: **ILI9341 confirmed (`0x9341`)**;
-- TEST-02 direct graphics smoke test prepared and ready for bench.
+- TEST-02 direct graphics smoke test: **PASS**;
+- RGB565 pixel writes and address windows: **verified**;
+- orientation observation: portrait logical frame is rotated relative to the board's normal landscape viewing position;
+- TEST-03 rotation/geometry/text plan added.
 
-The next certification event is the visible result from TEST-02.
+The next certification event is selection of the canonical 320 x 240 landscape orientation in TEST-03.
