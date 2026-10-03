@@ -107,6 +107,6 @@ See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 
 - **LAB-01** — W5100 + SD hardware diagnostics remain documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
-- **LAB-03** — MAR2406 TFT Touch: TEST-01 PASS, physical ILI9341 controller confirmed; TEST-02 graphics smoke test ready.
+- **LAB-03** — MAR2406 TFT Touch: TEST-01 PASS (ILI9341 confirmed); TEST-02 PASS (RGB565 graphics verified); TEST-03 orientation/geometry/text next.
 
 Optional IR, temperature, UART and external-GPIO interfaces for LAB-02 remain for later stages.
