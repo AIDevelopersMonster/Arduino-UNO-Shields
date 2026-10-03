@@ -52,6 +52,16 @@ Classic 4-LED Arduino Multi-Function Shield family:
 
 See: [shields/Multi-Function-Shield](shields/Multi-Function-Shield/)
 
+### Shield 03 — MAR2406 2.4-inch TFT Touch
+
+- 240 x 320 TFT
+- package marking: ILI9341
+- 8-bit parallel LCD bus
+- resistive touch panel
+- microSD slot
+
+See: [shields/MAR2406-2.4-TFT](shields/MAR2406-2.4-TFT/)
+
 ## Laboratories
 
 ### LAB-01 — Arduino UNO Clone + W5100 + SD 4 GB
@@ -75,6 +85,15 @@ See: [labs/02-UNO-MultiFunction-Shield](labs/02-UNO-MultiFunction-Shield/)
 
 GUI: [tools/MFS-GUI](tools/MFS-GUI/)
 
+### LAB-03 — Arduino UNO + MAR2406 2.4-inch TFT Touch Shield
+
+New laboratory for the 240 x 320 parallel TFT shield: controller identification,
+display graphics, resistive touch calibration, microSD testing and a small HMI.
+
+Intro video: https://youtube.com/shorts/TexEwx2-TlQ
+
+See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
+
 ## Project structure
 
 - `boards/` — Arduino UNO boards and hardware notes
@@ -88,5 +107,6 @@ GUI: [tools/MFS-GUI](tools/MFS-GUI/)
 
 - **LAB-01** — W5100 + SD hardware diagnostics remain documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
+- **LAB-03** — MAR2406 TFT Touch laboratory started; hardware documentation and initial test plan added.
 
-Optional IR, temperature, UART and external-GPIO interfaces remain for later stages.
+Optional IR, temperature, UART and external-GPIO interfaces for LAB-02 remain for later stages.
