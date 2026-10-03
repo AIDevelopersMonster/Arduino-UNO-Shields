@@ -72,6 +72,12 @@ Result: `results/TEST-03-ROTATION-GEOMETRY-TEXT.md`
 
 This 320 x 240 coordinate system is now the project default for HMI and touch calibration.
 
+## Video — TEST-04 touch calibration
+
+Physical five-point calibration of the resistive touch panel for the current tested MAR2406 batch:
+
+**YouTube:** https://youtu.be/0ftVpnH3YtU
+
 ## TEST-04 — raw resistive touch — READY FOR BENCH
 
 Firmware:
