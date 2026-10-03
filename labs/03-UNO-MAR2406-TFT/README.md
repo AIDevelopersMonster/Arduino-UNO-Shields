@@ -30,6 +30,20 @@ Detailed shield notes and pin map: [MAR2406 shield documentation](../../shields/
 
 Continuity measurements will be made only if a particular test exposes an unresolved hardware connection.
 
+## TEST-01 — LCD controller identification — READY FOR BENCH
+
+Firmware:
+
+`sketches/01_LCD_ID_Probe/01_LCD_ID_Probe.ino`
+
+Procedure:
+
+`tests/TEST-01-LCD-ID.md`
+
+TEST-01 uses direct 8-bit bus access and requires no display library. It reads the raw identification/status registers and looks for the ILI9341 `0x9341` signature without initializing the graphics engine.
+
+The package marking is **not** promoted to physical-sample verification until the serial capture from the real shield is recorded.
+
 ## Video
 
 ### Start of the laboratory — Arduino UNO + display shield
@@ -44,4 +58,10 @@ The video introduces the Arduino UNO + 2.4-inch TFT Touch Shield combination bef
 
 **STARTED — 2026-10-03**
 
-Hardware identified from the photographed unit. Initial documentation and test plan created. Controller identification is not yet counted as a laboratory PASS until confirmed on the physical unit.
+- hardware identified from the photographed unit;
+- shield pin map documented;
+- introductory video recorded;
+- TEST-01 low-level LCD ID probe prepared;
+- physical controller ID result: **pending bench run**.
+
+The next certification event is the serial capture from TEST-01 on the physical shield.
