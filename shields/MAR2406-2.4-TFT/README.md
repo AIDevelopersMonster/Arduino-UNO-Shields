@@ -73,3 +73,16 @@ TS_BOT  = 168
 
 Other batches / revisions may differ in pin sharing and calibration direction/range. Treat these values as verified for the current tested batch, not as universal MAR2406 constants.
 
+
+
+## Third-party references
+
+External/reference implementations reviewed during the MAR2406 study are kept separately under:
+
+`third-party/`
+
+Current reference:
+
+- `third-party/Dumblebots-ILI9486-TicTacToe/` — Aditya Agarwal / Dumblebots Tic-Tac-Toe for Arduino UNO R3 + ILI9486 TFT Touch. Includes upstream source snapshot, GPL-3.0 license and a MAR2406 compatibility audit.
+
+The third-party source is not part of the original LAB-03 firmware and is not directly compatible with the tested MAR2406 hardware without adaptation.
