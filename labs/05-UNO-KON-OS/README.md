@@ -960,7 +960,28 @@ Delta from KonSol 0.4:
 
 Compile-time Flash headroom remains 5458 bytes.
 
-Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+Physical boot result:
+
+```text
+SD: READY
+Boot free RAM: 801 B
+Steady shell free RAM: 737 B
+Tasks: 5
+TFT: PASS
+Touch service: running
+File browser / existing SD files: usable
+```
+
+Compared with KonSol 0.4 runtime:
+
+```text
+boot:  812 B -> 801 B  (-11 B)
+shell: 750 B -> 737 B  (-13 B)
+```
+
+The new KAP2 control layer therefore remains inside the UNO SRAM envelope.
+
+Status: **PHYSICAL BOOT + TFT + SD + KERNEL PRE-FLIGHT PASS / KAP2 APP TEST PENDING**.
 
 ## Publication
 
