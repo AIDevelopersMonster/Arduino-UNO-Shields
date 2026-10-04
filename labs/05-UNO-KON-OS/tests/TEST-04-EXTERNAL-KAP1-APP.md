@@ -147,7 +147,28 @@ git pull
 arduino-cli compile --fqbn arduino:avr:uno .\labs\05-UNO-KON-OS\sketches\04_KonSol_External_APP_VM
 ```
 
-Record Flash and SRAM before upload.
+Verified build:
+
+```text
+Sketch: 25720 / 32256 bytes Flash (79%)
+Globals: 1228 / 2048 bytes SRAM (59%)
+Linker-reported SRAM remaining: 820 bytes
+```
+
+Build status: **PASS**.
+
+Compared with KonSol 0.3:
+
+```text
+KonSol 0.3: 23666 B Flash / 1155 B globals
+KonSol 0.4: 25720 B Flash / 1228 B globals
+
+Delta: +2054 B Flash
+       +73 B global SRAM
+```
+
+Flash headroom after the build is 6536 bytes. Runtime free RAM must still be
+measured on physical hardware after TFT, Touch, SD and the KAP1 VM are active.
 
 ## Upload
 
