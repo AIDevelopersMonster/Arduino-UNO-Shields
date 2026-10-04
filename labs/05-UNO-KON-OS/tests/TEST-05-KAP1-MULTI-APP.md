@@ -259,7 +259,7 @@ resident KonSol ----+---- DEMO.KAP
              return to KonSol
 ```
 
-Status: **MULTI-APP EXECUTION PASS / FINAL CERTIFICATION CHECKS PENDING**.
+Status: **MULTI-APP + TFT-BROWSER + WAIT TIMING PASS / FINAL STATE CHECK PENDING**.
 
 
 ## DEMO.KAP physical result
@@ -312,10 +312,9 @@ This verifies:
 - the external program itself was created and stored on microSD without Arduino
   compilation or firmware reflashing.
 
-The second `APP RUN /DEMO.KAP` occurred without a typed shell command being
-shown in the captured transcript. This is consistent with a non-shell launch
-path, but TEST-05 documentation does not treat that alone as proof of Touch
-File Browser launch; explicit operator confirmation is still required.
+The operator explicitly confirmed that the second `APP RUN /DEMO.KAP` was
+started from the TFT Touch File Browser. This physically verifies the non-shell
+launch path for an external KAP1 application.
 
 ### Current TEST-05 status
 
@@ -330,11 +329,19 @@ ABOUT.KAP  — independent RUN / TFT / Serial verified
 DEMO.KAP   — independent RUN / Serial / repeated APP EXIT 0 verified
 ```
 
+The operator also confirmed the physical TFT sequence:
+
+```text
+KAP1 DEMO
+  -> approximately 1500 ms
+PROGRAM ON SD
+  -> approximately 1500 ms
+TOUCH TO EXIT
+```
+
+This verifies the cooperative `WAIT` opcode visually on hardware.
+
 Remaining gates before FULL PHYSICAL PASS:
 
 1. record the final `APP`, `MEM`, and `DIR /` state after the multi-app run;
-2. explicitly confirm the DEMO TFT timing sequence
-   (`KAP1 DEMO` -> 1500 ms -> `PROGRAM ON SD` -> 1500 ms -> `TOUCH TO EXIT`);
-3. explicitly confirm Touch File Browser launch for the remaining multi-app
-   sequence (or otherwise record which application the second DEMO launch used);
-4. record ABOUT.KAP `WAIT_TOUCH -> APP EXIT 0` if not already observed.
+2. record ABOUT.KAP `WAIT_TOUCH -> APP EXIT 0` if not already observed.
