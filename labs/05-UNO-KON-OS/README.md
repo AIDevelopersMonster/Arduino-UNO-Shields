@@ -435,7 +435,24 @@ Delta from KonSol 0.3:
 +73 B global SRAM
 ```
 
-Status: **BUILD PASS / READY FOR BENCH**.
+Status: **BUILD PASS / SERIAL BENCH PASS**.
+
+KonSol 0.4 Serial bench:
+
+```text
+Boot free RAM: 812 B
+Shell free RAM: 750 B
+Tasks: 5
+HELLO.KAP created on SD from KonSol shell
+RUN /HELLO.KAP: PASS
+Serial service from app: PASS
+APP EXIT 0: PASS
+Repeated RUN/EXIT: PASS
+```
+
+The external application lifecycle is therefore operational from the shell.
+Touch-browser launch was also reported working on the physical unit; final
+visual confirmation is pending before FULL PHYSICAL PASS.
 
 ## Publication
 
