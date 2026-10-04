@@ -128,3 +128,89 @@ TEST-01 passes when:
 A successful DIR / in this test is especially significant because the same
 filesystem operation was the point at which the FreeRTOS-based TEST-02 became
 unreliable.
+
+
+## Physical result
+
+TEST-01 was executed on the real Arduino UNO + MAR2406 shield and passed.
+
+Observed boot:
+
+```text
+KON-OS 0.1
+Arduino UNO / ATmega328P / 16 MHz
+32 KB FLASH / 2 KB SRAM
+Cooperative kernel + Serial shell + microSD
+
+BOOT: kernel init
+BOOT: SD mount
+SD: READY
+FREE RAM: 1009 B
+Type HELP
+A:/>
+```
+
+Observed runtime diagnostics:
+
+```text
+INFO
+KON-OS 0.1
+CPU: ATmega328P @ 16 MHz
+FLASH: 32 KB
+SRAM: 2 KB
+SCHED: cooperative
+TASKS: 2
+SD: READY
+FREE RAM: 834 B
+
+PS
+ID  TASK      PERIOD  RUNS
+0   SERIAL    1 ms    102636
+1   CLOCK     100 ms  1026
+
+UPTIME
+UPTIME: 117114 ms
+KERNEL TICKS: 1171
+```
+
+Filesystem operations all passed:
+
+- DIR / listed the real card contents;
+- WRITE created KONTEST.TXT;
+- TYPE read the file back;
+- APPEND added a second line;
+- MKDIR created /KON;
+- RMDIR removed /KON;
+- DEL removed KONTEST.TXT;
+- repeated DIR calls continued to work;
+- LS / and lowercase ls / were accepted as aliases and produced the directory listing.
+
+The observed free-RAM value after entering normal shell operation was 834 B.
+No reset or filesystem corruption was observed during the test sequence.
+
+### TEST-01 status
+
+**PASS on physical hardware.**
+
+This is the key comparison with LAB-04:
+
+```text
+LAB-04 FreeRTOS + SD:
+  SD init       PASS
+  shell command PASS
+  directory op  FAIL / unstable
+
+LAB-05 KON-OS:
+  SD init       PASS
+  scheduler     PASS
+  shell         PASS
+  DIR           PASS
+  WRITE         PASS
+  TYPE          PASS
+  APPEND        PASS
+  MKDIR/RMDIR   PASS
+  DEL           PASS
+```
+
+The result supports the design choice to use a cooperative single-stack kernel
+for this 2 KB SRAM target.
