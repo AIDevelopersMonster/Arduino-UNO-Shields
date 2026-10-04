@@ -68,4 +68,16 @@ Procedure:
 
 `tests/TEST-02-FREERTOS-SD-FILE-MANAGER.md`
 
-Status: **REVISED AFTER FLASH LIMIT — READY FOR BUILD**.
+Status: **BUILD PASS / READY FOR BENCH**.
+
+Verified TEST-02A build:
+
+```text
+Flash: 21166 / 32256 bytes (65%)
+SRAM globals: 1137 / 2048 bytes (55%)
+Linker-reported SRAM remaining: 911 bytes
+```
+
+Flash is no longer the limiting resource in the staged build. Runtime SRAM is
+now the primary constraint because FreeRTOS task stacks and control structures
+consume additional memory after startup.
