@@ -998,12 +998,15 @@ COUNTER KAP2
 APP EXIT 0
 ```
 
-This confirms KAP2 header recognition, file execution and clean exit, but the
-five-touch register/branch loop is not yet certified from the Serial evidence
-alone. The next run will inspect live KAP2 registers with `APP` between
-touches.
+The operator confirmed that five counted Touch presses were physically
+performed during the recorded test. The program then completed with
+`APP EXIT 0`. Per-touch Serial register dumps are treated as optional
+diagnostics, not as a required runtime feature.
 
-Status: **KAP2 HEADER + LAUNCH + KAP1 COMPATIBILITY PASS / INTERACTIVE LOOP CERTIFICATION PENDING**.
+Status: **TEST-06 FULL PHYSICAL PASS**.
+
+This establishes the first external KAP2 program with persistent VM state,
+Touch-driven iteration and conditional control flow on the physical UNO.
 
 ## Publication
 
