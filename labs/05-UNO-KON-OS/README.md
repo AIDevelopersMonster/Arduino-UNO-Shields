@@ -364,6 +364,18 @@ and microSD filesystem together on the ATmega328P.
 
 Status: **CORE PHYSICAL PASS**.
 
+Extended TEST-03 dataset was also created successfully:
+
+```text
+/TEST03
+  F01.TXT ... F07.TXT
+  SUB/
+```
+
+After approximately 2996 DISPLAY runs and 99898 TOUCH task runs, Serial `MEM`
+still reported 823 B free. The remaining FULL PASS gate is physical UI
+verification of NEXT/PREV and SUB/UP navigation.
+
 Final extended browser certification still requires a temporary test directory
 with more than five entries so PREV/NEXT and directory-enter/UP can be exercised
 rather than inferred.
