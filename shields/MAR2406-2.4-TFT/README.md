@@ -90,3 +90,24 @@ Adapted MAR2406 version of the Player-vs-Arduino Tic-Tac-Toe concept:
 `examples/TicTacToe_vs_Arduino/TicTacToe_vs_Arduino.ino`
 
 The implementation is original for this repository and uses the verified MAR2406 ILI9341 / 320x240 / D6-A2-A1-D7 touch configuration. The external Dumblebots / Aditya Agarwal project remains linked only as a reference.
+
+
+## Example — Boolean Algebra Interactive Learning HMI
+
+Physically verified on the tested Arduino UNO + MAR2406 shield:
+
+`examples/Boolean_Algebra_Interactive_HMI/Boolean_Algebra_Interactive_HMI.ino`
+
+Features:
+
+- LEARN and QUIZ modes;
+- interactive A/B input toggles;
+- NOT, AND, OR, XOR, NAND, NOR and XNOR;
+- live result calculation;
+- truth tables with active-row highlighting;
+- touch-controlled lesson navigation;
+- 0/1 quiz answers with immediate correct/wrong feedback.
+
+Status: **PASS on physical hardware**.
+
+This is a complete interactive educational HMI running directly on the ATmega328P with the verified ILI9341 / ROT1 320x240 display and calibrated resistive touch configuration.
