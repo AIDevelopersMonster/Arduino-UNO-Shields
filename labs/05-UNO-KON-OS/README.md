@@ -859,11 +859,24 @@ microSD, and executed twice by the unchanged KonSol 0.4 firmware. Both runs
 produced `DEMO KAP1` and `APP EXIT 0`, confirming a third independent
 bytecode stream and repeatable external-application lifecycle.
 
-Status: **MULTI-APP EXECUTION PASS / FINAL CERTIFICATION CHECKS PENDING**.
+The physical DEMO sequence was confirmed as:
 
-Remaining TEST-05 gates are final post-run `APP`/`MEM`/`DIR /` evidence,
-explicit DEMO TFT timing confirmation, and explicit operator confirmation of
-the Touch File Browser launch path for the multi-app sequence.
+```text
+KAP1 DEMO
+  -> ~1500 ms
+PROGRAM ON SD
+  -> ~1500 ms
+TOUCH TO EXIT
+```
+
+The second DEMO launch was explicitly confirmed as coming from the TFT Touch
+File Browser, not from the Serial shell.
+
+Status: **MULTI-APP + TFT-BROWSER + WAIT TIMING PASS / FINAL STATE CHECK PENDING**.
+
+Remaining TEST-05 gates are the final post-run `APP`/`MEM`/`DIR /`
+evidence and an explicit ABOUT.KAP `WAIT_TOUCH -> APP EXIT 0` record if that
+exit was not already observed.
 
 ## Publication
 
