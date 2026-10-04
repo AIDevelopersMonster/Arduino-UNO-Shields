@@ -179,6 +179,58 @@ Expected PS includes the fourth TOUCH task.
 11. MEM remains stable.
 12. No reset, display corruption or filesystem corruption occurs.
 
+
+## Extended browser certification dataset
+
+Create the complete browser test dataset from the KonSol shell itself. This
+simultaneously exercises filesystem write/create operations before the UI test.
+
+```text
+MKDIR /TEST03
+WRITE /TEST03/F01.TXT FILE 01
+WRITE /TEST03/F02.TXT FILE 02
+WRITE /TEST03/F03.TXT FILE 03
+WRITE /TEST03/F04.TXT FILE 04
+WRITE /TEST03/F05.TXT FILE 05
+WRITE /TEST03/F06.TXT FILE 06
+WRITE /TEST03/F07.TXT FILE 07
+MKDIR /TEST03/SUB
+WRITE /TEST03/SUB/INNER.TXT INNER FILE
+DIR /TEST03
+```
+
+Expected structure:
+
+```text
+/TEST03
+  F01.TXT
+  F02.TXT
+  F03.TXT
+  F04.TXT
+  F05.TXT
+  F06.TXT
+  F07.TXT
+  SUB/
+    INNER.TXT
+```
+
+Physical sequence:
+
+1. `FILES` or touch FILES.
+2. Open `TEST03`.
+3. Verify page 1 shows the first five entries.
+4. Touch `NEXT`; verify remaining entries appear.
+5. Touch `PREV`; verify page 1 returns.
+6. Open `SUB`.
+7. Open `INNER.TXT`; verify the viewer shows `INNER FILE`.
+8. Touch `BACK`; then `UP`; verify return to `/TEST03`.
+9. Touch `DASH`; verify return to the KonSol dashboard.
+10. From Serial run `DIR /TEST03`, `MEM`, and `PS`.
+11. Repeat NEXT/PREV/UP several times and confirm no reset, corruption or RAM drift.
+
+Only after these checks should TEST-03 be promoted from **CORE PHYSICAL PASS**
+to **FULL PHYSICAL PASS**.
+
 ## PASS criteria
 
 TEST-03 passes only after the direct Touch service, browser, viewer, Serial
