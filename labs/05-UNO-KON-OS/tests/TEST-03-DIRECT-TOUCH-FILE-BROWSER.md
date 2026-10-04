@@ -291,3 +291,47 @@ Serial shell, SD filesystem and watchdog reboot.
 The remaining extended navigation cases (multi-page PREV/NEXT and directory-enter/UP)
 require a directory with more than five entries and at least one subdirectory. They are
 kept as explicit final checks rather than inferred from the current two-file SD card.
+
+
+## Extended dataset creation result
+
+The certification dataset was created successfully from the KonSol 0.3 shell.
+
+Final verified directory listing:
+
+```text
+DIR /TEST03
+F 8 F01.TXT
+F 8 F02.TXT
+F 8 F03.TXT
+F 8 F04.TXT
+F 8 F05.TXT
+F 8 F06.TXT
+F 8 F07.TXT
+D 32768 SUB
+FILES: 8
+```
+
+After extended runtime and filesystem activity:
+
+```text
+MEM
+FREE RAM: 823 B
+
+PS
+0   SERIAL    1 ms    2996946
+1   CLOCK     100 ms  29969
+2   DISPLAY   1000 ms 2996
+3   TOUCH     30 ms   99898
+```
+
+The shell-side filesystem stage therefore passed with stable observed free RAM
+and all four cooperative tasks still running.
+
+A rapid multi-line paste initially produced a partial command sequence; repeating
+the commands individually completed the dataset. This is recorded as an input/
+terminal pacing observation rather than a filesystem failure because the final
+directory contents are correct and the system remained stable.
+
+The remaining requirement for FULL PHYSICAL PASS is direct on-screen
+verification of NEXT/PREV, entering SUB, viewing INNER.TXT, BACK, UP and DASH.
