@@ -894,6 +894,57 @@ multiple independently stored KAP1 applications, including shell and TFT Touch
 File Browser launch paths, cooperative WAIT, WAIT_TOUCH, resident display and
 Serial services, and clean EXIT back to KonSol without reflashing.
 
+### TEST-06 — KonSol 0.5 / KAP2 interactive control flow
+
+KonSol 0.5 is the next experimental branch after the physically certified
+KonSol 0.4 / TEST-05 baseline.
+
+KAP2 keeps KAP1 compatibility and adds the first compact VM control layer:
+
+```text
+4 x 16-bit registers: R0..R3
+MOVI
+INC / DEC
+CMPI
+MARK
+JNZ / JZ
+GET_TOUCH_X
+GET_TOUCH_Y
+DRAW_REG
+```
+
+The first application is:
+
+[apps/KAP2/COUNTER.KAP](apps/KAP2/COUNTER.KAP)
+
+It counts five Touch events, captures the last X/Y coordinates, redraws its own
+state, branches back through the bytecode loop, then displays DONE and exits
+back to the resident system.
+
+Firmware:
+
+[sketches/05_KonSol_KAP2_Interactive/05_KonSol_KAP2_Interactive.ino](sketches/05_KonSol_KAP2_Interactive/05_KonSol_KAP2_Interactive.ino)
+
+Specification:
+
+[docs/KAP2_SPEC.md](docs/KAP2_SPEC.md)
+
+Physical procedure:
+
+[tests/TEST-06-KAP2-INTERACTIVE.md](tests/TEST-06-KAP2-INTERACTIVE.md)
+
+Important compatibility rule:
+
+```text
+4B415031 = KAP1
+4B415032 = KAP2
+```
+
+KonSol 0.5 must continue to run the physically certified KAP1 applications while
+adding KAP2 state and control flow.
+
+Status: **READY FOR BUILD AND PHYSICAL TEST**.
+
 ## Publication
 
 KonSol 0.4 FULL PHYSICAL PASS is published on Zenodo as the current project
