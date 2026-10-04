@@ -3,33 +3,49 @@
 ## Goal
 
 Turn the MAR2406 microSD slot into a real removable file store reachable from a
-Windows PC over the Arduino UNO USB serial connection, while FreeRTOS keeps the
-HMI responsive.
+Windows PC over the Arduino UNO USB serial connection.
 
-The built-in LED heartbeat from TEST-01 is removed. D13 is SPI SCK for the SD
-card, so it must not be used as a status LED during SD traffic.
+The built-in LED heartbeat from TEST-01 is removed because D13 is SPI SCK for
+the SD card.
 
-## Architecture
+## Flash-limit result from the first build
+
+The first TEST-02 revision combined:
+
+- FreeRTOS
+- SD/SPI
+- MCUFRIEND_kbv
+- Adafruit_GFX
+- Serial file-transfer protocol
+
+On the Arduino UNO / ATmega328P that build exceeded the available program Flash
+and the linker reported that the text section did not fit.
+
+That is a useful architectural result: the full LAB-03 graphics stack plus
+FreeRTOS plus the SD filesystem is too large for this firmware layout.
+
+TEST-02 therefore now uses a staged design.
+
+## TEST-02A architecture
 
 ```text
 Windows PC
    |
  USB / COM4
    |
- FILE task
+ FreeRTOS FILE task
    |
  SPI / SD
    |
  microSD
-
-HMI task
-   |
- TFT status screen
 ```
 
-The FILE task owns Serial and the SD card. The HMI task owns the TFT. Touch is
-not part of TEST-02 yet; this keeps the first transfer test focused and avoids
-mixing two new subsystems at once.
+The TFT and Touch are deliberately not linked into this build. The physical
+shield may remain installed; only its microSD interface is used.
+
+Once file transfer is certified, a later test can reintroduce status graphics
+with a much smaller direct ILI9341 driver instead of MCUFRIEND_kbv +
+Adafruit_GFX.
 
 ## Firmware
 
@@ -48,20 +64,15 @@ MOUNT
 LS [path]
 GET <path>
 PUT <size> <path>
-RM <path>
-MKDIR <path>
-RMDIR <path>
 ```
 
 ### LIST
-
-Example:
 
 ```text
 LS /
 ```
 
-Response:
+Response format:
 
 ```text
 BEGIN LS
@@ -72,60 +83,60 @@ END LS
 
 ### GET
 
-Host sends:
+Host:
 
 ```text
 GET /TEST.TXT
 ```
 
-UNO replies:
+UNO:
 
 ```text
 DATA <size> 32
 ```
 
-Then UNO sends up to 32 raw bytes. After each block the PC sends:
+UNO then sends up to 32 raw bytes. After each block the PC sends:
 
 ```text
 ACK
 ```
 
-After the last block UNO sends:
+After the last block:
 
 ```text
 END <CRC16>
 ```
 
-CRC is CRC-16/CCITT with polynomial 0x1021 and initial value 0xFFFF.
-
 ### PUT
 
-Host sends:
+Host:
 
 ```text
 PUT <size> /TEST.TXT
 ```
 
-UNO replies:
+UNO:
 
 ```text
 READY 32
 ```
 
-The PC sends at most 32 raw bytes per block. After every block UNO replies:
+The PC sends one block of at most 32 raw bytes and waits for:
 
 ```text
 ACK <total_received>
 ```
 
-After the last block UNO replies:
+After the final block:
 
 ```text
 OK <size> <CRC16>
 ```
 
-The deliberately small 32-byte transport block prevents the AVR serial RX
-buffer from overflowing while the SD library is performing a sector write.
+CRC is CRC-16/CCITT, polynomial 0x1021, initial value 0xFFFF.
+
+The 32-byte block size is intentional: it keeps the transfer comfortably below
+the AVR serial RX-buffer limit while the SD library performs card writes.
 
 ## Build
 
@@ -142,20 +153,20 @@ arduino-cli compile --fqbn arduino:avr:uno .\labs\04-UNO-MAR2406-FreeRTOS\sketch
 arduino-cli upload -p COM4 --fqbn arduino:avr:uno .\labs\04-UNO-MAR2406-FreeRTOS\sketches\02_FreeRTOS_SD_File_Manager
 ```
 
-## First serial check
+## First bench check
 
 ```powershell
 arduino-cli monitor -p COM4 -c baudrate=115200
 ```
 
-Expected boot output:
+Expected boot:
 
 ```text
 BOOT FRTOSFM/1
 OK FRTOSFM/1 SD=READY BLOCK=32 BAUD=115200
 ```
 
-Then type:
+Then test:
 
 ```text
 PING
@@ -167,11 +178,11 @@ LS /
 
 TEST-02A passes when:
 
-1. SD initializes as READY;
-2. `PING` returns `OK PONG FRTOSFM/1`;
-3. `LS /` returns the actual directory contents;
-4. the TFT remains alive and shows the current operation;
-5. no reset or display corruption occurs during repeated directory listing.
+1. the firmware fits in UNO Flash;
+2. SD initializes as READY;
+3. PING returns OK PONG FRTOSFM/1;
+4. LS / returns the real card directory;
+5. repeated listings do not reset or hang the board.
 
-After TEST-02A we add the Windows CLI utility for PUT/GET and verify binary file
-round-trip with CRC.
+TEST-02B then adds the Windows host utility and verifies PUT/GET round-trip
+with CRC.
