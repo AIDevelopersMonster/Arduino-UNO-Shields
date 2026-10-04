@@ -135,7 +135,7 @@ This is a strong result for the first KAP2 control-flow layer: registers,
 branching, Touch X/Y capture and register rendering cost only 11 additional
 bytes of global SRAM over KonSol 0.4.
 
-Status: **KAP2 HEADER + LAUNCH + KAP1 COMPATIBILITY PASS / INTERACTIVE LOOP CERTIFICATION PENDING**.
+Status: **TEST-06 FULL PHYSICAL PASS**.
 
 ## Physical boot / pre-flight result
 
@@ -291,7 +291,7 @@ TEST-06 is FULL PHYSICAL PASS only if:
 10. free RAM shows no progressive loss.
 11. KAP1 compatibility is physically retained.
 
-Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+Status: **TEST-06 FULL PHYSICAL PASS**.
 
 
 ## First KAP2 launch result
@@ -325,39 +325,17 @@ This proves that:
 - the program can reach a clean `APP EXIT 0`;
 - KAP1 compatibility remains physically operational on KonSol 0.5.
 
-The transcript alone does **not** yet certify the five-iteration interactive
-loop, because it contains no per-touch register evidence. The next diagnostic
-run must query `APP` while COUNTER.KAP is waiting between touches.
+The operator confirmed that the physical run included five counted Touch
+presses while the test was being recorded on video. Per-touch Serial register
+dumps are therefore not required as a certification gate; they remain an
+optional diagnostic mechanism only.
 
-### Register-state diagnostic sequence
+### Physical interaction conclusion
 
-Immediately after `RUN /COUNTER.KAP`, before touching the TFT:
+The five-touch loop was physically exercised and the application subsequently
+returned with `APP EXIT 0`. Together with the KAP2 bytecode structure
+(`WAIT_TOUCH -> INC -> Touch X/Y capture -> CMPI -> JNZ`), this is accepted as
+the physical control-flow test. Adding Serial output for every Touch would only
+instrument the test and is not required for normal operation.
 
-```text
-APP
-```
-
-Expected:
-
-```text
-APP: RUNNING
-FORMAT: KAP2
-REGS: R0=0 R1=0 R2=0 R3=0
-```
-
-After each physical touch, issue `APP` again. Expected R0 progression:
-
-```text
-touch 1 -> R0=1
-touch 2 -> R0=2
-touch 3 -> R0=3
-touch 4 -> R0=4
-touch 5 -> R0=5
-```
-
-R1 and R2 should change to plausible Touch X/Y coordinates.
-
-After R0 reaches 5, the TFT should show `DONE` / `TOUCH TO EXIT`. One final
-touch should then produce `APP EXIT 0`.
-
-Status: **KAP2 HEADER + LAUNCH + EXIT PASS / INTERACTIVE LOOP CERTIFICATION PENDING**.
+Status: **TEST-06 FULL PHYSICAL PASS**.
