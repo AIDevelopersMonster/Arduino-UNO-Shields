@@ -114,22 +114,24 @@ The project therefore uses these criteria:
 
 ### Current status of the OS claim
 
-KON-OS 0.1 should be described precisely as a **small operating environment /
-kernel prototype**, not yet as a complete general-purpose operating system.
+KonSol 0.4 should be described precisely as a **resident cooperative operating
+environment with separately stored external applications**, not as a complete
+general-purpose operating system.
 
-TEST-01 can demonstrate the resident kernel, cooperative scheduler, shell and
-filesystem services. The stronger distinction from an ordinary monitor program
-will arrive when TEST-04 introduces an external application format that can be
-loaded from SD, run through kernel services, terminated, and returned to the
-shell without reflashing the ATmega328P.
+TEST-04 has now physically verified the key application boundary that earlier
+versions treated as the target milestone: the resident kernel remains in Flash,
+a KAP1 application remains on microSD, the application is launched without
+reflashing the ATmega328P, uses resident TFT/Touch/Serial services, waits for a
+Touch event, exits, and returns control to KonSol.
 
-That application boundary is the key milestone. Once the same resident kernel
-can execute different external programs through a stable system interface,
-KON-OS is no longer merely one large Arduino application with a menu.
+This is the first strong OS-boundary result of the project. It is narrower than
+a modern protected OS claim, but it is stronger than a single monolithic Arduino
+application with a menu because the resident system and external application are
+separate storage and lifecycle objects.
 
 ## Non-claims
 
-KON-OS 0.1 is not POSIX, not a protected multitasking OS, and not a replacement
+KonSol 0.4 is not POSIX, not a protected multitasking OS, and not a replacement
 for FreeRTOS.
 
 It has:
@@ -461,14 +463,18 @@ launched, interacted with and exited without reflashing the UNO.
 
 ## Publication
 
-KonSol 0.1 has been published as a software record on Zenodo.
+KonSol 0.4 FULL PHYSICAL PASS is published on Zenodo as the current project
+baseline.
 
-- DOI: https://doi.org/10.5281/zenodo.23139756
-- Video demonstration: https://www.youtube.com/watch?v=N3PEQUbUmPM
+- KonSol 0.4 DOI: https://doi.org/10.5281/zenodo.23144922
+- KonSol 0.4 record: https://zenodo.org/records/23144922
+- Historical KonSol 0.1 DOI: https://doi.org/10.5281/zenodo.23139756
+- KonSol 0.1 video demonstration: https://www.youtube.com/watch?v=N3PEQUbUmPM
 
-The Zenodo record corresponds to the physically verified KonSol 0.1 state:
-cooperative kernel, Serial shell, microSD filesystem operations, memory
-diagnostics and the TEST-01 hardware results documented in this laboratory.
+The 0.4 publication corresponds to the physically verified resident
+kernel + Shell + microSD + direct TFT + direct Touch + File Browser + streamed
+KAP1 application lifecycle. The 0.1 record remains preserved as the historical
+kernel/Shell/SD milestone.
 
 ## Documentation
 
