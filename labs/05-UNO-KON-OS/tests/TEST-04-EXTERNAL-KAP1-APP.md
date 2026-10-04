@@ -246,3 +246,62 @@ real UNO:
 This test is the first strong OS-boundary certification for KonSol: application
 content is separate from the resident kernel and can be changed on SD without
 rebuilding or reflashing the firmware.
+
+
+## Serial bench result
+
+Physical Arduino UNO boot and shell verification:
+
+```text
+KonSol 0.4
+BOOT: TFT init
+BOOT: kernel init
+BOOT: SD mount
+SD: READY
+FREE RAM: 812 B
+
+INFO
+TASKS: 5
+TFT: ILI9341 direct 8-bit
+TOUCH: direct resistive
+APP VM: KAP1 streamed from SD
+SD: READY
+FREE RAM: 750 B
+
+PS
+0   SERIAL    1 ms
+1   CLOCK     100 ms
+2   DISPLAY   1000 ms
+3   TOUCH     30 ms
+4   APP       10 ms
+```
+
+HELLO.KAP was created entirely through the resident KonSol shell on microSD.
+TYPE confirmed the expected encoded KAP1 contents.
+
+The external application then executed from SD without reflashing:
+
+```text
+RUN /HELLO.KAP
+APP RUN /HELLO.KAP
+HELLO KAP1
+APP EXIT 0
+```
+
+Repeated RUN cycles also returned with APP EXIT 0.
+
+This certifies the Serial-side resident-kernel -> external-SD-app -> EXIT ->
+resident-kernel path. Touch-browser launch was also reported operational on the
+physical unit; visual/photo confirmation is still pending before marking the
+complete TEST-04 as FULL PHYSICAL PASS.
+
+Observed memory:
+
+```text
+Boot free RAM: 812 B
+Shell INFO/MEM free RAM: 750 B
+```
+
+The shell prompt can appear before application Serial output because RUN starts
+the APP task cooperatively and the command parser returns immediately. This is
+a presentation-order issue, not an application lifecycle failure.
