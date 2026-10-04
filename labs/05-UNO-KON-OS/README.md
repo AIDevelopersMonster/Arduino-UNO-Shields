@@ -289,7 +289,22 @@ Delta from KonSol 0.1:
 +26 B global SRAM
 ```
 
-Status: **BUILD PASS / READY FOR BENCH**.
+Physical result:
+
+```text
+Boot free RAM: 981 B
+Steady shell free RAM: 806 B
+SD: READY
+DIR /: PASS
+TFT reinitialization: PASS
+DISPLAY task: RUNNING
+```
+
+The direct 320x240 ILI9341 dashboard was visually verified on the physical
+MAR2406 shield. Compared with KonSol 0.1, the complete display subsystem adds
+only about 28 bytes of observed runtime SRAM overhead.
+
+Status: **PASS ON PHYSICAL HARDWARE**.
 
 ### Planned TEST-03 — touch shell / file browser
 
