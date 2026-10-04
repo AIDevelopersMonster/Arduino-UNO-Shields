@@ -28,10 +28,10 @@ EXIT
 
 Second independent application for TEST-05.
 
-Physical bench result: **RUN / TFT / SERIAL PASS** on the same resident KonSol
-0.4 firmware. The display showed `KONSOL 0.4`, `EXTERNAL APP`,
-`RUNNING FROM SD`, and `TOUCH TO EXIT`; Serial produced `ABOUT KAP1`.
-Final WAIT_TOUCH -> EXIT confirmation for this run remains to be recorded.
+Physical bench result: **FULL APPLICATION LIFECYCLE PASS** on the same resident
+KonSol 0.4 firmware. The display showed `KONSOL 0.4`, `EXTERNAL APP`,
+`RUNNING FROM SD`, and `TOUCH TO EXIT`; Serial produced `ABOUT KAP1`,
+and the application completed with `APP EXIT 0`.
 
 Behavior:
 
@@ -108,3 +108,28 @@ A:/> RUN /DEMO.KAP
 
 The same resident KonSol firmware must execute all applications. No Arduino
 rebuild or reflash is part of TEST-05.
+
+
+## TEST-05 certification
+
+**FULL PHYSICAL PASS.**
+
+The same unchanged resident KonSol 0.4 firmware physically executed:
+
+```text
+HELLO.KAP
+ABOUT.KAP
+DEMO.KAP
+```
+
+The final resident state remained:
+
+```text
+APP: IDLE
+LAST EXIT: 0
+FREE RAM: 750 B
+```
+
+The microSD directory retained all three KAP1 files, and DEMO.KAP was also
+launched from the TFT Touch File Browser. No Arduino rebuild or reflash was
+required between applications.
