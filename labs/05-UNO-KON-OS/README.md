@@ -329,7 +329,22 @@ The TFT UI can open the SD browser, page through directory entries, enter
 directories, return to the parent directory and display a one-page ASCII text
 preview.
 
-Status: **READY FOR BUILD / BENCH**.
+Verified build:
+
+```text
+Flash: 23666 / 32256 bytes (73%)
+SRAM globals: 1155 / 2048 bytes (56%)
+Linker-reported SRAM remaining: 893 bytes
+```
+
+Delta from KonSol 0.2:
+
+```text
++3402 B Flash
++96 B global SRAM
+```
+
+Status: **BUILD PASS / READY FOR BENCH**.
 
 ### Planned TEST-04 — executable content
 
