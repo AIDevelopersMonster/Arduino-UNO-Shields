@@ -344,7 +344,29 @@ Delta from KonSol 0.2:
 +96 B global SRAM
 ```
 
-Status: **BUILD PASS / READY FOR BENCH**.
+Physical bench result:
+
+```text
+Boot free RAM: 885 B
+Shell INFO/MEM free RAM: 823 B
+Tasks: SERIAL / CLOCK / DISPLAY / TOUCH
+SD root: T07LOG.TXT, XOLOG.TXT
+Watchdog REBOOT: PASS
+Touch FILES: PASS
+File browser: PASS
+XOLOG.TXT open/view: PASS
+Return to dashboard: PASS
+```
+
+The photographed hardware run confirms that KonSol 0.3 can operate the direct
+ILI9341 display, direct resistive Touch service, cooperative kernel, Serial shell
+and microSD filesystem together on the ATmega328P.
+
+Status: **CORE PHYSICAL PASS**.
+
+Final extended browser certification still requires a temporary test directory
+with more than five entries so PREV/NEXT and directory-enter/UP can be exercised
+rather than inferred.
 
 ### Planned TEST-04 — executable content
 
