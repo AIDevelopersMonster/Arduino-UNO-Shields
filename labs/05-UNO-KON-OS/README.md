@@ -981,7 +981,29 @@ shell: 750 B -> 737 B  (-13 B)
 
 The new KAP2 control layer therefore remains inside the UNO SRAM envelope.
 
-Status: **PHYSICAL BOOT + TFT + SD + KERNEL PRE-FLIGHT PASS / KAP2 APP TEST PENDING**.
+KAP1 compatibility was physically rechecked on KonSol 0.5:
+
+```text
+APP RUN /HELLO.KAP
+HELLO KAP1
+APP EXIT 0
+```
+
+COUNTER.KAP was then created from the resident shell, read back from microSD,
+accepted as KAP2 and launched:
+
+```text
+APP RUN /COUNTER.KAP
+COUNTER KAP2
+APP EXIT 0
+```
+
+This confirms KAP2 header recognition, file execution and clean exit, but the
+five-touch register/branch loop is not yet certified from the Serial evidence
+alone. The next run will inspect live KAP2 registers with `APP` between
+touches.
+
+Status: **KAP2 HEADER + LAUNCH + KAP1 COMPATIBILITY PASS / INTERACTIVE LOOP CERTIFICATION PENDING**.
 
 ## Publication
 
