@@ -7,7 +7,7 @@
     - TFT/GFX remain intentionally removed to fit UNO Flash.
     - SD is mounted in setup() BEFORE the RTOS task starts.
     - boot-stage messages are printed before and after SD init and task creation.
-    - FILE task stack reduced from 320 to 256 bytes.
+    - FILE task stack raised to 384 bytes after LS / exposed that 256 bytes was too tight for SD directory operations.
     - D13 is reserved for SPI SCK; no LED heartbeat is used.
 
   Protocol: FRTOSFM/1
@@ -155,7 +155,15 @@ static void commandList(char *path) {
   path = skipSpaces(path);
   if (!*path) path = (char *)"/";
 
+  Serial.print(F("LS ENTER "));
+  Serial.println(path);
+  Serial.println(F("LS OPEN BEGIN"));
+  Serial.flush();
+
   File dir = SD.open(path);
+
+  Serial.println(F("LS OPEN RETURN"));
+  Serial.flush();
 
   if (!dir) {
     Serial.println(F("ERR OPEN"));
@@ -394,7 +402,7 @@ void setup() {
   BaseType_t ok = xTaskCreate(
     TaskFileServer,
     "FILE",
-    256,
+    384,
     NULL,
     1,
     NULL
