@@ -2,15 +2,18 @@
 
 ## Goal
 
-Turn the MAR2406 microSD slot into a real removable file store reachable from a
-Windows PC over the Arduino UNO USB serial connection.
+Evaluate whether Arduino UNO R3 / ATmega328P can run a practical FreeRTOS-based
+microSD file manager over USB Serial while using the MAR2406 shield.
 
-The built-in LED heartbeat from TEST-01 is removed because D13 is SPI SCK for
-the SD card.
+## Result
 
-## Flash-limit result from the first build
+**CLOSED — FAIL AS A PRACTICAL ARCHITECTURE ON THIS HARDWARE**
 
-The first TEST-02 revision combined:
+The experiment produced a useful boundary result.
+
+### Attempt 1 — FreeRTOS + SD + full TFT stack
+
+Combined:
 
 - FreeRTOS
 - SD/SPI
@@ -18,163 +21,20 @@ The first TEST-02 revision combined:
 - Adafruit_GFX
 - Serial file-transfer protocol
 
-On the Arduino UNO / ATmega328P that build exceeded the available program Flash
-and the linker reported that the text section did not fit.
+Result:
 
-That is a useful architectural result: the full LAB-03 graphics stack plus
-FreeRTOS plus the SD filesystem is too large for this firmware layout.
+- build failed because the text section exceeded Arduino UNO Flash.
 
-TEST-02 therefore now uses a staged design.
+Conclusion:
 
-## TEST-02A architecture
+The full LAB-03 graphics stack plus FreeRTOS plus SD/file-transfer logic does
+not fit the ATmega328P program-memory budget in this architecture.
 
-```text
-Windows PC
-   |
- USB / COM4
-   |
- FreeRTOS FILE task
-   |
- SPI / SD
-   |
- microSD
-```
+### Attempt 2 — staged FreeRTOS + SD + Serial only
 
-The TFT and Touch are deliberately not linked into this build. The physical
-shield may remain installed; only its microSD interface is used.
+TFT/GFX were removed.
 
-Once file transfer is certified, a later test can reintroduce status graphics
-with a much smaller direct ILI9341 driver instead of MCUFRIEND_kbv +
-Adafruit_GFX.
-
-## Firmware
-
-`sketches/02_FreeRTOS_SD_File_Manager/02_FreeRTOS_SD_File_Manager.ino`
-
-## Protocol
-
-Protocol identifier: `FRTOSFM/1`
-
-Commands:
-
-```text
-PING
-INFO
-MOUNT
-LS [path]
-GET <path>
-PUT <size> <path>
-```
-
-### LIST
-
-```text
-LS /
-```
-
-Response format:
-
-```text
-BEGIN LS
-F<TAB>123<TAB>TEST.TXT
-D<TAB>0<TAB>LEVELS/
-END LS
-```
-
-### GET
-
-Host:
-
-```text
-GET /TEST.TXT
-```
-
-UNO:
-
-```text
-DATA <size> 32
-```
-
-UNO then sends up to 32 raw bytes. After each block the PC sends:
-
-```text
-ACK
-```
-
-After the last block:
-
-```text
-END <CRC16>
-```
-
-### PUT
-
-Host:
-
-```text
-PUT <size> /TEST.TXT
-```
-
-UNO:
-
-```text
-READY 32
-```
-
-The PC sends one block of at most 32 raw bytes and waits for:
-
-```text
-ACK <total_received>
-```
-
-After the final block:
-
-```text
-OK <size> <CRC16>
-```
-
-CRC is CRC-16/CCITT, polynomial 0x1021, initial value 0xFFFF.
-
-The 32-byte block size is intentional: it keeps the transfer comfortably below
-the AVR serial RX-buffer limit while the SD library performs card writes.
-
-## Build
-
-```powershell
-cd C:\GitHub\Arduino-UNO-Shields
-git pull
-
-arduino-cli compile --fqbn arduino:avr:uno .\labs\04-UNO-MAR2406-FreeRTOS\sketches\02_FreeRTOS_SD_File_Manager
-```
-
-## Upload
-
-```powershell
-arduino-cli upload -p COM4 --fqbn arduino:avr:uno .\labs\04-UNO-MAR2406-FreeRTOS\sketches\02_FreeRTOS_SD_File_Manager
-```
-
-## First bench check
-
-```powershell
-arduino-cli monitor -p COM4 -c baudrate=115200
-```
-
-Expected boot:
-
-```text
-BOOT FRTOSFM/1
-OK FRTOSFM/1 SD=READY BLOCK=32 BAUD=115200
-```
-
-Then test:
-
-```text
-PING
-INFO
-LS /
-```
-
-## Verified build result
+Verified build:
 
 ```text
 Sketch: 21166 / 32256 bytes Flash (65%)
@@ -182,34 +42,7 @@ Globals: 1137 / 2048 bytes SRAM (55%)
 Linker-reported SRAM remaining: 911 bytes
 ```
 
-Build status: **PASS**.
-
-This confirms that the staged architecture fits comfortably in Flash once
-MCUFRIEND_kbv and Adafruit_GFX are removed.
-
-The SRAM margin is now the critical resource. The 911-byte linker remainder is
-not equal to the final runtime free RAM: FreeRTOS task/idle stacks and control
-structures are allocated after startup. TEST-02A therefore must be judged on
-physical stability during SD initialization, directory listing and file
-transfer, not only on the compiler report.
-
-## PASS criteria
-
-TEST-02A passes when:
-
-1. the firmware fits in UNO Flash;
-2. SD initializes as READY;
-3. PING returns OK PONG FRTOSFM/1;
-4. LS / returns the real card directory;
-5. repeated listings do not reset or hang the board.
-
-TEST-02B then adds the Windows host utility and verifies PUT/GET round-trip
-with CRC.
-
-
-## Physical startup result
-
-Observed on the real Arduino UNO + MAR2406 shield:
+Physical startup with a 256-byte FILE task stack:
 
 ```text
 BOOT0 FRTOSFM/1
@@ -218,17 +51,80 @@ SD INIT PASS
 TASK CREATE PASS
 RTOS FILE TASK RUNNING
 OK FRTOSFM/1 SD=READY BLOCK=32 BAUD=115200
+PING
+OK PONG FRTOSFM/1
+INFO
+OK FRTOSFM/1 SD=READY BLOCK=32 BAUD=115200
 ```
 
-This physically confirms:
+The first real filesystem operation:
 
-- microSD initialization succeeds on D10-D13;
-- the FreeRTOS FILE task is created successfully;
-- the scheduler runs the FILE task;
-- the serial protocol server reaches its command loop;
-- the SD card is reported READY after the scheduler starts.
+```text
+LS /
+```
 
-Status: **STARTUP PASS / DIRECTORY TEST NEXT**.
+did not complete.
 
-The white TFT screen in TEST-02A is expected because MCUFRIEND_kbv and
-Adafruit_GFX are intentionally not linked in this staged build.
+### Attempt 3 — larger FILE task stack
+
+The FILE task stack was increased from 256 to 384 bytes.
+
+Observed:
+
+```text
+BOOT0 FRTOSFM/1
+SD INIT BEGIN
+SD INIT PASS
+TASK CREATE PASS
+```
+
+but the FILE task did not reach:
+
+```text
+RTOS FILE TASK RUNNING
+```
+
+This is consistent with the runtime SRAM margin becoming insufficient once the
+larger task stack and FreeRTOS runtime structures are included.
+
+## Engineering conclusion
+
+TEST-02 is closed as unsuccessful for practical use on the classic UNO.
+
+What was proven:
+
+- FreeRTOS itself works on the UNO + MAR2406 platform;
+- FreeRTOS + TFT + Touch was physically demonstrated in TEST-01;
+- SD initialization works;
+- FreeRTOS + SD + Serial command handling can start;
+- the limiting resource for the staged SD build is runtime SRAM;
+- the full TFT + SD + FreeRTOS design also exceeds Flash.
+
+What was not achieved reliably:
+
+- directory listing under FreeRTOS;
+- GET/PUT file transfer;
+- a usable FreeRTOS file manager.
+
+This is not a claim that every possible FreeRTOS/SD implementation on an
+ATmega328P is impossible. It is a project decision that further optimization is
+not justified for this hardware and objective.
+
+## Recommended path
+
+For a file manager on this exact Arduino UNO + MAR2406 shield:
+
+- use the normal Arduino execution model without FreeRTOS;
+- keep SD + Serial + optional TFT/Touch;
+- use the already verified LAB-03 SD hardware path.
+
+For RTOS + filesystem + GUI work, move to a device with substantially more
+SRAM/Flash.
+
+## Firmware retained
+
+The experimental firmware is retained for reproducibility:
+
+`sketches/02_FreeRTOS_SD_File_Manager/02_FreeRTOS_SD_File_Manager.ino`
+
+Status: **ARCHIVED EXPERIMENT / FAIL**.
