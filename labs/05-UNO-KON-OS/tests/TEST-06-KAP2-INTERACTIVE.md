@@ -135,28 +135,88 @@ This is a strong result for the first KAP2 control-flow layer: registers,
 branching, Touch X/Y capture and register rendering cost only 11 additional
 bytes of global SRAM over KonSol 0.4.
 
-Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+Status: **PHYSICAL BOOT + TFT + SD + KERNEL PRE-FLIGHT PASS / KAP2 APP TEST PENDING**.
 
-## Pre-flight
+## Physical boot / pre-flight result
 
-Upload KonSol 0.5 and then record the runtime state.
+KonSol 0.5 was uploaded to the physical Arduino UNO / MAR2406 stand and booted
+successfully.
 
-Then:
-
-```text
-INFO
-MEM
-PS
-DIR /
-TYPE /COUNTER.KAP
-```
-
-Expected INFO includes:
+Observed boot:
 
 ```text
 KonSol 0.5
-APP VM: KAP1/KAP2 streamed from SD
+Arduino UNO / ATmega328P / 16 MHz
+Kernel + SD + direct ILI9341 + direct Touch
+External KAP1/KAP2 VM + touch file browser
+
+BOOT: TFT init
+BOOT: kernel init
+BOOT: SD mount
+SD: READY
+FREE RAM: 801 B
+Type HELP
+```
+
+Observed shell state:
+
+```text
+INFO
+KonSol 0.5
+CPU: ATmega328P @ 16 MHz
+FLASH: 32 KB
+SRAM: 2 KB
+SCHED: cooperative
 TASKS: 5
+TFT: ILI9341 direct 8-bit
+TOUCH: direct resistive
+APP VM: KAP1/KAP2 streamed from SD
+SD: READY
+FREE RAM: 737 B
+```
+
+Task table was live on hardware:
+
+```text
+0   SERIAL    1 ms
+1   CLOCK     100 ms
+2   DISPLAY   1000 ms
+3   TOUCH     30 ms
+4   APP       10 ms
+```
+
+The resident TFT UI loaded correctly and the existing microSD filesystem
+remained accessible:
+
+```text
+F 123 HELLO.KAP
+F 197 ABOUT.KAP
+F 171 DEMO.KAP
+```
+
+The operator also confirmed that the display loaded correctly and the existing
+files remained usable.
+
+Runtime comparison with the certified KonSol 0.4 baseline:
+
+```text
+KonSol 0.4: boot 812 B, steady shell 750 B
+KonSol 0.5: boot 801 B, steady shell 737 B
+
+Observed delta:
+-11 B at boot
+-13 B in steady shell
+```
+
+This closely tracks the +11 B compile-time global-SRAM increase.
+
+Status: **PHYSICAL BOOT + TFT + SD + KERNEL PRE-FLIGHT PASS**.
+
+Next:
+
+```text
+TYPE /COUNTER.KAP
+RUN /COUNTER.KAP
 ```
 
 ## Execution
