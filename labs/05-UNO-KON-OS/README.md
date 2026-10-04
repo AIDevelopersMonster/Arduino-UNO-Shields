@@ -420,7 +420,22 @@ APP
 The touch file browser also recognizes `.KAP` files and launches them instead
 of opening them in the text viewer.
 
-Status: **READY FOR BUILD / BENCH**.
+Verified build:
+
+```text
+Flash: 25720 / 32256 bytes (79%)
+SRAM globals: 1228 / 2048 bytes (59%)
+Linker-reported SRAM remaining: 820 bytes
+```
+
+Delta from KonSol 0.3:
+
+```text
++2054 B Flash
++73 B global SRAM
+```
+
+Status: **BUILD PASS / READY FOR BENCH**.
 
 ## Publication
 
