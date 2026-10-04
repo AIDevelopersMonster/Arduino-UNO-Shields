@@ -1,0 +1,190 @@
+# LAB-05 / TEST-06 — KonSol 0.5 KAP2 interactive application
+
+## Goal
+
+Verify the first external KonSol application that has its own state, loop,
+conditional branch and Touch-coordinate input.
+
+KonSol 0.4 / TEST-05 already proved multiple independent KAP1 applications.
+TEST-06 moves the boundary from "external command stream" to "external program
+with control flow".
+
+## Firmware
+
+`sketches/05_KonSol_KAP2_Interactive/05_KonSol_KAP2_Interactive.ino`
+
+This is a new experimental firmware derived from the physically certified
+KonSol 0.4 baseline. KonSol 0.4 remains preserved unchanged.
+
+## Application
+
+`apps/KAP2/COUNTER.KAP`
+
+Header:
+
+```text
+4B415032 = KAP2
+```
+
+Expected application behavior:
+
+```text
+TOUCH COUNTER
+TAP SCREEN 5X
+
+touch #1 -> TAPS 1 + X/Y
+touch #2 -> TAPS 2 + X/Y
+touch #3 -> TAPS 3 + X/Y
+touch #4 -> TAPS 4 + X/Y
+touch #5 -> TAPS 5 + X/Y
+
+DONE
+TOUCH TO EXIT
+```
+
+The final touch must execute `FF` and return to resident KonSol.
+
+## KAP2 features under test
+
+```text
+R0 = touch count
+R1 = last Touch X
+R2 = last Touch Y
+
+MOVI
+INC
+CMPI
+MARK
+JNZ
+GET_TOUCH_X
+GET_TOUCH_Y
+DRAW_REG
+WAIT_TOUCH
+EXIT
+```
+
+## Create COUNTER.KAP from the KonSol shell
+
+```text
+WRITE /COUNTER.KAP 4B415032
+APPEND /COUNTER.KAP 1000
+APPEND /COUNTER.KAP 11081403020D544F55434820434F554E544552
+APPEND /COUNTER.KAP 11083402030D5441502053435245454E203558
+APPEND /COUNTER.KAP 300C434F554E544552204B415032
+APPEND /COUNTER.KAP 40000000
+APPEND /COUNTER.KAP 44
+APPEND /COUNTER.KAP 21
+APPEND /COUNTER.KAP 4100
+APPEND /COUNTER.KAP 4601
+APPEND /COUNTER.KAP 4702
+APPEND /COUNTER.KAP 1000
+APPEND /COUNTER.KAP 11081203020D544F55434820434F554E544552
+APPEND /COUNTER.KAP 110A4802010454415053
+APPEND /COUNTER.KAP 483C48030300
+APPEND /COUNTER.KAP 110A7002010158
+APPEND /COUNTER.KAP 482870020201
+APPEND /COUNTER.KAP 110A8E02010159
+APPEND /COUNTER.KAP 48288E020202
+APPEND /COUNTER.KAP 43000500
+APPEND /COUNTER.KAP 45
+APPEND /COUNTER.KAP 110AB2020404444F4E45
+APPEND /COUNTER.KAP 110ACC02030D544F55434820544F2045584954
+APPEND /COUNTER.KAP 21
+APPEND /COUNTER.KAP FF
+```
+
+## Pre-flight
+
+Compile and upload KonSol 0.5. Record build usage.
+
+Then:
+
+```text
+INFO
+MEM
+PS
+DIR /
+TYPE /COUNTER.KAP
+```
+
+Expected INFO includes:
+
+```text
+KonSol 0.5
+APP VM: KAP1/KAP2 streamed from SD
+TASKS: 5
+```
+
+## Execution
+
+```text
+RUN /COUNTER.KAP
+```
+
+Expected Serial start:
+
+```text
+APP RUN /COUNTER.KAP
+COUNTER KAP2
+```
+
+Touch the screen five times at visibly different positions.
+
+After each touch confirm:
+
+- TAPS increments by exactly one;
+- X and Y update to plausible screen coordinates;
+- the app does not exit early;
+- kernel remains responsive.
+
+After touch 5:
+
+```text
+DONE
+TOUCH TO EXIT
+```
+
+One final touch must produce:
+
+```text
+APP EXIT 0
+```
+
+Then record:
+
+```text
+APP
+MEM
+DIR /
+```
+
+## Compatibility check
+
+The new VM must still execute the existing KAP1 files:
+
+```text
+RUN /HELLO.KAP
+RUN /ABOUT.KAP
+RUN /DEMO.KAP
+```
+
+At least one complete KAP1 RUN -> WAIT_TOUCH -> EXIT cycle must be rechecked on
+KonSol 0.5.
+
+## PASS criteria
+
+TEST-06 is FULL PHYSICAL PASS only if:
+
+1. KonSol 0.5 compiles and boots on the same UNO/MAR2406 hardware.
+2. KAP2 header is recognized.
+3. COUNTER.KAP runs from microSD.
+4. R0 persists and increments across loop iterations.
+5. five Touch events cause five loop iterations.
+6. R1/R2 display changing Touch X/Y values.
+7. CMPI + JNZ terminate the loop exactly at count 5.
+8. final WAIT_TOUCH + FF returns with APP EXIT 0.
+9. resident shell and SD remain usable after exit.
+10. free RAM shows no progressive loss.
+11. KAP1 compatibility is physically retained.
+
+Status: **READY FOR BUILD AND PHYSICAL TEST**.
