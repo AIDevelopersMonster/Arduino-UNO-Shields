@@ -38,6 +38,21 @@ Arduino_FreeRTOS_Library.
 arduino-cli compile --fqbn arduino:avr:uno .\labs\04-UNO-MAR2406-FreeRTOS\sketches\01_FreeRTOS_TFT_Touch_Monitor
 ```
 
+## Verified build result
+
+```text
+Sketch: 26520 / 32256 bytes Flash (82%)
+Globals: 592 / 2048 bytes SRAM (28%)
+Linker-reported SRAM remaining: 1456 bytes
+```
+
+Build status: **PASS**.
+
+Important: the linker SRAM line does not include all memory consumed later by
+dynamically created FreeRTOS objects. The two task stacks, task control blocks
+and queue reduce the real runtime margin, so the bench test must also confirm
+stability under touch activity.
+
 ## Upload
 
 ```powershell
