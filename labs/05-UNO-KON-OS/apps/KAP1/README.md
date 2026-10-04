@@ -28,6 +28,11 @@ EXIT
 
 Second independent application for TEST-05.
 
+Physical bench result: **RUN / TFT / SERIAL PASS** on the same resident KonSol
+0.4 firmware. The display showed `KONSOL 0.4`, `EXTERNAL APP`,
+`RUNNING FROM SD`, and `TOUCH TO EXIT`; Serial produced `ABOUT KAP1`.
+Final WAIT_TOUCH -> EXIT confirmation for this run remains to be recorded.
+
 Behavior:
 
 ```text
