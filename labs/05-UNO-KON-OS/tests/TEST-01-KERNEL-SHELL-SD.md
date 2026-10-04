@@ -24,7 +24,17 @@ git pull
 arduino-cli compile --fqbn arduino:avr:uno .\labs\05-UNO-KON-OS\sketches\01_KONOS_Shell_SD
 ```
 
-Record both Flash and SRAM numbers.
+Verified build:
+
+```text
+Sketch: 16930 / 32256 bytes Flash (52%)
+Globals: 1033 / 2048 bytes SRAM (50%)
+Linker-reported SRAM remaining: 1015 bytes
+```
+
+Build status: **PASS**.
+
+The result is significant because the kernel, shell and SD filesystem fit while retaining roughly half of program Flash and without FreeRTOS per-task stacks.
 
 ## Upload
 
