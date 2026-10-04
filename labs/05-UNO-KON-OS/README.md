@@ -214,7 +214,38 @@ SRAM globals: 1033 / 2048 bytes (50%)
 Linker-reported SRAM remaining: 1015 bytes
 ```
 
-Status: **BUILD PASS / READY FOR BENCH**.
+Status: **PASS ON PHYSICAL HARDWARE**.
+
+Verified runtime:
+
+```text
+Boot free RAM: 1009 B
+Steady shell free RAM: 834 B
+Tasks:
+  SERIAL  period 1 ms
+  CLOCK   period 100 ms
+```
+
+Physically verified commands:
+
+```text
+HELP
+INFO
+MEM
+PS
+UPTIME
+DIR /
+LS /
+WRITE
+TYPE
+APPEND
+MKDIR
+RMDIR
+DEL
+```
+
+The complete create/read/append/list/directory/delete cycle passed on the
+microSD card without reset or corruption.
 
 Unlike the FreeRTOS SD experiment, KON-OS does not allocate a separate stack for each cooperative task. The linker-reported SRAM remainder is still not the same as final runtime free memory, but the runtime model has materially less stack overhead.
 
