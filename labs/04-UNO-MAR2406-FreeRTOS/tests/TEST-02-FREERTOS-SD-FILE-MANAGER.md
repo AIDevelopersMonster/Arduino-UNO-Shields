@@ -205,3 +205,30 @@ TEST-02A passes when:
 
 TEST-02B then adds the Windows host utility and verifies PUT/GET round-trip
 with CRC.
+
+
+## Physical startup result
+
+Observed on the real Arduino UNO + MAR2406 shield:
+
+```text
+BOOT0 FRTOSFM/1
+SD INIT BEGIN
+SD INIT PASS
+TASK CREATE PASS
+RTOS FILE TASK RUNNING
+OK FRTOSFM/1 SD=READY BLOCK=32 BAUD=115200
+```
+
+This physically confirms:
+
+- microSD initialization succeeds on D10-D13;
+- the FreeRTOS FILE task is created successfully;
+- the scheduler runs the FILE task;
+- the serial protocol server reaches its command loop;
+- the SD card is reported READY after the scheduler starts.
+
+Status: **STARTUP PASS / DIRECTORY TEST NEXT**.
+
+The white TFT screen in TEST-02A is expected because MCUFRIEND_kbv and
+Adafruit_GFX are intentionally not linked in this staged build.
