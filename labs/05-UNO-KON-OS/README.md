@@ -86,13 +86,12 @@ The project therefore uses these criteria:
      stable KON-OS interface.
 
 5. **Application lifecycle**
-   - the target is LOAD/RUN/STOP/RETURN without reflashing the UNO;
-   - after an application exits, control returns to the KON-OS shell or launcher.
+   - KonSol 0.4 physically verifies RUN/WAIT/EXIT/RETURN without reflashing the UNO;
+   - after an application exits, control returns to the resident KonSol environment.
 
 6. **External executable content**
-   - applications are planned to live on SD in an interpreted/bytecode format;
-   - adding a new application should eventually mean copying a file to SD,
-     not rebuilding the kernel.
+   - KAP1 applications live on SD in a streamed interpreted bytecode format;
+   - adding or changing a KAP1 application does not require rebuilding the kernel.
 
 7. **System shell**
    - commands such as DIR, TYPE, MEM, PS and later RUN operate on system
@@ -460,6 +459,353 @@ service, followed by the already verified Touch/EXIT return path.
 KonSol 0.4 therefore crosses the first strong OS boundary: the resident kernel
 remains in Flash while the application is a separate file on microSD and can be
 launched, interacted with and exited without reflashing the UNO.
+
+## KAP1 application model — how `HELLO.KAP` is created and executed
+
+`HELLO.KAP` is not an Arduino sketch and it is not AVR machine code. It is a
+separate external **KAP1 bytecode application** stored on microSD and
+interpreted by the resident KonSol VM.
+
+The verified example is:
+
+```text
+4B415031
+1000
+110A3C03030D48454C4C4F2046524F4D205344
+110A7802030D544F55434820544F2045584954
+300A48454C4C4F204B415031
+21
+FF
+```
+
+KAP1 deliberately uses ASCII hexadecimal storage. That makes the file readable,
+easy to inspect with `TYPE`, and simple enough to create from the KonSol shell
+itself without a separate compiler on the PC.
+
+### Header and opcodes
+
+Every KAP1 application begins with:
+
+```text
+4B 41 50 31
+ K  A  P  1
+```
+
+or, without spaces:
+
+```text
+4B415031
+```
+
+KonSol validates this decoded signature before execution. A missing or invalid
+header produces `ERR APP_HEADER`.
+
+The initial KAP1 instruction set in KonSol 0.4 is:
+
+| Opcode | Meaning |
+| --- | --- |
+| `10 cc` | clear TFT using color index `cc` |
+| `11 xx yy ss cc nn <data>` | draw `nn` text bytes on TFT |
+| `20 ll hh` | cooperative WAIT in milliseconds, little-endian |
+| `21` | WAIT_TOUCH |
+| `30 nn <data>` | write `nn` bytes to Serial |
+| `FF` | EXIT back to KonSol |
+
+Color indices are:
+
+```text
+0 BLACK
+1 WHITE
+2 CYAN
+3 YELLOW
+4 GREEN
+5 RED
+6 BLUE
+7 GREY
+```
+
+### Decoding the verified `HELLO.KAP`
+
+The first instruction is:
+
+```text
+1000
+```
+
+which decodes as:
+
+```text
+10 00
+|  |
+|  +-- color 0 = BLACK
++----- CLS
+```
+
+The first TFT text instruction is:
+
+```text
+110A3C03030D48454C4C4F2046524F4D205344
+```
+
+decoded as:
+
+```text
+11       TEXT
+0A       xUnit = 10
+3C       Y = 60
+03       scale = 3
+03       color = YELLOW
+0D       length = 13
+
+48 45 4C 4C 4F 20 46 52 4F 4D 20 53 44
+ H  E  L  L  O     F  R  O  M     S  D
+```
+
+KAP1 stores X as `xUnit`; the VM calculates:
+
+```text
+X = xUnit * 2
+0A = 10 -> X = 20 pixels
+```
+
+The display therefore receives approximately:
+
+```text
+HELLO FROM SD
+X=20, Y=60, scale=3, YELLOW
+```
+
+The next instruction:
+
+```text
+110A7802030D544F55434820544F2045584954
+```
+
+renders:
+
+```text
+TOUCH TO EXIT
+X=20, Y=120, scale=2, YELLOW
+```
+
+The Serial instruction:
+
+```text
+300A48454C4C4F204B415031
+```
+
+decodes to:
+
+```text
+30       SERIAL
+0A       10 characters
+48 45 4C 4C 4F 20 4B 41 50 31
+ H  E  L  L  O     K  A  P  1
+```
+
+and produces:
+
+```text
+HELLO KAP1
+```
+
+Finally:
+
+```text
+21    WAIT_TOUCH
+FF    EXIT
+```
+
+`WAIT_TOUCH` is cooperative: the application does not busy-loop waiting for
+the screen. It changes VM state and returns control to the kernel dispatcher.
+
+### Creating the application from KonSol itself
+
+The complete example can be created directly in the resident shell:
+
+```text
+A:/> WRITE /HELLO.KAP 4B415031
+A:/> APPEND /HELLO.KAP 1000
+A:/> APPEND /HELLO.KAP 110A3C03030D48454C4C4F2046524F4D205344
+A:/> APPEND /HELLO.KAP 110A7802030D544F55434820544F2045584954
+A:/> APPEND /HELLO.KAP 300A48454C4C4F204B415031
+A:/> APPEND /HELLO.KAP 21
+A:/> APPEND /HELLO.KAP FF
+```
+
+The decoder ignores whitespace between hexadecimal bytes:
+
+```text
+space
+TAB
+CR
+LF
+```
+
+so the program can remain line-oriented and human-readable.
+
+It can then be inspected:
+
+```text
+A:/> TYPE /HELLO.KAP
+-----
+4B415031
+1000
+110A3C03030D48454C4C4F2046524F4D205344
+110A7802030D544F55434820544F2045584954
+300A48454C4C4F204B415031
+21
+FF
+-----
+```
+
+and launched without rebuilding or reflashing the UNO:
+
+```text
+A:/> RUN /HELLO.KAP
+```
+
+### What happens after `RUN`
+
+The shell path is:
+
+```text
+RUN /HELLO.KAP
+      |
+      v
+cmdRun()
+      |
+      v
+check .KAP extension
+      |
+      v
+appStart("/HELLO.KAP")
+      |
+      v
+SD.open()
+      |
+      v
+validate KAP1 header
+      |
+      v
+appRunning = true
+uiMode = UI_APP
+      |
+      v
+taskApp()
+```
+
+The complete application is **not copied into the ATmega328P's 2 KB SRAM**.
+KonSol keeps the file open and decodes it incrementally:
+
+```text
+microSD
+   |
+   v
+vmReadNibble()
+   |
+   v
+vmReadByte()
+   |
+   v
+opcode
+   |
+   v
+taskApp()
+```
+
+In practical terms:
+
+```text
+SD -> decode -> execute -> SD -> decode -> execute ...
+```
+
+This streaming model is one of the reasons external applications are practical
+inside the UNO memory envelope.
+
+### Kernel scheduling while an application runs
+
+In KonSol 0.4, APP is the fifth cooperative task:
+
+```text
+0  SERIAL    1 ms
+1  CLOCK     100 ms
+2  DISPLAY   1000 ms
+3  TOUCH     30 ms
+4  APP       10 ms
+```
+
+`taskApp()` normally interprets at most one VM instruction per dispatch. The
+resident kernel therefore continues to schedule its services while the
+application is active.
+
+When the VM reaches opcode `21`:
+
+```cpp
+appWaitTouch = true;
+```
+
+the APP task returns to the scheduler. The 30 ms TOUCH task detects a new press
+and, while an application is running, records the event:
+
+```cpp
+if (appRunning)
+    appTouchEvent = true;
+```
+
+A later APP dispatch consumes that event, resumes the KAP1 stream and reaches
+`FF`. EXIT closes the KAP file, clears application state, reports
+`APP EXIT 0`, redraws the resident dashboard and returns control to KonSol.
+
+The verified lifecycle is therefore:
+
+```text
+             Arduino UNO Flash
+        +-------------------------+
+        |       KonSol 0.4        |
+        | Kernel                  |
+        | Scheduler               |
+        | Shell                   |
+        | TFT service             |
+        | Touch service           |
+        | SD service              |
+        | KAP1 VM                 |
+        +------------+------------+
+                     |
+                     | RUN
+                     v
+               microSD card
+        +-------------------------+
+        |       HELLO.KAP         |
+        | CLS                     |
+        | TEXT "HELLO FROM SD"    |
+        | TEXT "TOUCH TO EXIT"    |
+        | SERIAL "HELLO KAP1"     |
+        | WAIT_TOUCH              |
+        | EXIT                    |
+        +-------------------------+
+```
+
+This is the key KonSol 0.4 result:
+
+```text
+separate application file
+        |
+        v
+RUN
+        |
+        v
+execution through resident services
+        |
+        v
+EXIT
+        |
+        v
+return to resident KonSol
+```
+
+No new Arduino sketch is compiled and the ATmega328P is not reflashed when
+`HELLO.KAP` is created, changed or executed.
 
 ## Publication
 
