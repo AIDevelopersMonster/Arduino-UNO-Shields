@@ -51,11 +51,13 @@ EXIT
 Third independent application for TEST-05. It also exercises cooperative
 `WAIT`.
 
-Physical bench result: **RUN / Serial / repeated EXIT PASS**. The file was
-created from KonSol with `WRITE`/`APPEND`, verified with `TYPE`, and then
-executed twice. Both executions produced `DEMO KAP1` followed by
-`APP EXIT 0`. Final visual timing and Touch-browser-path certification are
-tracked in TEST-05.
+Physical bench result: **RUN / TFT timing / Serial / repeated EXIT / Touch
+File Browser PASS**. The file was created from KonSol with
+`WRITE`/`APPEND`, verified with `TYPE`, and executed twice. Both executions
+produced `DEMO KAP1` followed by `APP EXIT 0`. The TFT sequence
+`KAP1 DEMO -> ~1500 ms -> PROGRAM ON SD -> ~1500 ms -> TOUCH TO EXIT` was
+confirmed, and the second launch was explicitly confirmed as a TFT Touch File
+Browser launch.
 
 Behavior:
 
