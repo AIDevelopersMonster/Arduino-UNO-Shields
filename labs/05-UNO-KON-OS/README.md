@@ -846,7 +846,19 @@ No Arduino firmware rebuild or upload is permitted between application runs.
 All applications must remain separate files on microSD and execute through the
 same resident KonSol 0.4 kernel and KAP1 VM.
 
-Status: **READY FOR PHYSICAL TEST**.
+Physical progress:
+
+```text
+HELLO.KAP  FULL PHYSICAL PASS (TEST-04)
+ABOUT.KAP  RUN / TFT / SERIAL PASS
+DEMO.KAP   pending
+```
+
+ABOUT.KAP was created and read from microSD, launched with the unchanged
+published KonSol 0.4 firmware, rendered its distinct TFT content and produced
+`ABOUT KAP1` through the resident Serial service.
+
+Status: **PARTIAL PHYSICAL PASS — DEMO.KAP and remaining lifecycle checks pending**.
 
 ## Publication
 
