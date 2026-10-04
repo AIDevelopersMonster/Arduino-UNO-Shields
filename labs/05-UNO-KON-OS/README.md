@@ -872,11 +872,27 @@ TOUCH TO EXIT
 The second DEMO launch was explicitly confirmed as coming from the TFT Touch
 File Browser, not from the Serial shell.
 
-Status: **MULTI-APP + TFT-BROWSER + WAIT TIMING PASS / FINAL STATE CHECK PENDING**.
+Final physical state:
 
-Remaining TEST-05 gates are the final post-run `APP`/`MEM`/`DIR /`
-evidence and an explicit ABOUT.KAP `WAIT_TOUCH -> APP EXIT 0` record if that
-exit was not already observed.
+```text
+APP: IDLE
+LAST EXIT: 0
+FREE RAM: 750 B
+
+HELLO.KAP  123 B
+ABOUT.KAP  197 B
+DEMO.KAP   171 B
+```
+
+The final `APP` / `MEM` / `DIR /` check was repeated with the same result.
+ABOUT.KAP also produced `ABOUT KAP1` and completed with `APP EXIT 0`.
+
+Status: **TEST-05 FULL PHYSICAL PASS**.
+
+This certifies that one unchanged resident KonSol 0.4 firmware can execute
+multiple independently stored KAP1 applications, including shell and TFT Touch
+File Browser launch paths, cooperative WAIT, WAIT_TOUCH, resident display and
+Serial services, and clean EXIT back to KonSol without reflashing.
 
 ## Publication
 
