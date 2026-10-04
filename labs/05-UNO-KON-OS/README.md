@@ -272,6 +272,23 @@ browser.
 Introduce an interpreted application format / bytecode stored on SD so programs
 can be added without reflashing the UNO.
 
+## Documentation
+
+KON-OS 0.1 documentation is split by role:
+
+- [System description](docs/DESCRIPTION.md) — purpose, architecture, verified
+  resource usage, OS boundary, current limitations and roadmap.
+- [System programmer guide](docs/SYSTEM_PROGRAMMER_GUIDE.md) — kernel,
+  cooperative scheduler, task table, memory rules, command parser, SD service
+  rules and system-extension procedure.
+- [Functional programmer guide](docs/FUNCTIONAL_PROGRAMMER_GUIDE.md) —
+  adding commands and cooperative services without changing the kernel model;
+  includes rules for state machines and the future application ABI.
+- [User guide](docs/USER_GUIDE.md) — boot, terminal use, filesystem workflow,
+  practical examples and error handling.
+- [Command reference](docs/COMMAND_REFERENCE.md) — exact shell syntax, aliases,
+  responses and error codes.
+
 ## Native SD boot mode: KON-Boot
 
 A second execution model is technically possible in addition to interpreted KON-OS applications.
