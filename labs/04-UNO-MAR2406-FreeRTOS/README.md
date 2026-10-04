@@ -36,9 +36,15 @@ directly.
    - FreeRTOS queue
    - LED heartbeat
    - live RTOS tick and touch state
-2. Task timing / priority experiment.
-3. Queue and producer/consumer experiment.
-4. Optional SD logger task, subject to SRAM budget.
+2. **TEST-02 — SD File Manager over USB Serial**
+   - FILE task owns Serial + microSD
+   - HMI task owns TFT
+   - PC directory listing
+   - binary PUT / GET in 32-byte blocks
+   - CRC-16/CCITT verification
+   - no LED heartbeat: D13 is reserved for SPI SCK
+3. Task timing / priority experiment.
+4. Queue and producer/consumer experiment.
 5. Port one existing application to RTOS architecture if memory permits.
 
 ## TEST-01
@@ -50,5 +56,18 @@ Firmware:
 Procedure:
 
 `tests/TEST-01-FREERTOS-SCHEDULER-TFT-TOUCH.md`
+
+Status: **READY FOR BUILD / BENCH**.
+
+
+## TEST-02
+
+Firmware:
+
+`sketches/02_FreeRTOS_SD_File_Manager/02_FreeRTOS_SD_File_Manager.ino`
+
+Procedure:
+
+`tests/TEST-02-FREERTOS-SD-FILE-MANAGER.md`
 
 Status: **READY FOR BUILD / BENCH**.
