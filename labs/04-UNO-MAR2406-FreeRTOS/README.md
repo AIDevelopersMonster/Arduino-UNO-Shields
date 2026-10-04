@@ -2,75 +2,63 @@
 
 ## Goal
 
-Run a real preemptive RTOS on the same Arduino UNO R3 + MAR2406 hardware that
-was certified in LAB-03, then determine how far the 32 KB Flash / 2 KB SRAM
-ATmega328P can be pushed with tasks, queues, storage and an interactive HMI.
+Determine what a real preemptive RTOS can practically do on the classic
+Arduino UNO R3 / ATmega328P with the verified MAR2406 TFT Touch shield.
 
-LAB-03 remains closed. LAB-04 starts a new software-architecture line on the
-same verified hardware.
+LAB-03 remains closed. LAB-04 is the RTOS experiment line on the same hardware.
 
 ## Platform
 
 - Arduino UNO R3 / ATmega328P, 16 MHz
+- 32 KB Flash
+- 2 KB SRAM
 - MAR2406 2.4-inch TFT Touch Shield
-- ILI9341, canonical ROT1 / 320x240
+- ILI9341, ROT1 / 320x240
 - resistive touch: XP=D6, XM=A2, YP=A1, YM=D7
 - microSD: CS=D10, MOSI=D11, MISO=D12, SCK=D13
 - Arduino AVR core
 - Arduino_FreeRTOS_Library / FreeRTOS for AVR
 
-## Architecture rule
+## Results
 
-TFT and Touch have one owner task whenever the graphics stack is present,
-because the shield shares GPIO resources between the LCD interface and the
-resistive touch panel.
+### TEST-01 — FreeRTOS + TFT + Touch
 
-D13 is reserved for SPI SCK whenever microSD is active; it is not used as a
-heartbeat LED.
+**PASS on physical hardware.**
 
-## Test plan
+Confirmed:
 
-1. **TEST-01 — Scheduler + TFT + Touch monitor**
-   - HMI task
-   - Worker task
-   - FreeRTOS queue
-   - live RTOS tick and touch state
-   - physical PASS obtained on the verified shield
-2. **TEST-02 — SD File Manager over USB Serial**
-   - FreeRTOS FILE task
-   - PC directory listing
-   - binary PUT / GET in 32-byte blocks
-   - CRC-16/CCITT verification
-   - first full TFT/GFX + SD build exceeded UNO Flash
-   - revised TEST-02A removes MCUFRIEND_kbv/Adafruit_GFX and proves storage first
-3. Reintroduce a minimal TFT status layer with a direct ILI9341 driver if the
-   remaining Flash/SRAM budget permits.
-4. Task timing / priority experiment.
-5. Port an existing application to RTOS architecture if memory permits.
+- FreeRTOS scheduler running;
+- two application tasks;
+- different task priorities;
+- FreeRTOS queue;
+- live worker heartbeat;
+- live RTOS tick;
+- TFT output;
+- resistive Touch input.
 
-## TEST-01
+Verified build:
 
-Firmware:
+```text
+Flash: 26520 / 32256 bytes (82%)
+SRAM globals: 592 / 2048 bytes (28%)
+```
 
-`sketches/01_FreeRTOS_TFT_Touch_Monitor/01_FreeRTOS_TFT_Touch_Monitor.ino`
+This proves that FreeRTOS itself is viable on the UNO for a compact,
+carefully-budgeted application.
 
-Procedure:
+### TEST-02 — FreeRTOS SD File Manager
 
-`tests/TEST-01-FREERTOS-SCHEDULER-TFT-TOUCH.md`
+**CLOSED — FAIL AS A PRACTICAL ARCHITECTURE.**
 
-## TEST-02
+First design:
 
-Firmware:
+```text
+FreeRTOS + SD + MCUFRIEND_kbv + Adafruit_GFX + file protocol
+```
 
-`sketches/02_FreeRTOS_SD_File_Manager/02_FreeRTOS_SD_File_Manager.ino`
+Result: exceeded UNO Flash.
 
-Procedure:
-
-`tests/TEST-02-FREERTOS-SD-FILE-MANAGER.md`
-
-Status: **BUILD PASS / READY FOR BENCH**.
-
-Verified TEST-02A build:
+Staged design without TFT/GFX:
 
 ```text
 Flash: 21166 / 32256 bytes (65%)
@@ -78,6 +66,35 @@ SRAM globals: 1137 / 2048 bytes (55%)
 Linker-reported SRAM remaining: 911 bytes
 ```
 
-Flash is no longer the limiting resource in the staged build. Runtime SRAM is
-now the primary constraint because FreeRTOS task stacks and control structures
-consume additional memory after startup.
+With a 256-byte FILE task stack:
+
+- SD initialization PASS;
+- FILE task started;
+- PING PASS;
+- INFO PASS;
+- LS / did not complete.
+
+With a 384-byte FILE task stack:
+
+- SD initialization PASS;
+- task creation returned PASS;
+- scheduler did not reach the FILE task startup message.
+
+Project conclusion: runtime SRAM is too tight for a reliable FreeRTOS + SD
+filesystem design using this library stack on the ATmega328P, while the full
+GUI version also exceeds Flash.
+
+The experiment is intentionally stopped here. Further byte-level optimization
+would have low value compared with using either:
+
+- ordinary Arduino scheduling on this UNO for SD/file-manager work; or
+- a larger MCU for RTOS + filesystem + GUI.
+
+## Current LAB-04 status
+
+- TEST-01: **PASS**
+- TEST-02: **FAIL / CLOSED**
+- further FreeRTOS experiments on this UNO should stay compact and avoid the SD
+  filesystem unless there is a specific reason to revisit the memory limit.
+
+The failed TEST-02 firmware is retained for reproducibility.
