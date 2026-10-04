@@ -93,9 +93,53 @@ APPEND /COUNTER.KAP 21
 APPEND /COUNTER.KAP FF
 ```
 
+## Build result
+
+KonSol 0.5 compiled successfully for `arduino:avr:uno`.
+
+Observed Arduino CLI result:
+
+```text
+Sketch uses 26798 bytes (83%) of program storage space.
+Maximum is 32256 bytes.
+
+Global variables use 1239 bytes (60%) of dynamic memory,
+leaving 809 bytes for local variables.
+Maximum is 2048 bytes.
+```
+
+Compared with the physically certified KonSol 0.4 build:
+
+```text
+KonSol 0.4
+Flash: 25720 / 32256 bytes
+SRAM globals: 1228 / 2048 bytes
+
+KonSol 0.5
+Flash: 26798 / 32256 bytes
+SRAM globals: 1239 / 2048 bytes
+
+Delta:
++1078 B Flash
++11 B global SRAM
+```
+
+Remaining compile-time headroom:
+
+```text
+Flash: 5458 B
+SRAM after globals: 809 B
+```
+
+This is a strong result for the first KAP2 control-flow layer: registers,
+branching, Touch X/Y capture and register rendering cost only 11 additional
+bytes of global SRAM over KonSol 0.4.
+
+Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+
 ## Pre-flight
 
-Compile and upload KonSol 0.5. Record build usage.
+Upload KonSol 0.5 and then record the runtime state.
 
 Then:
 
@@ -187,4 +231,4 @@ TEST-06 is FULL PHYSICAL PASS only if:
 10. free RAM shows no progressive loss.
 11. KAP1 compatibility is physically retained.
 
-Status: **READY FOR BUILD AND PHYSICAL TEST**.
+Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
