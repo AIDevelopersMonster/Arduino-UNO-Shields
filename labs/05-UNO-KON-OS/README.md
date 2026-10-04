@@ -306,10 +306,30 @@ only about 28 bytes of observed runtime SRAM overhead.
 
 Status: **PASS ON PHYSICAL HARDWARE**.
 
-### Planned TEST-03 — touch shell / file browser
+### TEST-03 — KonSol 0.3 direct Touch + file browser
 
-Add the already verified MAR2406 resistive touch wiring and a simple file
-browser.
+Firmware:
+
+`sketches/03_KonSol_Touch_File_Browser/03_KonSol_Touch_File_Browser.ino`
+
+Procedure:
+
+`tests/TEST-03-DIRECT-TOUCH-FILE-BROWSER.md`
+
+TEST-03 removes the remaining TouchScreen-library dependency and adds a direct
+resistive-touch system service plus an on-screen microSD browser.
+
+New fourth cooperative task:
+
+```text
+3   TOUCH     30 ms
+```
+
+The TFT UI can open the SD browser, page through directory entries, enter
+directories, return to the parent directory and display a one-page ASCII text
+preview.
+
+Status: **READY FOR BUILD / BENCH**.
 
 ### Planned TEST-04 — executable content
 
