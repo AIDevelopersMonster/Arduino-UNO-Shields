@@ -174,6 +174,25 @@ INFO
 LS /
 ```
 
+## Verified build result
+
+```text
+Sketch: 21166 / 32256 bytes Flash (65%)
+Globals: 1137 / 2048 bytes SRAM (55%)
+Linker-reported SRAM remaining: 911 bytes
+```
+
+Build status: **PASS**.
+
+This confirms that the staged architecture fits comfortably in Flash once
+MCUFRIEND_kbv and Adafruit_GFX are removed.
+
+The SRAM margin is now the critical resource. The 911-byte linker remainder is
+not equal to the final runtime free RAM: FreeRTOS task/idle stacks and control
+structures are allocated after startup. TEST-02A therefore must be judged on
+physical stability during SD initialization, directory listing and file
+transfer, not only on the compiler report.
+
 ## PASS criteria
 
 TEST-02A passes when:
