@@ -943,7 +943,24 @@ Important compatibility rule:
 KonSol 0.5 must continue to run the physically certified KAP1 applications while
 adding KAP2 state and control flow.
 
-Status: **READY FOR BUILD AND PHYSICAL TEST**.
+Verified build:
+
+```text
+Flash: 26798 / 32256 bytes (83%)
+SRAM globals: 1239 / 2048 bytes (60%)
+Linker-reported SRAM remaining: 809 bytes
+```
+
+Delta from KonSol 0.4:
+
+```text
++1078 B Flash
++11 B global SRAM
+```
+
+Compile-time Flash headroom remains 5458 bytes.
+
+Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
 
 ## Publication
 
