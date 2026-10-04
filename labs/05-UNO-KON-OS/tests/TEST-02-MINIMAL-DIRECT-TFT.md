@@ -69,7 +69,29 @@ git pull
 arduino-cli compile --fqbn arduino:avr:uno .\labs\05-UNO-KON-OS\sketches\02_KonSol_Minimal_TFT
 ```
 
-Record Flash and SRAM usage.
+Verified build:
+
+```text
+Sketch: 20264 / 32256 bytes Flash (62%)
+Globals: 1059 / 2048 bytes SRAM (51%)
+Linker-reported SRAM remaining: 989 bytes
+```
+
+Build status: **PASS**.
+
+Compared with KonSol 0.1:
+
+```text
+KonSol 0.1: 16930 B Flash / 1033 B globals
+KonSol 0.2: 20264 B Flash / 1059 B globals
+
+Delta: +3334 B Flash
+       +26 B global SRAM
+```
+
+The direct TFT subsystem therefore adds a visible system display while consuming
+only 26 additional bytes of global SRAM. Runtime free RAM must still be measured
+on the physical board after TFT and SD initialization.
 
 ## Upload
 
