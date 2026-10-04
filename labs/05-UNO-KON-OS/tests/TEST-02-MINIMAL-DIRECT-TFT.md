@@ -157,3 +157,68 @@ TEST-02 passes when:
 Touch is intentionally not enabled in TEST-02. The resistive touch interface
 shares A1/A2/D6/D7 with the LCD bus. Touch will be introduced as a separate
 controlled service after the direct display driver is certified.
+
+
+## Physical result
+
+TEST-02 was executed on the real Arduino UNO + MAR2406 shield and passed.
+
+Serial observations:
+
+```text
+BOOT: TFT init
+BOOT: kernel init
+BOOT: SD mount
+SD: READY
+FREE RAM: 981 B
+
+INFO
+KonSol 0.2
+TASKS: 3
+TFT: ILI9341 direct 8-bit
+SD: READY
+FREE RAM: 806 B
+
+PS
+0   SERIAL    1 ms
+1   CLOCK     100 ms
+2   DISPLAY   1000 ms
+
+DIR /
+F 175 T07LOG.TXT
+F 23 XOLOG.TXT
+FILES: 2
+
+TFT
+TFT INIT
+TFT OK
+```
+
+Physical display observation:
+
+- 320x240 landscape dashboard is readable;
+- KONSOL 0.2 title is rendered;
+- KERNEL reports RUN;
+- SD reports READY;
+- RAM and UPTIME are dynamically displayed;
+- SHELL prompt is displayed;
+- the footer identifies DIRECT ILI9341 8-BIT;
+- the display remains operational together with Serial shell and SD.
+
+Runtime memory comparison:
+
+```text
+                 KonSol 0.1   KonSol 0.2
+Boot free RAM        1009 B        981 B
+Shell free RAM        834 B        806 B
+Delta                               -28 B
+```
+
+### TEST-02 status
+
+**PASS on physical hardware.**
+
+The result certifies that a direct ILI9341 system display can coexist with the
+KonSol cooperative kernel, Serial shell and microSD filesystem on the
+ATmega328P while costing approximately 28 bytes of additional observed runtime
+SRAM compared with KonSol 0.1.
