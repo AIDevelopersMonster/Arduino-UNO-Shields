@@ -435,7 +435,7 @@ Delta from KonSol 0.3:
 +73 B global SRAM
 ```
 
-Status: **BUILD PASS / SERIAL BENCH PASS**.
+Status: **FULL PHYSICAL PASS**.
 
 KonSol 0.4 Serial bench:
 
@@ -450,9 +450,14 @@ APP EXIT 0: PASS
 Repeated RUN/EXIT: PASS
 ```
 
-The external application lifecycle is therefore operational from the shell.
-Touch-browser launch was also reported working on the physical unit; final
-visual confirmation is pending before FULL PHYSICAL PASS.
+The external application lifecycle is operational from the shell and Touch
+browser. Final physical TFT evidence confirmed the external SD application
+rendering `HELLO FROM SD` / `TOUCH TO EXIT` through the resident display
+service, followed by the already verified Touch/EXIT return path.
+
+KonSol 0.4 therefore crosses the first strong OS boundary: the resident kernel
+remains in Flash while the application is a separate file on microSD and can be
+launched, interacted with and exited without reflashing the UNO.
 
 ## Publication
 
