@@ -184,3 +184,58 @@ Expected PS includes the fourth TOUCH task.
 TEST-03 passes only after the direct Touch service, browser, viewer, Serial
 shell and microSD filesystem are all observed working together on the physical
 Arduino UNO.
+
+
+## Physical bench result — 2026-10-04
+
+Serial verification:
+
+```text
+BOOT: TFT init
+BOOT: kernel init
+BOOT: SD mount
+SD: READY
+FREE RAM: 885 B
+
+INFO
+TASKS: 4
+TFT: ILI9341 direct 8-bit
+TOUCH: direct resistive
+SD: READY
+FREE RAM: 823 B
+
+PS
+0   SERIAL    1 ms
+1   CLOCK     100 ms
+2   DISPLAY   1000 ms
+3   TOUCH     30 ms
+
+DIR /
+F 175 T07LOG.TXT
+F 23 XOLOG.TXT
+FILES: 2
+```
+
+The watchdog REBOOT command also returned the system to a clean KonSol 0.3 boot.
+
+Physical TFT/Touch observations:
+
+- dashboard renders correctly and reports KERNEL RUN, SD READY and TOUCH READY;
+- FILES opens the touch file browser;
+- the SD root is shown with T07LOG.TXT and XOLOG.TXT;
+- touching XOLOG.TXT opens the VIEW screen for that file;
+- returning to the dashboard works;
+- the direct touch service and direct ILI9341 driver coexist with the SD filesystem on the physical UNO.
+
+Observed dashboard free-RAM display was approximately 855 B during the photographed run.
+This value is sampled from a different call depth than the Serial INFO/MEM value and is
+therefore not treated as directly interchangeable with the 823 B shell measurement.
+
+### Current certification state
+
+**CORE PHYSICAL PASS** for dashboard, direct Touch, file browser, file opening/viewer,
+Serial shell, SD filesystem and watchdog reboot.
+
+The remaining extended navigation cases (multi-page PREV/NEXT and directory-enter/UP)
+require a directory with more than five entries and at least one subdirectory. They are
+kept as explicit final checks rather than inferred from the current two-file SD card.
