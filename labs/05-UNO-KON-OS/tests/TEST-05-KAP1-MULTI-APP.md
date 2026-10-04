@@ -45,6 +45,41 @@ Exercises TFT TEXT, Serial output, WAIT_TOUCH and EXIT.
 
 ### ABOUT.KAP
 
+Physical bench status: **RUN / TFT / SERIAL PASS**. WAIT_TOUCH/EXIT confirmation
+is still pending for this run.
+
+Observed from the resident KonSol 0.4 shell:
+
+```text
+A:/> TYPE /ABOUT.KAP
+-----
+4B415031
+1000
+110A2802020A4B4F4E534F4C20302E34
+110A5002030C45585445524E414C20415050
+110A7802020F52554E4E494E472046524F4D205344
+110A9B02030D544F55434820544F2045584954
+300A41424F5554204B415031
+21
+FF
+-----
+A:/> RUN /ABOUT.KAP
+APP RUN /ABOUT.KAP
+A:/> ABOUT KAP1
+```
+
+The physical TFT displayed the expected independent application content:
+
+```text
+KONSOL 0.4
+EXTERNAL APP
+RUNNING FROM SD
+TOUCH TO EXIT
+```
+
+This verifies that the unchanged resident KonSol firmware can parse and execute
+a second bytecode stream with different TFT and Serial output.
+
 Independent application:
 
 ```text
@@ -224,4 +259,4 @@ resident KonSol ----+---- DEMO.KAP
              return to KonSol
 ```
 
-Status: **READY FOR PHYSICAL TEST**.
+Status: **PARTIAL PHYSICAL PASS — HELLO.KAP and ABOUT.KAP execution confirmed; DEMO.KAP and final lifecycle checks pending**.
