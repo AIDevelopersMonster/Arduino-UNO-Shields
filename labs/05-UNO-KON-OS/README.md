@@ -274,7 +274,22 @@ Implemented system-display primitives:
 - periodic DISPLAY cooperative task;
 - TFT shell command for display reinitialization.
 
-Status: **READY FOR BUILD / BENCH**.
+Verified build:
+
+```text
+Flash: 20264 / 32256 bytes (62%)
+SRAM globals: 1059 / 2048 bytes (51%)
+Linker-reported SRAM remaining: 989 bytes
+```
+
+Delta from KonSol 0.1:
+
+```text
++3334 B Flash
++26 B global SRAM
+```
+
+Status: **BUILD PASS / READY FOR BENCH**.
 
 ### Planned TEST-03 — touch shell / file browser
 
