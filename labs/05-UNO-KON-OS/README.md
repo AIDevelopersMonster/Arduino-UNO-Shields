@@ -1008,6 +1008,44 @@ Status: **TEST-06 FULL PHYSICAL PASS**.
 This establishes the first external KAP2 program with persistent VM state,
 Touch-driven iteration and conditional control flow on the physical UNO.
 
+### TEST-07 — KASM readable source assembler
+
+After TEST-06, the main usability bottleneck is manual hexadecimal authoring of
+KAP applications. TEST-07 moves that work to a host-side assembler without
+changing KonSol 0.5 or consuming additional UNO Flash/SRAM.
+
+Added:
+
+- [tools/kasm/kasm.py](../../tools/kasm/kasm.py) — dependency-free Python KAP1/KAP2 assembler;
+- [tools/kasm/README.md](../../tools/kasm/README.md) — syntax and CLI guide;
+- [apps/KAP2/COUNTER.kasm](apps/KAP2/COUNTER.kasm) — readable source for the
+  physical COUNTER application;
+- [tests/TEST-07-KASM-ASSEMBLER.md](tests/TEST-07-KASM-ASSEMBLER.md) —
+  reproducibility procedure.
+
+The intended development path is now:
+
+```text
+human-readable .kasm
+        |
+        v
+host-side KASM assembler
+        |
+        v
+ASCII-hex .KAP
+        |
+        v
+microSD
+        |
+        v
+resident KonSol VM
+```
+
+The assembler was locally checked against the existing COUNTER.KAP bytecode and
+produced the same instruction stream.
+
+Status: **READY FOR CLI TEST**.
+
 ## Publication
 
 KonSol 0.4 FULL PHYSICAL PASS is published on Zenodo as the current project
