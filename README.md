@@ -102,6 +102,25 @@ Intro video: https://youtube.com/shorts/TexEwx2-TlQ
 
 See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 
+### LAB-05 — KonSol / KON-OS on Arduino UNO
+
+Experimental cooperative operating environment for Arduino UNO / ATmega328P:
+
+- resident kernel prototype;
+- cooperative scheduler;
+- Serial shell;
+- microSD filesystem services;
+- physical TEST-01 PASS;
+- 16930 / 32256 bytes Flash (52%);
+- 1033 / 2048 bytes SRAM globals (50%);
+- measured free RAM in active shell: 834 B.
+
+Zenodo: https://doi.org/10.5281/zenodo.23139756
+
+Video: https://www.youtube.com/watch?v=N3PEQUbUmPM
+
+See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
+
 ## Project structure
 
 - `boards/` — Arduino UNO boards and hardware notes
@@ -116,5 +135,6 @@ See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
+- **LAB-05** — **KonSol 0.1 TEST-01 PASS** on physical Arduino UNO: cooperative kernel, Serial shell and microSD filesystem verified; published on Zenodo with DOI 10.5281/zenodo.23139756.
 
 Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
