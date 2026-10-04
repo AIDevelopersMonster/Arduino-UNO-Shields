@@ -45,8 +45,10 @@ Exercises TFT TEXT, Serial output, WAIT_TOUCH and EXIT.
 
 ### ABOUT.KAP
 
-Physical bench status: **RUN / TFT / SERIAL PASS**. WAIT_TOUCH/EXIT confirmation
-is still pending for this run.
+Physical bench status: **FULL APPLICATION LIFECYCLE PASS**.
+
+The TFT rendered the independent ABOUT screen, Serial produced `ABOUT KAP1`,
+and the application completed `WAIT_TOUCH -> FF -> APP EXIT 0`.
 
 Observed from the resident KonSol 0.4 shell:
 
@@ -259,7 +261,7 @@ resident KonSol ----+---- DEMO.KAP
              return to KonSol
 ```
 
-Status: **MULTI-APP + TFT-BROWSER + WAIT TIMING PASS / FINAL STATE CHECK PENDING**.
+Status: **FULL PHYSICAL PASS**.
 
 
 ## DEMO.KAP physical result
@@ -318,7 +320,7 @@ launch path for an external KAP1 application.
 
 ### Current TEST-05 status
 
-**MULTI-APP EXECUTION PASS / FINAL CERTIFICATION CHECKS PENDING.**
+**FULL PHYSICAL PASS.**
 
 Three different KAP1 programs have now executed on the same resident KonSol 0.4
 system:
@@ -341,7 +343,67 @@ TOUCH TO EXIT
 
 This verifies the cooperative `WAIT` opcode visually on hardware.
 
-Remaining gates before FULL PHYSICAL PASS:
+Final post-run state was physically recorded twice:
 
-1. record the final `APP`, `MEM`, and `DIR /` state after the multi-app run;
-2. record ABOUT.KAP `WAIT_TOUCH -> APP EXIT 0` if not already observed.
+```text
+A:/> APP
+APP: IDLE
+LAST EXIT: 0
+
+A:/> MEM
+FREE RAM: 750 B
+
+A:/> DIR /
+DIR /
+F 175 T07LOG.TXT
+F 23 XOLOG.TXT
+D 32768 TEST03
+F 123 HELLO.KAP
+F 197 ABOUT.KAP
+F 171 DEMO.KAP
+FILES: 6
+```
+
+The repeated check returned the same `APP: IDLE`, `LAST EXIT: 0`, and
+`FREE RAM: 750 B`, with all three KAP1 files still present on microSD.
+
+ABOUT.KAP was also confirmed to complete its lifecycle:
+
+```text
+APP RUN /ABOUT.KAP
+ABOUT KAP1
+APP EXIT 0
+```
+
+This closes the remaining TEST-05 gates. There is no observed progressive RAM
+loss across the multi-application sequence, the shell and filesystem remain
+usable, the Touch File Browser launch path is verified, and all three external
+applications execute through the same unchanged resident KonSol 0.4 firmware.
+
+## Final certification result
+
+**TEST-05: FULL PHYSICAL PASS.**
+
+The physically certified result is now:
+
+```text
+one resident KonSol 0.4 firmware
+        |
+        +-- HELLO.KAP
+        +-- ABOUT.KAP
+        +-- DEMO.KAP
+        |
+        +-- shell launch
+        +-- TFT Touch File Browser launch
+        +-- resident TFT / Touch / Serial services
+        +-- cooperative WAIT
+        +-- WAIT_TOUCH
+        +-- APP EXIT 0
+        |
+        +-- return to resident KonSol
+        |
+        +-- FREE RAM remains 750 B
+```
+
+TEST-05 therefore demonstrates that KAP1 is a reusable external application
+format rather than a special case built only for HELLO.KAP.
