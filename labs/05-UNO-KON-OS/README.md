@@ -362,7 +362,7 @@ The photographed hardware run confirms that KonSol 0.3 can operate the direct
 ILI9341 display, direct resistive Touch service, cooperative kernel, Serial shell
 and microSD filesystem together on the ATmega328P.
 
-Status: **CORE PHYSICAL PASS**.
+Status: **FULL PHYSICAL PASS**.
 
 Extended TEST-03 dataset was also created successfully:
 
@@ -373,12 +373,19 @@ Extended TEST-03 dataset was also created successfully:
 ```
 
 After approximately 2996 DISPLAY runs and 99898 TOUCH task runs, Serial `MEM`
-still reported 823 B free. The remaining FULL PASS gate is physical UI
-verification of NEXT/PREV and SUB/UP navigation.
+still reported 823 B free. The remaining UI gate was then physically verified: NEXT/PREV, SUB/INNER.TXT, BACK, UP and DASH all passed.
 
-Final extended browser certification still requires a temporary test directory
-with more than five entries so PREV/NEXT and directory-enter/UP can be exercised
-rather than inferred.
+Extended browser certification was completed on physical hardware using a
+temporary TEST03 directory containing seven files and a SUB directory.
+
+Verified UI sequence:
+
+```text
+FILES → TEST03 → NEXT → PREV → SUB → INNER.TXT → BACK → UP → DASH
+```
+
+All navigation steps passed without reset, display corruption or filesystem
+corruption. Serial MEM remained at 823 B after the extended run.
 
 ### Planned TEST-04 — executable content
 
