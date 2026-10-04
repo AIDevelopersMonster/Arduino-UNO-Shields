@@ -1,19 +1,14 @@
 /*
-  LAB-04 / TEST-02
+  LAB-04 / TEST-02A
   Arduino UNO + MAR2406 microSD + FreeRTOS
   PC <-> microSD file manager over USB Serial
 
-  IMPORTANT:
-  The first TEST-02 build combined FreeRTOS + SD + MCUFRIEND_kbv +
-  Adafruit_GFX and exceeded the ATmega328P program Flash limit.
-
-  This revision deliberately removes TFT/GFX from the file-transfer firmware.
-  The goal is to prove a reliable FreeRTOS + SD + Serial file manager first.
-  The display can be reintroduced later with a small direct ILI9341 driver
-  instead of the full graphics stack.
-
-  No LED heartbeat is used:
-    D13 = SPI SCK for the microSD card.
+  Diagnostic revision:
+    - TFT/GFX remain intentionally removed to fit UNO Flash.
+    - SD is mounted in setup() BEFORE the RTOS task starts.
+    - boot-stage messages are printed before and after SD init and task creation.
+    - FILE task stack reduced from 320 to 256 bytes.
+    - D13 is reserved for SPI SCK; no LED heartbeat is used.
 
   Protocol: FRTOSFM/1
     PING
@@ -51,6 +46,7 @@ const unsigned long ACK_TIMEOUT_MS = 5000UL;
 static uint8_t ioBuf[BLOCK_SIZE];
 static char lineBuf[LINE_SIZE];
 static uint8_t lineLen = 0;
+static bool sdReady = false;
 
 static void TaskFileServer(void *pvParameters);
 
@@ -141,7 +137,7 @@ static bool waitForAck() {
   return false;
 }
 
-static void commandInfo(bool sdReady) {
+static void commandInfo() {
   Serial.print(F("OK FRTOSFM/1 SD="));
   Serial.print(sdReady ? F("READY") : F("NO"));
   Serial.print(F(" BLOCK="));
@@ -150,7 +146,7 @@ static void commandInfo(bool sdReady) {
   Serial.println(SERIAL_BAUD);
 }
 
-static void commandList(char *path, bool sdReady) {
+static void commandList(char *path) {
   if (!sdReady) {
     Serial.println(F("ERR SD_NOT_READY"));
     return;
@@ -192,7 +188,7 @@ static void commandList(char *path, bool sdReady) {
   Serial.println(F("END LS"));
 }
 
-static void commandGet(char *path, bool sdReady) {
+static void commandGet(char *path) {
   if (!sdReady) {
     Serial.println(F("ERR SD_NOT_READY"));
     return;
@@ -260,7 +256,7 @@ static void commandGet(char *path, bool sdReady) {
   Serial.write('\n');
 }
 
-static void commandPut(char *args, bool sdReady) {
+static void commandPut(char *args) {
   if (!sdReady) {
     Serial.println(F("ERR SD_NOT_READY"));
     return;
@@ -337,7 +333,7 @@ static void commandPut(char *args, bool sdReady) {
   Serial.write('\n');
 }
 
-static void processCommand(char *line, bool &sdReady) {
+static void processCommand(char *line) {
   if (!*line) return;
 
   if (strcmp(line, "PING") == 0) {
@@ -346,31 +342,35 @@ static void processCommand(char *line, bool &sdReady) {
   }
 
   if (strcmp(line, "INFO") == 0) {
-    commandInfo(sdReady);
+    commandInfo();
     return;
   }
 
   if (strcmp(line, "MOUNT") == 0) {
+    Serial.println(F("MOUNT BEGIN"));
+    Serial.flush();
+
     sdReady = mountSD();
+
     Serial.println(sdReady ? F("OK SD_READY") : F("ERR SD_INIT"));
     return;
   }
 
   if (strncmp(line, "LS", 2) == 0 &&
       (line[2] == 0 || line[2] == ' ' || line[2] == '\t')) {
-    commandList(line + 2, sdReady);
+    commandList(line + 2);
     return;
   }
 
   if (strncmp(line, "GET", 3) == 0 &&
       (line[3] == ' ' || line[3] == '\t')) {
-    commandGet(line + 3, sdReady);
+    commandGet(line + 3);
     return;
   }
 
   if (strncmp(line, "PUT", 3) == 0 &&
       (line[3] == ' ' || line[3] == '\t')) {
-    commandPut(line + 3, sdReady);
+    commandPut(line + 3);
     return;
   }
 
@@ -380,18 +380,34 @@ static void processCommand(char *line, bool &sdReady) {
 void setup() {
   Serial.begin(SERIAL_BAUD);
 
+  Serial.println();
+  Serial.println(F("BOOT0 FRTOSFM/1"));
+  Serial.println(F("SD INIT BEGIN"));
+  Serial.flush();
+
+  sdReady = mountSD();
+
+  Serial.print(F("SD INIT "));
+  Serial.println(sdReady ? F("PASS") : F("FAIL"));
+  Serial.flush();
+
   BaseType_t ok = xTaskCreate(
     TaskFileServer,
     "FILE",
-    320,
+    256,
     NULL,
     1,
     NULL
   );
 
+  Serial.print(F("TASK CREATE "));
+  Serial.println(ok == pdPASS ? F("PASS") : F("FAIL"));
+  Serial.flush();
+
   if (ok != pdPASS) {
-    Serial.println(F("ERR TASK_CREATE"));
-    for (;;) {}
+    for (;;) {
+      delay(1000);
+    }
   }
 }
 
@@ -402,10 +418,8 @@ void loop() {
 static void TaskFileServer(void *pvParameters) {
   (void)pvParameters;
 
-  bool sdReady = mountSD();
-
-  Serial.println(F("BOOT FRTOSFM/1"));
-  commandInfo(sdReady);
+  Serial.println(F("RTOS FILE TASK RUNNING"));
+  commandInfo();
 
   for (;;) {
     while (Serial.available()) {
@@ -415,7 +429,7 @@ static void TaskFileServer(void *pvParameters) {
 
       if (c == '\n') {
         lineBuf[lineLen] = 0;
-        processCommand(lineBuf, sdReady);
+        processCommand(lineBuf);
         lineLen = 0;
         continue;
       }
