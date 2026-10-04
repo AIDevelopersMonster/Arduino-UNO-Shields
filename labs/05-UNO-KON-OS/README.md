@@ -851,14 +851,19 @@ Physical progress:
 ```text
 HELLO.KAP  FULL PHYSICAL PASS (TEST-04)
 ABOUT.KAP  RUN / TFT / SERIAL PASS
-DEMO.KAP   pending
+DEMO.KAP   RUN / SERIAL / repeated APP EXIT 0 PASS
 ```
 
-ABOUT.KAP was created and read from microSD, launched with the unchanged
-published KonSol 0.4 firmware, rendered its distinct TFT content and produced
-`ABOUT KAP1` through the resident Serial service.
+DEMO.KAP was created entirely through the resident KonSol shell, read back from
+microSD, and executed twice by the unchanged KonSol 0.4 firmware. Both runs
+produced `DEMO KAP1` and `APP EXIT 0`, confirming a third independent
+bytecode stream and repeatable external-application lifecycle.
 
-Status: **PARTIAL PHYSICAL PASS — DEMO.KAP and remaining lifecycle checks pending**.
+Status: **MULTI-APP EXECUTION PASS / FINAL CERTIFICATION CHECKS PENDING**.
+
+Remaining TEST-05 gates are final post-run `APP`/`MEM`/`DIR /` evidence,
+explicit DEMO TFT timing confirmation, and explicit operator confirmation of
+the Touch File Browser launch path for the multi-app sequence.
 
 ## Publication
 
