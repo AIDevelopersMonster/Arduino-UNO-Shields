@@ -114,7 +114,36 @@ git pull
 arduino-cli compile --fqbn arduino:avr:uno .\labs\05-UNO-KON-OS\sketches\03_KonSol_Touch_File_Browser
 ```
 
-Record Flash and SRAM before upload.
+Verified build:
+
+```text
+Sketch: 23666 / 32256 bytes Flash (73%)
+Globals: 1155 / 2048 bytes SRAM (56%)
+Linker-reported SRAM remaining: 893 bytes
+```
+
+Build status: **PASS**.
+
+Compared with KonSol 0.2:
+
+```text
+KonSol 0.2: 20264 B Flash / 1059 B globals
+KonSol 0.3: 23666 B Flash / 1155 B globals
+
+Delta: +3402 B Flash
+       +96 B global SRAM
+```
+
+Compared with KonSol 0.1:
+
+```text
+Delta: +6736 B Flash
+       +122 B global SRAM
+```
+
+The direct Touch service, browser state, path buffer and file-viewer UI still
+fit with 893 bytes of linker-reported SRAM remaining. Runtime free RAM must be
+measured on hardware before TEST-03 can be certified.
 
 ## Upload
 
