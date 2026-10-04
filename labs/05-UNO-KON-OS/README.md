@@ -206,7 +206,17 @@ CLS
 REBOOT
 ```
 
-Status: **READY FOR BUILD / BENCH**.
+Verified build:
+
+```text
+Flash: 16930 / 32256 bytes (52%)
+SRAM globals: 1033 / 2048 bytes (50%)
+Linker-reported SRAM remaining: 1015 bytes
+```
+
+Status: **BUILD PASS / READY FOR BENCH**.
+
+Unlike the FreeRTOS SD experiment, KON-OS does not allocate a separate stack for each cooperative task. The linker-reported SRAM remainder is still not the same as final runtime free memory, but the runtime model has materially less stack overhead.
 
 ### Planned TEST-02 — minimal display driver
 
@@ -230,6 +240,74 @@ browser.
 
 Introduce an interpreted application format / bytecode stored on SD so programs
 can be added without reflashing the UNO.
+
+## Native SD boot mode: KON-Boot
+
+A second execution model is technically possible in addition to interpreted KON-OS applications.
+
+The ATmega328P can self-program its Flash. A small loader placed in the AVR Boot Loader Section can read an image from microSD, program the Application Flash page by page, verify it, and then start the newly installed program.
+
+This is **not direct execution from SD**. The sequence is:
+
+```text
+microSD
+  |
+  | APP.BIN
+  v
+KON-Boot
+  |
+  | erase/write Flash pages
+  v
+ATmega328P Application Flash
+  |
+ reset / jump
+  v
+native AVR application
+```
+
+The Boot Loader Section size on ATmega328P is selected by the BOOTSZ fuses. The available configurations are 256, 512, 1024 or 2048 words, i.e. 512 B, 1 KB, 2 KB or 4 KB. A practical SD-aware loader may therefore require a larger boot section than the very small conventional UNO bootloader.
+
+A native image format should not be just an anonymous byte stream. KON-Boot should use a small header, for example:
+
+```text
+KON1
+TARGET=ATMEGA328P
+LOAD=0x0000
+SIZE=...
+CRC32=...
+VERSION=...
+<raw AVR image>
+```
+
+Minimum safety rules:
+
+- verify target MCU before erase;
+- verify image length;
+- verify CRC before marking the image bootable;
+- never overwrite the protected boot loader;
+- retain a recovery path if programming is interrupted;
+- only jump to the application after full verification.
+
+### Two complementary application models
+
+KON-OS can therefore support two different kinds of software:
+
+| Mode | Storage/execution | Advantage | Cost |
+| --- | --- | --- | --- |
+| KON-OS bytecode/app | stays on SD, interpreted by resident kernel | instant switching, no Flash wear, kernel stays resident | slower, limited by VM/API |
+| KON-Boot native .BIN | copied from SD into AVR Application Flash | full native AVR speed and almost all MCU features | rewrites Flash, reboot required |
+
+The hybrid model is especially attractive:
+
+```text
+Boot section:       KON-Boot / recovery
+Application Flash: KON-OS kernel OR selected native image
+microSD:           OS images + native apps + bytecode apps + data
+```
+
+KON-Boot can eventually make the UNO behave like a very small SD-based multi-boot computer: select an image, install it into Application Flash, run it, and return to the boot/recovery environment for another image.
+
+This is distinct from TEST-04 bytecode execution. Both paths are worth keeping: bytecode for resident-OS applications, native .BIN loading for maximum performance.
 
 ## Why LAB-05 follows LAB-04
 
