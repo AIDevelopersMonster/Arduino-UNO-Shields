@@ -4,7 +4,7 @@
 
 Run a real preemptive RTOS on the same Arduino UNO R3 + MAR2406 hardware that
 was certified in LAB-03, then determine how far the 32 KB Flash / 2 KB SRAM
-ATmega328P can be pushed with tasks, queues and an interactive TFT/Touch HMI.
+ATmega328P can be pushed with tasks, queues, storage and an interactive HMI.
 
 LAB-03 remains closed. LAB-04 starts a new software-architecture line on the
 same verified hardware.
@@ -15,18 +15,18 @@ same verified hardware.
 - MAR2406 2.4-inch TFT Touch Shield
 - ILI9341, canonical ROT1 / 320x240
 - resistive touch: XP=D6, XM=A2, YP=A1, YM=D7
-- calibrated touch: LEFT=153, RIGHT=930, TOP=962, BOTTOM=168
+- microSD: CS=D10, MOSI=D11, MISO=D12, SCK=D13
 - Arduino AVR core
 - Arduino_FreeRTOS_Library / FreeRTOS for AVR
 
 ## Architecture rule
 
-**TFT and Touch have one owner task.**
+TFT and Touch have one owner task whenever the graphics stack is present,
+because the shield shares GPIO resources between the LCD interface and the
+resistive touch panel.
 
-The shield shares pins between the LCD interface and the resistive touch panel.
-LAB-04 therefore starts with an HMI task that owns both devices. Other tasks
-communicate with HMI through RTOS mechanisms instead of writing to the display
-directly.
+D13 is reserved for SPI SCK whenever microSD is active; it is not used as a
+heartbeat LED.
 
 ## Test plan
 
@@ -34,18 +34,19 @@ directly.
    - HMI task
    - Worker task
    - FreeRTOS queue
-   - LED heartbeat
    - live RTOS tick and touch state
+   - physical PASS obtained on the verified shield
 2. **TEST-02 — SD File Manager over USB Serial**
-   - FILE task owns Serial + microSD
-   - HMI task owns TFT
+   - FreeRTOS FILE task
    - PC directory listing
    - binary PUT / GET in 32-byte blocks
    - CRC-16/CCITT verification
-   - no LED heartbeat: D13 is reserved for SPI SCK
-3. Task timing / priority experiment.
-4. Queue and producer/consumer experiment.
-5. Port one existing application to RTOS architecture if memory permits.
+   - first full TFT/GFX + SD build exceeded UNO Flash
+   - revised TEST-02A removes MCUFRIEND_kbv/Adafruit_GFX and proves storage first
+3. Reintroduce a minimal TFT status layer with a direct ILI9341 driver if the
+   remaining Flash/SRAM budget permits.
+4. Task timing / priority experiment.
+5. Port an existing application to RTOS architecture if memory permits.
 
 ## TEST-01
 
@@ -57,9 +58,6 @@ Procedure:
 
 `tests/TEST-01-FREERTOS-SCHEDULER-TFT-TOUCH.md`
 
-Status: **READY FOR BUILD / BENCH**.
-
-
 ## TEST-02
 
 Firmware:
@@ -70,4 +68,4 @@ Procedure:
 
 `tests/TEST-02-FREERTOS-SD-FILE-MANAGER.md`
 
-Status: **READY FOR BUILD / BENCH**.
+Status: **REVISED AFTER FLASH LIMIT — READY FOR BUILD**.
