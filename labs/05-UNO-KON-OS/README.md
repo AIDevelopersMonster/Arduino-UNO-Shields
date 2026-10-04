@@ -249,18 +249,32 @@ microSD card without reset or corruption.
 
 Unlike the FreeRTOS SD experiment, KON-OS does not allocate a separate stack for each cooperative task. The linker-reported SRAM remainder is still not the same as final runtime free memory, but the runtime model has materially less stack overhead.
 
-### Planned TEST-02 — minimal display driver
+### TEST-02 — KonSol 0.2 minimal direct TFT driver
 
-Replace the large generic TFT libraries with only the ILI9341 operations needed
-by KON-OS.
+Firmware:
 
-Target operations:
+`sketches/02_KonSol_Minimal_TFT/02_KonSol_Minimal_TFT.ino`
 
-- init;
-- fill;
-- pixel/line/rect;
-- fixed small font;
-- status console.
+Procedure:
+
+`tests/TEST-02-MINIMAL-DIRECT-TFT.md`
+
+The first display implementation removes MCUFRIEND_kbv and Adafruit_GFX and
+drives the verified ILI9341 8-bit parallel bus directly.
+
+Implemented system-display primitives:
+
+- hardware reset and ILI9341 init;
+- RGB565 fill;
+- pixel;
+- horizontal line;
+- rectangle;
+- tiny 3x5 PROGMEM font;
+- KonSol system dashboard;
+- periodic DISPLAY cooperative task;
+- TFT shell command for display reinitialization.
+
+Status: **READY FOR BUILD / BENCH**.
 
 ### Planned TEST-03 — touch shell / file browser
 
