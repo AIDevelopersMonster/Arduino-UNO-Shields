@@ -807,6 +807,47 @@ return to resident KonSol
 No new Arduino sketch is compiled and the ATmega328P is not reflashed when
 `HELLO.KAP` is created, changed or executed.
 
+### TEST-05 — KAP1 multi-application certification
+
+TEST-05 strengthens the external-application result without changing the
+published KonSol 0.4 resident firmware.
+
+Applications:
+
+- [HELLO.KAP](apps/KAP1/HELLO.KAP) — verified first external application;
+- [ABOUT.KAP](apps/KAP1/ABOUT.KAP) — independent multi-line system/about app;
+- [DEMO.KAP](apps/KAP1/DEMO.KAP) — timed KAP1 demo using cooperative WAIT.
+
+Application directory:
+
+[apps/KAP1/](apps/KAP1/)
+
+Test procedure:
+
+[tests/TEST-05-KAP1-MULTI-APP.md](tests/TEST-05-KAP1-MULTI-APP.md)
+
+The certification target is intentionally stronger than TEST-04:
+
+```text
+                 HELLO.KAP
+                    |
+                 ABOUT.KAP
+                    |
+resident KonSol ----+---- DEMO.KAP
+                    |
+             same kernel/services
+                    |
+                  EXIT
+                    |
+             return to KonSol
+```
+
+No Arduino firmware rebuild or upload is permitted between application runs.
+All applications must remain separate files on microSD and execute through the
+same resident KonSol 0.4 kernel and KAP1 VM.
+
+Status: **READY FOR PHYSICAL TEST**.
+
 ## Publication
 
 KonSol 0.4 FULL PHYSICAL PASS is published on Zenodo as the current project
