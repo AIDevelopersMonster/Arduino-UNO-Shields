@@ -291,9 +291,20 @@ APP EXIT 0
 Repeated RUN cycles also returned with APP EXIT 0.
 
 This certifies the Serial-side resident-kernel -> external-SD-app -> EXIT ->
-resident-kernel path. Touch-browser launch was also reported operational on the
-physical unit; visual/photo confirmation is still pending before marking the
-complete TEST-04 as FULL PHYSICAL PASS.
+resident-kernel path.
+
+Final physical visual confirmation was then obtained on the real Arduino UNO +
+MAR2406 display. The externally stored /HELLO.KAP application rendered:
+
+```text
+HELLO FROM SD
+TOUCH TO EXIT
+```
+
+on the TFT after launch from the resident KonSol environment. Together with the
+already verified Touch launch, WAIT_TOUCH/EXIT lifecycle, repeated RUN/EXIT
+cycles, resident-shell recovery and stable memory measurements, this closes the
+remaining visual gate for TEST-04.
 
 Observed memory:
 
@@ -305,3 +316,47 @@ Shell INFO/MEM free RAM: 750 B
 The shell prompt can appear before application Serial output because RUN starts
 the APP task cooperatively and the command parser returns immediately. This is
 a presentation-order issue, not an application lifecycle failure.
+
+
+## Final physical certification
+
+Physical TFT evidence confirmed the external KAP1 application executing from
+microSD through resident KonSol services:
+
+```text
+HELLO FROM SD
+TOUCH TO EXIT
+```
+
+The certification chain is now complete:
+
+```text
+resident KonSol 0.4
+  -> microSD HELLO.KAP
+  -> KAP1 APP task
+  -> KonSol TFT service
+  -> WAIT_TOUCH
+  -> Touch event
+  -> FF / EXIT
+  -> resident KonSol dashboard / shell
+```
+
+Verified together on the physical Arduino UNO / ATmega328P:
+
+- resident kernel remains in Flash;
+- application content remains on microSD;
+- application launches without firmware rebuild or reflashing;
+- application draws through the resident direct ILI9341 service;
+- application waits for and resumes on resident Touch events;
+- application exits back to KonSol;
+- repeated RUN/EXIT cycles do not reset the board;
+- shell, SD filesystem and browser remain available after exit;
+- observed shell free RAM remains 750 B after the tested lifecycle.
+
+### TEST-04 final status
+
+**FULL PHYSICAL PASS.**
+
+This is the first strong KonSol OS-boundary certification: the resident system
+and the external application are separate artifacts, and the application can be
+changed on SD without changing the resident firmware.
