@@ -387,10 +387,40 @@ FILES → TEST03 → NEXT → PREV → SUB → INNER.TXT → BACK → UP → DAS
 All navigation steps passed without reset, display corruption or filesystem
 corruption. Serial MEM remained at 823 B after the extended run.
 
-### Planned TEST-04 — executable content
+### TEST-04 — KonSol 0.4 external KAP1 application VM
 
-Introduce an interpreted application format / bytecode stored on SD so programs
-can be added without reflashing the UNO.
+Firmware:
+
+`sketches/04_KonSol_External_APP_VM/04_KonSol_External_APP_VM.ino`
+
+Procedure:
+
+`tests/TEST-04-EXTERNAL-KAP1-APP.md`
+
+KonSol 0.4 introduces the first external application boundary. A `.KAP`
+program remains on microSD and is interpreted by a fifth cooperative APP task.
+The complete application is streamed from SD rather than copied into SRAM.
+
+Initial KAP1 services:
+
+- screen clear;
+- text drawing through the resident direct ILI9341 driver;
+- cooperative WAIT;
+- WAIT_TOUCH through the resident Touch service;
+- Serial output;
+- EXIT back to the KonSol dashboard.
+
+Shell:
+
+```text
+RUN <file.KAP>
+APP
+```
+
+The touch file browser also recognizes `.KAP` files and launches them instead
+of opening them in the text viewer.
+
+Status: **READY FOR BUILD / BENCH**.
 
 ## Publication
 
