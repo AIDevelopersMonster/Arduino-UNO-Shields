@@ -272,6 +272,17 @@ browser.
 Introduce an interpreted application format / bytecode stored on SD so programs
 can be added without reflashing the UNO.
 
+## Publication
+
+KonSol 0.1 has been published as a software record on Zenodo.
+
+- DOI: https://doi.org/10.5281/zenodo.23139756
+- Video demonstration: https://www.youtube.com/watch?v=N3PEQUbUmPM
+
+The Zenodo record corresponds to the physically verified KonSol 0.1 state:
+cooperative kernel, Serial shell, microSD filesystem operations, memory
+diagnostics and the TEST-01 hardware results documented in this laboratory.
+
 ## Documentation
 
 KON-OS 0.1 documentation is split by role:
