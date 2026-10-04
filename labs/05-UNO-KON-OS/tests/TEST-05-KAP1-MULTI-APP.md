@@ -259,4 +259,82 @@ resident KonSol ----+---- DEMO.KAP
              return to KonSol
 ```
 
-Status: **PARTIAL PHYSICAL PASS — HELLO.KAP and ABOUT.KAP execution confirmed; DEMO.KAP and final lifecycle checks pending**.
+Status: **MULTI-APP EXECUTION PASS / FINAL CERTIFICATION CHECKS PENDING**.
+
+
+## DEMO.KAP physical result
+
+The third independent KAP1 application was created entirely from the resident
+KonSol shell with `WRITE` / `APPEND`, then read back with `TYPE`.
+
+Observed creation/readback:
+
+```text
+A:/> WRITE /DEMO.KAP 4B415031
+OK 8 B
+...
+A:/> TYPE /DEMO.KAP
+-----
+4B415031
+1000
+110A320302094B4150312044454D4F
+20DC05
+1000
+110A4602030D50524F4752414D204F4E205344
+20DC05
+110A7802030D544F55434820544F2045584954
+300944454D4F204B415031
+21
+FF
+-----
+```
+
+The resident firmware then launched the same external file and the VM completed
+the application lifecycle twice:
+
+```text
+A:/> RUN /DEMO.KAP
+APP RUN /DEMO.KAP
+A:/> DEMO KAP1
+APP EXIT 0
+APP RUN /DEMO.KAP
+DEMO KAP1
+APP EXIT 0
+```
+
+This verifies:
+
+- a third independent KAP1 bytecode stream is accepted by the unchanged resident
+  KonSol 0.4 firmware;
+- Serial opcode output is correct (`DEMO KAP1`);
+- `WAIT_TOUCH` is eventually released and `FF` returns through `APP EXIT 0`;
+- the application can be launched repeatedly without board reset;
+- the external program itself was created and stored on microSD without Arduino
+  compilation or firmware reflashing.
+
+The second `APP RUN /DEMO.KAP` occurred without a typed shell command being
+shown in the captured transcript. This is consistent with a non-shell launch
+path, but TEST-05 documentation does not treat that alone as proof of Touch
+File Browser launch; explicit operator confirmation is still required.
+
+### Current TEST-05 status
+
+**MULTI-APP EXECUTION PASS / FINAL CERTIFICATION CHECKS PENDING.**
+
+Three different KAP1 programs have now executed on the same resident KonSol 0.4
+system:
+
+```text
+HELLO.KAP  — full physical lifecycle previously certified
+ABOUT.KAP  — independent RUN / TFT / Serial verified
+DEMO.KAP   — independent RUN / Serial / repeated APP EXIT 0 verified
+```
+
+Remaining gates before FULL PHYSICAL PASS:
+
+1. record the final `APP`, `MEM`, and `DIR /` state after the multi-app run;
+2. explicitly confirm the DEMO TFT timing sequence
+   (`KAP1 DEMO` -> 1500 ms -> `PROGRAM ON SD` -> 1500 ms -> `TOUCH TO EXIT`);
+3. explicitly confirm Touch File Browser launch for the remaining multi-app
+   sequence (or otherwise record which application the second DEMO launch used);
+4. record ABOUT.KAP `WAIT_TOUCH -> APP EXIT 0` if not already observed.
