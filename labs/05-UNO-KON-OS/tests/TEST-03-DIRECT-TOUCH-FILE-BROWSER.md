@@ -335,3 +335,56 @@ directory contents are correct and the system remained stable.
 
 The remaining requirement for FULL PHYSICAL PASS is direct on-screen
 verification of NEXT/PREV, entering SUB, viewing INNER.TXT, BACK, UP and DASH.
+
+
+## Final physical certification
+
+The extended on-screen browser sequence was completed successfully on the
+physical Arduino UNO + MAR2406 hardware:
+
+```text
+FILES
+→ TEST03
+→ NEXT
+→ PREV
+→ SUB
+→ INNER.TXT
+→ BACK
+→ UP
+→ DASH
+```
+
+Verified physically:
+
+- root browser opens;
+- TEST03 opens;
+- NEXT shows the second page;
+- PREV returns to the first page;
+- SUB directory opens;
+- INNER.TXT opens in the text viewer;
+- BACK returns to the browser;
+- UP returns to the parent directory;
+- DASH returns to the system dashboard;
+- no reset or display corruption occurred;
+- filesystem contents remained intact;
+- Serial shell and four cooperative tasks remained operational;
+- observed shell free RAM remained stable at 823 B after extended activity.
+
+### TEST-03 final status
+
+**FULL PHYSICAL PASS.**
+
+KonSol 0.3 therefore certifies the combined operation of:
+
+- cooperative kernel;
+- Serial shell;
+- microSD filesystem;
+- direct ILI9341 8-bit driver;
+- direct resistive Touch driver;
+- system dashboard;
+- touch file browser;
+- directory navigation and pagination;
+- one-page text viewer;
+- watchdog reboot;
+
+on the Arduino UNO / ATmega328P with 2 KB SRAM.
