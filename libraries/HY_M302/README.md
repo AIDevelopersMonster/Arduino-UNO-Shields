@@ -52,9 +52,15 @@ The first in-house implementation failed because it measured DHT pulses with
 reads the input port directly and measures pulse lengths using loop counts,
 removing the Timer0 timing dependency.
 
-IR decoding is not yet included in v0.1. We will first determine the actual
-remote/protocol requirements and then decide whether a compact in-house decoder
-is preferable to a full external library.
+A compact in-house NEC decoder is included. The physical D6 receiver has now
+been verified independently with Arduino-IRremote using an Orange Pi remote:
+protocol NEC, address 0x04. The reference run produced 12 unique commands:
+0x13, 0x10, 0x11, 0x0F, 0x0C, 0x0D, 0x0B, 0x08, 0x09, 0x58, 0x47 and 0x53.
+
+The first in-house NEC test timed out because its pulseIn timeout was only
+5000 us while the NEC leader LOW pulse itself is about 9000 us. The decoder
+timeout has been corrected to 15000 us and is pending physical re-test before
+the in-house decoder is promoted to PASS.
 
 ## Arduino IDE installation
 
