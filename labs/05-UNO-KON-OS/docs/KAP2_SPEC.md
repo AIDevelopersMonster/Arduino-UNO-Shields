@@ -1,7 +1,10 @@
-# KAP2 bytecode — KonSol 0.5 draft specification
+# KAP2 bytecode — KonSol 0.5 specification
 
 KAP2 is the first control-flow extension of the external KonSol application
 format.
+
+Status: **physically verified by TEST-06 on Arduino UNO / ATmega328P**.
+The host-side KASM source-to-bytecode path was reproducibly verified by TEST-07.
 
 It keeps the KAP1 storage model:
 
