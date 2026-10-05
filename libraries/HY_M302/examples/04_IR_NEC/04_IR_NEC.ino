@@ -39,8 +39,8 @@ static void waitOneFrame() {
   while (millis() - started < 10000UL) {
     HY_M302::IrNecFrame frame;
 
-    // NEC starts with an approximately 9 ms LOW leader, so the per-attempt
-    // timeout must exceed the full leader pulse.
+    // The decoder now uses pulseIn() only for the initial LOW leader and
+    // measures all following already-active pulses directly.
     if (shield.readIrNec(frame, 15000UL)) {
       printFrame(frame);
       return;
