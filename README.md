@@ -123,7 +123,12 @@ KonSol 0.4 physical certification:
 - 1228 / 2048 bytes SRAM globals (59%);
 - measured free RAM: 812 B after boot, 750 B in the active shell.
 
-Current Zenodo publication (KonSol 0.5): https://doi.org/10.5281/zenodo.23149141
+Standalone KonSol 0.6 article: https://doi.org/10.5281/zenodo.23161379
+
+This 0.6 record is a separate technical article for the TEST-08 multi-label result,
+not a replacement/version update of the KonSol 0.5 publication.
+
+KonSol 0.5 publication: https://doi.org/10.5281/zenodo.23149141
 
 KonSol 0.5 video: https://youtu.be/HVHLsfV9dFY
 
@@ -141,6 +146,11 @@ TEST-07 adds the host-side KASM assembler. Human-readable COUNTER.kasm was
 compiled to a generated KAP2 file that compared exactly equal to the physically
 certified COUNTER.KAP bytecode.
 
+KonSol 0.6 / TEST-08 extends KAP2 with up to eight indexed labels and symbolic
+LABEL/JMP/JZ/JNZ source-level control flow. The physical RED -> YELLOW -> GREEN
+sequence, clean APP EXIT 0, 720 B post-run shell free RAM, readable SD filesystem
+and unchanged legacy COUNTER.KAP execution were all verified on Arduino UNO.
+
 See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
 ## Project structure
@@ -157,6 +167,6 @@ See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
-- **LAB-05** — **KonSol 0.5 TEST-06 FULL PHYSICAL PASS + TEST-07 KASM FULL PASS**. KonSol 0.5 runs KAP1/KAP2 from microSD with registers, Touch-driven loops and conditional branching; COUNTER.KAP completed the physical five-touch loop and clean APP EXIT 0. KASM then reproduced the certified COUNTER.KAP bytecode exactly from readable COUNTER.kasm source. The current published version is KonSol 0.5, DOI 10.5281/zenodo.23149141, with video demonstration https://youtu.be/HVHLsfV9dFY. Previous version 0.4 remains at DOI 10.5281/zenodo.23144922; historical 0.1 remains at DOI 10.5281/zenodo.23139756.
+- **LAB-05** — **KonSol 0.6 TEST-08 FULL PHYSICAL PASS**. KAP2 now supports indexed multi-label control flow with LABEL/JMP/JZ/JNZ while retaining legacy KonSol 0.5 MARK/JNZ compatibility. MULTI.KAP physically completed RED -> YELLOW -> GREEN -> APP EXIT 0, the old COUNTER.KAP still ran unchanged, post-run shell free RAM remained 720 B, all five cooperative tasks stayed active, and DIR / remained operational. Standalone KonSol 0.6 article: DOI 10.5281/zenodo.23161379. KonSol 0.5 remains a separate publication at DOI 10.5281/zenodo.23149141 with video https://youtu.be/HVHLsfV9dFY.
 
 Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
