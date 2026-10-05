@@ -19,7 +19,7 @@ drivers.
 - LDR
 - LM35 raw + Celsius conversion
 - minimal DHT11 reader
-- IR pin exposure for the next driver stage
+- bench-verified non-blocking NEC IR receiver on D6
 - configurable pin map
 
 ## Important status
@@ -91,8 +91,29 @@ minimal ISR. The main code calls `serviceIrNec()`, which runs the NEC state
 machine outside the ISR and queues decoded frames. The driver exposes dropped
 edge/frame counters so physical robustness can be measured explicitly.
 
-This asynchronous path is **implementation complete / physical certification
-pending**. The old blocking `readIrNec()` remains available for comparison.
+The asynchronous path has now passed a physical 12-button comparison run on the
+same Orange Pi remote. Every full frame matched Arduino-IRremote exactly:
+
+```text
+EC13FB04 / 04 / 13
+EF10FB04 / 04 / 10
+EE11FB04 / 04 / 11
+F00FFB04 / 04 / 0F
+F30CFB04 / 04 / 0C
+F20DFB04 / 04 / 0D
+F40BFB04 / 04 / 0B
+F708FB04 / 04 / 08
+F609FB04 / 04 / 09
+A758FB04 / 04 / 58
+B847FB04 / 04 / 47
+AC53FB04 / 04 / 53
+```
+
+Status: **ASYNC NEC PHYSICAL PASS — functional correctness 12/12**.
+
+A final stress run using live reception plus `irNecDroppedEdges()` and
+`irNecDroppedFrames()` remains the explicit robustness certification step.
+The old blocking `readIrNec()` remains available only for comparison.
 
 ## Arduino IDE installation
 
