@@ -56,8 +56,11 @@ public:
   void setRgbRaw(uint8_t ch1, uint8_t ch2, uint8_t ch3);
   void rgbOff();
 
-  void buzzerTone(unsigned int frequency, unsigned long durationMs = 0);
+  // Bench-certified on our HY-M302 sample: active/self-oscillating buzzer on D5.
+  void buzzerOn();
   void buzzerOff();
+  // Optional PWM/tone drive retained for experiments and clone compatibility.
+  void buzzerTone(unsigned int frequency, unsigned long durationMs = 0);
 
   int readPotRaw() const;
   int readLightRaw() const;
