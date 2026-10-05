@@ -37,8 +37,20 @@ TEST-01 on the physical shield has now bench-certified the LED mapping:
 The library therefore exposes named `setRGB(red, green, blue)`, `ledRed()` and
 `ledBlue()` helpers while retaining the raw channel API for diagnostics.
 
-The DHT11 routine is deliberately small and dependency-free. It must be tested
-on the physical shield before being promoted to PASS.
+The DHT11 routine is deliberately small and dependency-free. It is now
+**PHYSICAL PASS** on the tested HY-M302.
+
+Reference comparison on the same board:
+
+```text
+Adafruit reference: 30.3 C, 39-41 % RH
+HY_M302 low-level:  30.2 C, 39-40 % RH
+```
+
+The first in-house implementation failed because it measured DHT pulses with
+`micros()` while interrupts were disabled. The corrected AVR implementation
+reads the input port directly and measures pulse lengths using loop counts,
+removing the Timer0 timing dependency.
 
 IR decoding is not yet included in v0.1. We will first determine the actual
 remote/protocol requirements and then decide whether a compact in-house decoder
@@ -96,3 +108,31 @@ The library retains `readLm35Raw()` and `readLm35C()` because the A2 mapping is
 still valid and other HY-M302 samples or a replacement LM35 may work correctly.
 Do not use the current tested board's LM35 readings as a certified temperature
 measurement.
+
+
+## DHT11 physical certification
+
+Status: **PASS**.
+
+Physical procedure:
+
+1. verify the onboard DHT11 on D4 with the Adafruit reference library;
+2. verify the same sensor with the HY_M302 dependency-free low-level driver;
+3. compare repeated temperature/humidity results.
+
+Observed:
+
+```text
+Adafruit:
+30.3 C / 39.0 %
+30.3 C / 41.0 %
+
+HY_M302:
+30.2 C / 39.0 %
+30.2 C / 40.0 %
+30.2 C / 40.0 %
+30.2 C / 40.0 %
+```
+
+The two implementations agree within the normal resolution/variation expected
+for this class of sensor.
