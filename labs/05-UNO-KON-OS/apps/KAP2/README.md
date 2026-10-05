@@ -26,7 +26,7 @@ See:
 - [TEST-06](../../tests/TEST-06-KAP2-INTERACTIVE.md)
 
 
-## MULTILABEL.KAP
+## MULTI.KAP
 
 TEST-08 / KonSol 0.6 reference application for named multi-target KAP2 control
 flow.
