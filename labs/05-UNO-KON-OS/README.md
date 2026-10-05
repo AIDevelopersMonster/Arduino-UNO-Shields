@@ -1070,6 +1070,36 @@ readable .kasm
    -> previously certified KonSol 0.5 execution
 ```
 
+### TEST-08 — KonSol 0.6 / KAP2 multi-label control flow
+
+KonSol 0.5 proved state, Touch input and one MARK-based loop. TEST-08 removes
+that single-target limitation while keeping old KAP2 bytecode valid.
+
+KonSol 0.6 adds:
+
+```text
+up to 8 indexed labels
+LABEL
+JMP
+JZ label
+JNZ label
+forward and backward named branches in KASM
+```
+
+KASM resolves human-readable names to compact label IDs. The resident VM scans
+the external KAP2 file once at launch, indexes label positions, rewinds, and
+then branches by direct SD seek.
+
+Reference application:
+
+[apps/KAP2/MULTILABEL.kasm](apps/KAP2/MULTILABEL.kasm)
+
+Physical procedure:
+
+[tests/TEST-08-KAP2-MULTILABEL.md](tests/TEST-08-KAP2-MULTILABEL.md)
+
+Status: **READY FOR BUILD AND PHYSICAL TEST**.
+
 ## Publication
 
 KonSol 0.5 is published as the current Zenodo version of the KonSol line.
