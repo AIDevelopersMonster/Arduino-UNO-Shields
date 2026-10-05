@@ -1072,18 +1072,18 @@ readable .kasm
 
 ## Publication
 
-KonSol 0.4 FULL PHYSICAL PASS is published on Zenodo as the current project
-baseline.
+KonSol 0.5 is published as the current Zenodo version of the KonSol line.
 
-- KonSol 0.4 DOI: https://doi.org/10.5281/zenodo.23144922
-- KonSol 0.4 record: https://zenodo.org/records/23144922
+- KonSol 0.5 DOI: https://doi.org/10.5281/zenodo.23149141
+- KonSol 0.5 video: https://youtu.be/HVHLsfV9dFY
+- Previous KonSol 0.4 DOI: https://doi.org/10.5281/zenodo.23144922
 - Historical KonSol 0.1 DOI: https://doi.org/10.5281/zenodo.23139756
 - KonSol 0.1 video demonstration: https://www.youtube.com/watch?v=N3PEQUbUmPM
 
-The 0.4 publication corresponds to the physically verified resident
-kernel + Shell + microSD + direct TFT + direct Touch + File Browser + streamed
-KAP1 application lifecycle. The 0.1 record remains preserved as the historical
-kernel/Shell/SD milestone.
+The 0.5 version adds the physically verified KAP2 state/control-flow layer and
+the reproducibly verified KASM source-to-bytecode toolchain. KonSol 0.4 remains
+the previous published KAP1 external-application baseline, and KonSol 0.1 remains
+the historical kernel/Shell/microSD milestone.
 
 ## Documentation
 
