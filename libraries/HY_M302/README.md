@@ -71,3 +71,15 @@ The project prefers:
 
 This library will also become the hardware-abstraction layer for the later
 KonSol-HY project.
+
+
+## Bench-certified analog behavior
+
+LDR direction is bench-certified on the physical HY-M302 sample:
+
+- ordinary room light: about 368 ADC counts;
+- LDR covered: about 56-61 ADC counts;
+- therefore brighter -> higher ADC reading, darker -> lower ADC reading.
+
+These are not universal thresholds; they document the verified direction of the
+divider on our sample.
