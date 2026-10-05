@@ -24,3 +24,24 @@ See:
 
 - [KAP2 specification](../../docs/KAP2_SPEC.md)
 - [TEST-06](../../tests/TEST-06-KAP2-INTERACTIVE.md)
+
+
+## MULTILABEL.KAP
+
+TEST-08 / KonSol 0.6 reference application for named multi-target KAP2 control
+flow.
+
+Readable source: `MULTILABEL.kasm`.
+
+It uses four labels:
+
+```text
+LOOP
+RED_STATE
+YELLOW_STATE
+GREEN_STATE
+```
+
+Three Touch events select three different branches. RED and YELLOW return to
+LOOP with an unconditional JMP; the GREEN state waits for one final Touch and
+exits.
