@@ -57,10 +57,35 @@ been verified independently with Arduino-IRremote using an Orange Pi remote:
 protocol NEC, address 0x04. The reference run produced 12 unique commands:
 0x13, 0x10, 0x11, 0x0F, 0x0C, 0x0D, 0x0B, 0x08, 0x09, 0x58, 0x47 and 0x53.
 
-The first in-house NEC test timed out because its pulseIn timeout was only
-5000 us while the NEC leader LOW pulse itself is about 9000 us. The decoder
-timeout has been corrected to 15000 us and is pending physical re-test before
-the in-house decoder is promoted to PASS.
+The first in-house NEC test exposed two blocking-decoder bugs, both now
+corrected: the initial timeout was shorter than the approximately 9 ms NEC
+leader LOW pulse, and a subsequent pulseIn(HIGH) skipped the already-active
+leader HIGH pulse.
+
+After those fixes, the in-house decoder produced the same 12 unique frames as
+Arduino-IRremote on the Orange Pi remote:
+
+```text
+RAW       ADDR CMD
+EC13FB04  04   13
+EF10FB04  04   10
+EE11FB04  04   11
+F00FFB04  04   0F
+F30CFB04  04   0C
+F20DFB04  04   0D
+F40BFB04  04   0B
+F708FB04  04   08
+F609FB04  04   09
+A758FB04  04   58
+B847FB04  04   47
+AC53FB04  04   53
+```
+
+Semantic decode status is therefore PASS for these frames. Robustness is not yet
+certified: the manual blocking implementation still produced one timeout in the
+comparison run and had to discard trailing NEC repeat frames. For the future
+KonSol driver, replace the blocking pulseIn-based path with a non-blocking
+edge/state-machine implementation.
 
 ## Arduino IDE installation
 
