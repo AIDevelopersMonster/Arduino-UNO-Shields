@@ -1115,19 +1115,24 @@ Delta from KonSol 0.5:
 
 The SRAM increase exactly matches the planned 17-byte persistent label table.
 
-Status: **PHYSICAL CONTROL-FLOW PASS / FINAL EXIT GATE PENDING**.
+Status: **FULL PHYSICAL PASS**.
 
-Physical TFT evidence now confirms the complete named-branch display sequence:
+Physical TFT evidence confirms the complete named-branch display sequence:
 
 ```text
 RED -> YELLOW -> GREEN
 ```
 
-with STEP 1/2/3 reached by successive Touch events. The legacy KonSol 0.5
-`COUNTER.KAP` also runs unchanged under KonSol 0.6 and was photographed at
-`TAPS 4` with live Touch coordinates, confirming compatibility of the older
-MARK/JNZ control-flow path. The final certification gate is the explicit
-application EXIT path plus post-run MEM/SD stability check.
+with STEP 1/2/3 reached by successive Touch events. The final Touch then returned
+`APP EXIT 0`, and the resident shell reported `APP: IDLE`, `LAST EXIT: 0`
+and 720 B free RAM. The SD root remained readable.
+
+The legacy KonSol 0.5 `COUNTER.KAP` also ran unchanged under KonSol 0.6 and
+exited with `APP EXIT 0`. A second post-run `MEM` still reported 720 B, all
+five cooperative tasks remained active, and `DIR /` succeeded again.
+
+TEST-08 therefore closes as FULL PHYSICAL PASS with both the new multi-label
+control-flow path and backward compatibility verified on the physical UNO.
 
 ## Publication
 
