@@ -14,7 +14,7 @@ drivers.
 - SW1 / SW2
 - LED1 / LED2
 - bench-certified RGB control: D9=R, D10=G, D11=B
-- passive buzzer using AVR/Arduino tone support
+- bench-certified active/self-oscillating buzzer on D5
 - potentiometer
 - LDR
 - LM35 raw + Celsius conversion
@@ -136,3 +136,25 @@ HY_M302:
 
 The two implementations agree within the normal resolution/variation expected
 for this class of sensor.
+
+
+## Buzzer physical certification
+
+Status: **PASS as active/self-oscillating buzzer on the tested sample**.
+
+Manual bench behavior:
+
+- constant HIGH on D5 produces the strongest sustained sound;
+- LOW / OFF silences the buzzer;
+- frequency-driven `tone()` output is weaker and is retained only as an
+  optional compatibility/experiment path.
+
+The primary API is therefore:
+
+```cpp
+shield.buzzerOn();
+shield.buzzerOff();
+```
+
+`buzzerTone()` remains available, but it is not the preferred control mode for
+the tested HY-M302 sample.
