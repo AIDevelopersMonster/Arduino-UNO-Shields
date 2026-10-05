@@ -84,6 +84,8 @@ our physical HY-M302 sample before they are marked PASS.
 
 See: [shields/HY-M302-Multi-Purpose-Shield](shields/HY-M302-Multi-Purpose-Shield/)
 
+Overview video: https://youtube.com/shorts/t4WG9GA9Qws
+
 ## Laboratories
 
 ### LAB-01 — Arduino UNO Clone + W5100 + SD 4 GB
