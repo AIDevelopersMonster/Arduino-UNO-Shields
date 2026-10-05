@@ -86,6 +86,23 @@ See: [shields/HY-M302-Multi-Purpose-Shield](shields/HY-M302-Multi-Purpose-Shield
 
 Overview video: https://youtube.com/shorts/t4WG9GA9Qws
 
+## Libraries
+
+### HY_M302
+
+Initial low-overhead Arduino library for Shield 04:
+
+- buttons;
+- LED1/LED2;
+- raw PWM RGB channels D9-D11;
+- passive buzzer;
+- potentiometer, LDR, LM35 and A3;
+- compact dependency-free DHT11 reader;
+- compact NEC IR decoder;
+- D7/D8 GPIO helpers.
+
+See: [libraries/HY_M302](libraries/HY_M302/)
+
 ## Laboratories
 
 ### LAB-01 — Arduino UNO Clone + W5100 + SD 4 GB
