@@ -1,5 +1,44 @@
 #include "HY_M302.h"
 
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+#include <avr/interrupt.h>
+
+namespace {
+static const uint8_t IR_EDGE_BUFFER_SIZE = 96;
+
+volatile uint16_t g_irEdgeDurationUs[IR_EDGE_BUFFER_SIZE];
+volatile uint8_t g_irEdgeLevel[IR_EDGE_BUFFER_SIZE];
+volatile uint8_t g_irEdgeHead = 0;
+volatile uint8_t g_irEdgeTail = 0;
+volatile uint16_t g_irDroppedEdges = 0;
+volatile uint32_t g_irLastEdgeUs = 0;
+volatile bool g_irCaptureEnabled = false;
+
+ISR(PCINT2_vect) {
+  if (!g_irCaptureEnabled) return;
+
+  const uint32_t now = micros();
+  const uint8_t newLevel = (PIND & _BV(PD6)) ? HIGH : LOW;
+  const uint8_t previousLevel = (newLevel == HIGH) ? LOW : HIGH;
+  const uint32_t elapsed = now - g_irLastEdgeUs;
+  g_irLastEdgeUs = now;
+
+  uint8_t next = uint8_t(g_irEdgeHead + 1);
+  if (next >= IR_EDGE_BUFFER_SIZE) next = 0;
+
+  if (next == g_irEdgeTail) {
+    ++g_irDroppedEdges;
+    return;
+  }
+
+  g_irEdgeDurationUs[g_irEdgeHead] =
+      (elapsed > 65535UL) ? 65535U : uint16_t(elapsed);
+  g_irEdgeLevel[g_irEdgeHead] = previousLevel;
+  g_irEdgeHead = next;
+}
+}  // namespace
+#endif
+
 HY_M302::HY_M302() : _pins() {}
 HY_M302::HY_M302(const PinMap& pins) : _pins(pins) {}
 
@@ -208,6 +247,8 @@ bool HY_M302::inRange(unsigned long value, unsigned long minUs, unsigned long ma
 }
 
 bool HY_M302::readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs) {
+  if (_irAsyncEnabled) return false;
+
   frame.address = 0;
   frame.command = 0;
   frame.raw = 0;
@@ -282,6 +323,243 @@ bool HY_M302::readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs) {
   frame.command = b2;
   frame.ok = true;
   return true;
+}
+
+
+void HY_M302::resetIrAsyncDecoder() {
+  _irAsyncState = IR_WAIT_LEADER_LOW;
+  _irAsyncBitIndex = 0;
+  _irAsyncRaw = 0;
+}
+
+void HY_M302::queueIrAsyncFrame(const IrNecFrame& frame) {
+  uint8_t next = uint8_t(_irAsyncFrameHead + 1);
+  if (next >= IR_ASYNC_FRAME_QUEUE_SIZE) next = 0;
+
+  if (next == _irAsyncFrameTail) {
+    ++_irAsyncDroppedFrames;
+    return;
+  }
+
+  _irAsyncFrames[_irAsyncFrameHead] = frame;
+  _irAsyncFrameHead = next;
+}
+
+void HY_M302::processIrAsyncPulse(uint8_t level, uint16_t durationUs) {
+  // A valid NEC leader LOW is also a natural re-synchronization point.
+  if (level == LOW && inRange(durationUs, 8000UL, 10000UL)) {
+    _irAsyncState = IR_WAIT_LEADER_HIGH;
+    _irAsyncBitIndex = 0;
+    _irAsyncRaw = 0;
+    return;
+  }
+
+  switch (_irAsyncState) {
+    case IR_WAIT_LEADER_LOW:
+      return;
+
+    case IR_WAIT_LEADER_HIGH:
+      if (level != HIGH) {
+        resetIrAsyncDecoder();
+        return;
+      }
+
+      if (inRange(durationUs, 3800UL, 5200UL)) {
+        _irAsyncBitIndex = 0;
+        _irAsyncRaw = 0;
+        _irAsyncState = IR_WAIT_BIT_LOW;
+        return;
+      }
+
+      if (inRange(durationUs, 1800UL, 2800UL)) {
+        _irAsyncState = IR_WAIT_REPEAT_LOW;
+        return;
+      }
+
+      resetIrAsyncDecoder();
+      return;
+
+    case IR_WAIT_REPEAT_LOW:
+      if (level == LOW && inRange(durationUs, 300UL, 900UL)) {
+        IrNecFrame repeat = _irAsyncLastFull;
+        repeat.repeat = true;
+        repeat.ok = true;
+        queueIrAsyncFrame(repeat);
+      }
+      resetIrAsyncDecoder();
+      return;
+
+    case IR_WAIT_BIT_LOW:
+      if (level == LOW && inRange(durationUs, 300UL, 900UL)) {
+        _irAsyncState = IR_WAIT_BIT_HIGH;
+        return;
+      }
+      resetIrAsyncDecoder();
+      return;
+
+    case IR_WAIT_BIT_HIGH:
+      if (level != HIGH) {
+        resetIrAsyncDecoder();
+        return;
+      }
+
+      if (inRange(durationUs, 300UL, 900UL)) {
+        // logical zero
+      } else if (inRange(durationUs, 1200UL, 2100UL)) {
+        _irAsyncRaw |= (uint32_t(1) << _irAsyncBitIndex);
+      } else {
+        resetIrAsyncDecoder();
+        return;
+      }
+
+      ++_irAsyncBitIndex;
+
+      if (_irAsyncBitIndex < 32) {
+        _irAsyncState = IR_WAIT_BIT_LOW;
+        return;
+      }
+
+      {
+        const uint8_t b0 = uint8_t(_irAsyncRaw & 0xFFUL);
+        const uint8_t b1 = uint8_t((_irAsyncRaw >> 8) & 0xFFUL);
+        const uint8_t b2 = uint8_t((_irAsyncRaw >> 16) & 0xFFUL);
+        const uint8_t b3 = uint8_t((_irAsyncRaw >> 24) & 0xFFUL);
+
+        if (uint8_t(b2 ^ b3) == 0xFFU) {
+          IrNecFrame frame;
+          frame.raw = _irAsyncRaw;
+          frame.address =
+              (uint8_t(b0 ^ b1) == 0xFFU)
+                  ? uint16_t(b0)
+                  : uint16_t(b0) | (uint16_t(b1) << 8);
+          frame.command = b2;
+          frame.repeat = false;
+          frame.ok = true;
+
+          _irAsyncLastFull = frame;
+          queueIrAsyncFrame(frame);
+        }
+      }
+
+      resetIrAsyncDecoder();
+      return;
+  }
+}
+
+bool HY_M302::beginIrNecAsync() {
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  // The optimized interrupt path is intentionally tied to the standard
+  // HY-M302 wiring: D6 = PD6 = PCINT22 on Arduino UNO-class ATmega328P/168.
+  if (_pins.ir != 6) return false;
+
+  endIrNecAsync();
+
+  pinMode(_pins.ir, INPUT);
+  resetIrAsyncDecoder();
+  _irAsyncFrameHead = 0;
+  _irAsyncFrameTail = 0;
+  _irAsyncDroppedFrames = 0;
+  _irAsyncLastFull = {0, 0, 0, false, false};
+
+  const uint32_t now = micros();
+  const uint8_t savedSreg = SREG;
+  cli();
+
+  g_irEdgeHead = 0;
+  g_irEdgeTail = 0;
+  g_irDroppedEdges = 0;
+  g_irLastEdgeUs = now;
+  g_irCaptureEnabled = true;
+
+  PCIFR |= _BV(PCIF2);       // clear any pending Port D pin-change flag
+  PCMSK2 |= _BV(PCINT22);    // D6 / PD6
+  PCICR |= _BV(PCIE2);       // enable Port D pin-change group
+
+  SREG = savedSreg;
+
+  _irAsyncEnabled = true;
+  return true;
+#else
+  return false;
+#endif
+}
+
+void HY_M302::endIrNecAsync() {
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  const uint8_t savedSreg = SREG;
+  cli();
+
+  g_irCaptureEnabled = false;
+  PCMSK2 &= uint8_t(~_BV(PCINT22));
+  if (PCMSK2 == 0) {
+    PCICR &= uint8_t(~_BV(PCIE2));
+  }
+
+  SREG = savedSreg;
+#endif
+
+  _irAsyncEnabled = false;
+  resetIrAsyncDecoder();
+}
+
+void HY_M302::serviceIrNec() {
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  if (!_irAsyncEnabled) return;
+
+  while (g_irEdgeTail != g_irEdgeHead) {
+    const uint8_t index = g_irEdgeTail;
+    const uint16_t durationUs = g_irEdgeDurationUs[index];
+    const uint8_t level = g_irEdgeLevel[index];
+
+    uint8_t next = uint8_t(index + 1);
+    if (next >= IR_EDGE_BUFFER_SIZE) next = 0;
+    g_irEdgeTail = next;
+
+    processIrAsyncPulse(level, durationUs);
+  }
+#endif
+}
+
+bool HY_M302::irNecAvailable() const {
+  return _irAsyncFrameHead != _irAsyncFrameTail;
+}
+
+bool HY_M302::readIrNecAsync(IrNecFrame& frame) {
+  if (!irNecAvailable()) return false;
+
+  frame = _irAsyncFrames[_irAsyncFrameTail];
+
+  uint8_t next = uint8_t(_irAsyncFrameTail + 1);
+  if (next >= IR_ASYNC_FRAME_QUEUE_SIZE) next = 0;
+  _irAsyncFrameTail = next;
+
+  return true;
+}
+
+uint16_t HY_M302::irNecDroppedEdges() const {
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  const uint8_t savedSreg = SREG;
+  cli();
+  const uint16_t value = g_irDroppedEdges;
+  SREG = savedSreg;
+  return value;
+#else
+  return 0;
+#endif
+}
+
+uint16_t HY_M302::irNecDroppedFrames() const {
+  return _irAsyncDroppedFrames;
+}
+
+void HY_M302::resetIrNecStats() {
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  const uint8_t savedSreg = SREG;
+  cli();
+  g_irDroppedEdges = 0;
+  SREG = savedSreg;
+#endif
+  _irAsyncDroppedFrames = 0;
 }
 
 void HY_M302::gpio7Mode(uint8_t mode) {
