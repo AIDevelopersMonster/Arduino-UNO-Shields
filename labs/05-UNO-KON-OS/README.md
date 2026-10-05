@@ -1151,20 +1151,29 @@ the historical kernel/Shell/microSD milestone.
 
 ## Documentation
 
-KON-OS 0.1 documentation is split by role:
+The original KON-OS 0.1 role-based guides are retained as the historical kernel
+baseline:
 
-- [System description](docs/DESCRIPTION.md) — purpose, architecture, verified
-  resource usage, OS boundary, current limitations and roadmap.
-- [System programmer guide](docs/SYSTEM_PROGRAMMER_GUIDE.md) — kernel,
-  cooperative scheduler, task table, memory rules, command parser, SD service
-  rules and system-extension procedure.
-- [Functional programmer guide](docs/FUNCTIONAL_PROGRAMMER_GUIDE.md) —
-  adding commands and cooperative services without changing the kernel model;
-  includes rules for state machines and the future application ABI.
-- [User guide](docs/USER_GUIDE.md) — boot, terminal use, filesystem workflow,
-  practical examples and error handling.
-- [Command reference](docs/COMMAND_REFERENCE.md) — exact shell syntax, aliases,
-  responses and error codes.
+- [System description](docs/DESCRIPTION.md)
+- [System programmer guide](docs/SYSTEM_PROGRAMMER_GUIDE.md)
+- [Functional programmer guide](docs/FUNCTIONAL_PROGRAMMER_GUIDE.md)
+- [User guide](docs/USER_GUIDE.md)
+- [Command reference](docs/COMMAND_REFERENCE.md)
+
+Current external-application documentation is maintained separately so the
+historical 0.1 guides are not silently rewritten:
+
+- [KAP2 specification](docs/KAP2_SPEC.md) — KAP1/KAP2 bytecode, registers,
+  flags, legacy MARK control flow and the KonSol 0.6 indexed-label extension.
+- [KAP2 input/output model](docs/KAP2_IO_MODEL.md) — current Touch/TFT/Serial
+  services, microSD role, MAR2406 pin ownership, capabilities not yet exposed
+  to KAP applications, and the separate KON-Boot/Flash-Writer line.
+- [KASM guide](../../tools/kasm/README.md) — readable `.kasm` source to
+  ASCII-hex `.KAP` bytecode.
+
+This split is intentional: version-specific application interfaces evolve,
+while the early 0.1 documents remain reproducible records of the original
+kernel stage.
 
 ## Native SD boot mode: KON-Boot
 
