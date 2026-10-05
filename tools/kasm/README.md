@@ -58,8 +58,17 @@ KAP2 instructions:
     GET_TOUCH_Y Rn
     DRAW_REG x y scale color Rn
 
-Current VM limitation: there is one active MARK target. KASM enforces this so
-source code cannot imply branch capabilities that KonSol 0.5 does not have.
+KonSol 0.5 legacy bytecode still supports one active MARK target.
+
+KonSol 0.6 / TEST-08 adds up to eight indexed labels:
+
+    LABEL LOOP
+    JMP LOOP
+    JZ DONE
+    JNZ AGAIN
+
+Forward references are supported because KASM resolves label names before
+emitting bytecode. Existing MARK-based source remains valid.
 
 Colors:
 
