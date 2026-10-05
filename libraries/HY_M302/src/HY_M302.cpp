@@ -96,63 +96,78 @@ float HY_M302::readLm35C(float aref) const {
   return volts * 100.0f;
 }
 
-bool HY_M302::readDhtBit(uint8_t pin, uint8_t& bit) {
-  unsigned long start = micros();
-  while (digitalRead(pin) == LOW) {
-    if (micros() - start > 100UL) return false;
+uint32_t HY_M302::expectPulse(volatile uint8_t* inputReg,
+                                uint8_t bitMask,
+                                uint8_t level,
+                                uint32_t maxLoops) {
+  uint32_t count = 0;
+
+  if (level == HIGH) {
+    while ((*inputReg & bitMask) != 0) {
+      if (++count >= maxLoops) return 0;
+    }
+  } else {
+    while ((*inputReg & bitMask) == 0) {
+      if (++count >= maxLoops) return 0;
+    }
   }
 
-  const unsigned long highStart = micros();
-  while (digitalRead(pin) == HIGH) {
-    if (micros() - highStart > 120UL) return false;
-  }
-
-  const unsigned long highLen = micros() - highStart;
-  bit = highLen > 40UL ? 1 : 0;
-  return true;
+  return count;
 }
 
 HY_M302::DhtReading HY_M302::readDht11() {
   DhtReading out = {0.0f, 0.0f, false};
   uint8_t data[5] = {0, 0, 0, 0, 0};
 
+  // DHT11 host start signal.
   pinMode(_pins.dht, OUTPUT);
   digitalWrite(_pins.dht, LOW);
-  delay(18);
+  delay(20);
   digitalWrite(_pins.dht, HIGH);
-  delayMicroseconds(30);
+  delayMicroseconds(35);
   pinMode(_pins.dht, INPUT_PULLUP);
+
+  const uint8_t bitMask = digitalPinToBitMask(_pins.dht);
+  const uint8_t port = digitalPinToPort(_pins.dht);
+  if (port == NOT_A_PIN) return out;
+
+  volatile uint8_t* inputReg = portInputRegister(port);
+
+  // Loop-count timeout only. Do not use micros() while interrupts are disabled:
+  // on AVR, micros() depends on Timer0 overflow bookkeeping.
+  const uint32_t maxLoops = microsecondsToClockCycles(120UL) / 4UL + 20UL;
 
   noInterrupts();
 
-  unsigned long start = micros();
-  while (digitalRead(_pins.dht) == HIGH) {
-    if (micros() - start > 120UL) { interrupts(); return out; }
+  // Sensor response: ~80 us LOW, then ~80 us HIGH.
+  if (expectPulse(inputReg, bitMask, LOW, maxLoops) == 0 ||
+      expectPulse(inputReg, bitMask, HIGH, maxLoops) == 0) {
+    interrupts();
+    return out;
   }
 
-  start = micros();
-  while (digitalRead(_pins.dht) == LOW) {
-    if (micros() - start > 120UL) { interrupts(); return out; }
-  }
-
-  start = micros();
-  while (digitalRead(_pins.dht) == HIGH) {
-    if (micros() - start > 120UL) { interrupts(); return out; }
-  }
-
+  // Each data bit: ~50 us LOW followed by either ~26-28 us HIGH (0)
+  // or ~70 us HIGH (1). Compare HIGH against the preceding LOW duration;
+  // this avoids relying on an absolute microsecond threshold.
   for (uint8_t i = 0; i < 40; ++i) {
-    uint8_t bit = 0;
-    if (!readDhtBit(_pins.dht, bit)) {
+    const uint32_t lowCycles =
+        expectPulse(inputReg, bitMask, LOW, maxLoops);
+    const uint32_t highCycles =
+        expectPulse(inputReg, bitMask, HIGH, maxLoops);
+
+    if (lowCycles == 0 || highCycles == 0) {
       interrupts();
       return out;
     }
+
     data[i / 8] <<= 1;
-    data[i / 8] |= bit;
+    if (highCycles > lowCycles) data[i / 8] |= 1;
   }
 
   interrupts();
 
-  const uint8_t checksum = uint8_t(data[0] + data[1] + data[2] + data[3]);
+  const uint8_t checksum =
+      uint8_t(data[0] + data[1] + data[2] + data[3]);
   if (checksum != data[4]) return out;
 
   out.humidity = data[0] + data[1] * 0.1f;
