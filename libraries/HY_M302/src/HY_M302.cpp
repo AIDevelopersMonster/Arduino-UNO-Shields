@@ -182,6 +182,27 @@ HY_M302::DhtReading HY_M302::readDht11() {
   return out;
 }
 
+unsigned long HY_M302::measureCurrentPulseUs(volatile uint8_t* inputReg,
+                                               uint8_t bitMask,
+                                               uint8_t level,
+                                               unsigned long timeoutUs) {
+  const unsigned long started = micros();
+
+  if (level == HIGH) {
+    if ((*inputReg & bitMask) == 0) return 0;
+    while ((*inputReg & bitMask) != 0) {
+      if ((micros() - started) >= timeoutUs) return 0;
+    }
+  } else {
+    if ((*inputReg & bitMask) != 0) return 0;
+    while ((*inputReg & bitMask) == 0) {
+      if ((micros() - started) >= timeoutUs) return 0;
+    }
+  }
+
+  return micros() - started;
+}
+
 bool HY_M302::inRange(unsigned long value, unsigned long minUs, unsigned long maxUs) {
   return value >= minUs && value <= maxUs;
 }
@@ -193,16 +214,25 @@ bool HY_M302::readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs) {
   frame.repeat = false;
   frame.ok = false;
 
-  // NEC begins with an approximately 9 ms LOW leader. The pulseIn timeout
-  // must therefore be longer than that complete pulse, not merely the
-  // pre-frame waiting interval.
+  // pulseIn() is used only to wait for and measure the initial LOW leader.
+  // When it returns, the receiver has just transitioned to HIGH.
   const unsigned long leadLow = pulseIn(_pins.ir, LOW, startTimeoutUs);
-  if (leadLow == 0) return false;
   if (!inRange(leadLow, 8000UL, 10000UL)) return false;
 
-  const unsigned long leadHigh = pulseIn(_pins.ir, HIGH, 6000UL);
-  if (inRange(leadHigh, 2000UL, 2800UL)) {
-    const unsigned long repeatLow = pulseIn(_pins.ir, LOW, 1000UL);
+  const uint8_t bitMask = digitalPinToBitMask(_pins.ir);
+  const uint8_t port = digitalPinToPort(_pins.ir);
+  if (port == NOT_A_PIN) return false;
+  volatile uint8_t* inputReg = portInputRegister(port);
+
+  // IMPORTANT: do not call pulseIn(HIGH) here. The leader HIGH is already in
+  // progress, and pulseIn() would first wait for that pulse to end and skip it.
+  const unsigned long leadHigh =
+      measureCurrentPulseUs(inputReg, bitMask, HIGH, 6000UL);
+
+  if (inRange(leadHigh, 1800UL, 2800UL)) {
+    // NEC repeat: 9 ms LOW + 2.25 ms HIGH + ~560 us LOW.
+    const unsigned long repeatLow =
+        measureCurrentPulseUs(inputReg, bitMask, LOW, 1200UL);
     if (inRange(repeatLow, 300UL, 900UL)) {
       frame.repeat = true;
       frame.ok = true;
@@ -211,17 +241,23 @@ bool HY_M302::readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs) {
     return false;
   }
 
-  if (!inRange(leadHigh, 4000UL, 5000UL)) return false;
+  if (!inRange(leadHigh, 3800UL, 5200UL)) return false;
 
   uint32_t raw = 0;
-  for (uint8_t i = 0; i < 32; ++i) {
-    const unsigned long bitLow = pulseIn(_pins.ir, LOW, 1000UL);
-    if (!inRange(bitLow, 350UL, 800UL)) return false;
 
-    const unsigned long bitHigh = pulseIn(_pins.ir, HIGH, 2200UL);
-    if (inRange(bitHigh, 350UL, 900UL)) {
+  for (uint8_t i = 0; i < 32; ++i) {
+    // At this point each next pulse is already active. Measure the current
+    // level directly so no transition is skipped.
+    const unsigned long bitLow =
+        measureCurrentPulseUs(inputReg, bitMask, LOW, 1200UL);
+    if (!inRange(bitLow, 300UL, 900UL)) return false;
+
+    const unsigned long bitHigh =
+        measureCurrentPulseUs(inputReg, bitMask, HIGH, 2300UL);
+
+    if (inRange(bitHigh, 300UL, 900UL)) {
       // logical zero
-    } else if (inRange(bitHigh, 1300UL, 2000UL)) {
+    } else if (inRange(bitHigh, 1200UL, 2100UL)) {
       raw |= (uint32_t(1) << i);
     } else {
       return false;
