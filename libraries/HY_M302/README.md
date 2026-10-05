@@ -81,11 +81,18 @@ B847FB04  04   47
 AC53FB04  04   53
 ```
 
-Semantic decode status is therefore PASS for these frames. Robustness is not yet
-certified: the manual blocking implementation still produced one timeout in the
-comparison run and had to discard trailing NEC repeat frames. For the future
-KonSol driver, replace the blocking pulseIn-based path with a non-blocking
-edge/state-machine implementation.
+Semantic decode status is therefore PASS for these frames. The earlier blocking
+implementation still produced one timeout in the comparison run and had to
+discard trailing NEC repeat frames.
+
+A new non-blocking AVR/UNO receiver is now implemented as the KonSol-oriented
+path. On the standard HY-M302 wiring, D6/PD6/PCINT22 captures edge timing in a
+minimal ISR. The main code calls `serviceIrNec()`, which runs the NEC state
+machine outside the ISR and queues decoded frames. The driver exposes dropped
+edge/frame counters so physical robustness can be measured explicitly.
+
+This asynchronous path is **implementation complete / physical certification
+pending**. The old blocking `readIrNec()` remains available for comparison.
 
 ## Arduino IDE installation
 
@@ -189,3 +196,32 @@ shield.buzzerOff();
 
 `buzzerTone()` remains available, but it is not the preferred control mode for
 the tested HY-M302 sample.
+
+
+## Non-blocking NEC API
+
+For Arduino UNO + standard HY-M302 D6 wiring:
+
+```cpp
+shield.beginIrNecAsync();
+
+void loop() {
+  shield.serviceIrNec();
+
+  HY_M302::IrNecFrame frame;
+  while (shield.readIrNecAsync(frame)) {
+    // handle full or repeat NEC frame
+  }
+}
+```
+
+Diagnostic counters:
+
+```cpp
+shield.irNecDroppedEdges();
+shield.irNecDroppedFrames();
+shield.resetIrNecStats();
+```
+
+The interrupt handler records only edge duration/level into a fixed ring buffer.
+Protocol decoding and frame validation are performed outside the ISR.
