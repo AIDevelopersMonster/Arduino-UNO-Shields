@@ -46,7 +46,7 @@ static void printHelp() {
   Serial.println(F("  LIVE OFF  stop live printing"));
   Serial.println(F("  ONE       wait for one full NEC frame without blocking IR capture"));
   Serial.println(F("  STATS     print dropped edge/frame counters"));
-  Serial.println(F("  ZERO      reset counters"));
+  Serial.println(F("  ZERO      flush queued frames and reset counters"));
   Serial.println(F("  L         print current D6 logic level"));
   Serial.println(F("  ?         help"));
   Serial.println(F(""));
@@ -96,8 +96,15 @@ static void executeCommand(const char* s) {
   } else if (strcmp(s, "STATS") == 0 || strcmp(s, "S") == 0) {
     printStats();
   } else if (strcmp(s, "ZERO") == 0 || strcmp(s, "Z") == 0) {
+    // First service any already captured edges, then discard every queued frame
+    // so a new stress run starts from a clean logical state.
+    shield.serviceIrNec();
+    HY_M302::IrNecFrame stale;
+    while (shield.readIrNecAsync(stale)) {
+      // drain
+    }
     shield.resetIrNecStats();
-    Serial.println(F("IR STATS RESET"));
+    Serial.println(F("IR QUEUE FLUSHED / STATS RESET"));
   } else if (strcmp(s, "L") == 0) {
     Serial.print(F("D6 LEVEL="));
     Serial.println(digitalRead(shield.irPin()));
