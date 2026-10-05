@@ -106,22 +106,4 @@ private:
                                              uint8_t level,
                                              unsigned long timeoutUs);
   static bool inRange(unsigned long value, unsigned long minUs, unsigned long maxUs);
-
-
-  void processIrAsyncPulse(uint8_t level, uint16_t durationUs);
-  void queueIrAsyncFrame(const IrNecFrame& frame);
-  void resetIrAsyncDecoder();
-
-  bool _irAsyncEnabled = false;
-  uint8_t _irAsyncState = IR_WAIT_LEADER_LOW;
-  uint8_t _irAsyncBitIndex = 0;
-  uint32_t _irAsyncRaw = 0;
-
-  static const uint8_t IR_ASYNC_FRAME_QUEUE_SIZE = 4;
-  IrNecFrame _irAsyncFrames[IR_ASYNC_FRAME_QUEUE_SIZE];
-  uint8_t _irAsyncFrameHead = 0;
-  uint8_t _irAsyncFrameTail = 0;
-  uint16_t _irAsyncDroppedFrames = 0;
-
-  IrNecFrame _irAsyncLastFull = {0, 0, 0, false, false};
 };
