@@ -470,7 +470,7 @@ class MapperGUI:
         )
         ttk.Label(
             box,
-            text="Press the requested button on the remote, then click Capture current key.",
+            text="Click Capture current key first, then press the requested remote button.",
         ).pack(anchor="w", pady=(6, 0))
 
         self.tree = ttk.Treeview(
