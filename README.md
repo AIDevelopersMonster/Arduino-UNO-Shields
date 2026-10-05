@@ -173,6 +173,27 @@ and unchanged legacy COUNTER.KAP execution were all verified on Arduino UNO.
 
 See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
+## Projects
+
+### Project 01 — HY-M302 KonSol Operating Environment
+
+Driver-based KonSol line for Arduino UNO + HY-M302:
+
+- resident cooperative kernel;
+- HY-M302 measurement and actuator services;
+- USB Serial and Bluetooth transports using one protocol;
+- IR event/input driver;
+- optional SD storage driver;
+- optional display driver;
+- compact external measurement/control programs;
+- future PC CLI/GUI and Android client.
+
+External modules are treated as drivers with explicit pin/resource ownership.
+The kernel must detect incompatible configurations instead of assuming every
+Arduino library can own the same pins simultaneously.
+
+See: [projects/HY-M302-KonSol-OS](projects/HY-M302-KonSol-OS/)
+
 ## Project structure
 
 - `boards/` — Arduino UNO boards and hardware notes
@@ -181,6 +202,7 @@ See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 - `docs/` — common project documentation
 - `examples/` — reusable Arduino sketches and demonstrations
 - `tools/` — utilities and test tools
+- `projects/` — higher-level systems built from certified boards, shields and drivers
 
 ## Status
 
