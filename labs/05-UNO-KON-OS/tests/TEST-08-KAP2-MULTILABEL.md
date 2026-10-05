@@ -400,3 +400,15 @@ TEST-08 now physically certifies:
 - continued SD filesystem access;
 - backward compatibility with the legacy KonSol 0.5 MARK/JNZ application;
 - all five cooperative tasks remaining operational after execution.
+
+
+## Publication record
+
+TEST-08 / KonSol 0.6 is published as a standalone technical article:
+
+- DOI: https://doi.org/10.5281/zenodo.23161379
+
+This DOI is intentionally a separate publication record, not a version
+replacement for the KonSol 0.5 article/record. The standalone article covers
+the indexed multi-label KAP2 extension and its physical backward-compatibility
+certification.
