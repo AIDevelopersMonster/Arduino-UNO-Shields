@@ -87,5 +87,9 @@ private:
 
   static uint32_t expectPulse(volatile uint8_t* inputReg, uint8_t bitMask,
                               uint8_t level, uint32_t maxLoops);
+  static unsigned long measureCurrentPulseUs(volatile uint8_t* inputReg,
+                                             uint8_t bitMask,
+                                             uint8_t level,
+                                             unsigned long timeoutUs);
   static bool inRange(unsigned long value, unsigned long minUs, unsigned long maxUs);
 };
