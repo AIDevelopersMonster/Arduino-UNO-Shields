@@ -189,10 +189,17 @@ Observed unique commands in one 12-button pass:
 13 10 11 0F 0C 0D 0B 08 09 58 47 53
 ```
 
-Repeat frames were also received normally. The initial project NEC decoder
-timed out because its first-pulse timeout was 5000 us, shorter than the
-approximately 9000 us NEC leader LOW pulse. That timeout has been corrected;
-the in-house decoder is pending a physical re-test before certification.
+Repeat frames were also received normally. After correcting the project
+decoder's leader timing and already-active-pulse handling, all 12 unique Orange
+Pi remote frames matched Arduino-IRremote exactly in RAW value, address and
+command.
+
+The project decoder is therefore functionally correct for the tested NEC frames,
+but robustness is not yet certified: one timeout occurred in the manual
+comparison run and trailing repeat frames had to be filtered. The D6 receiver
+itself remains PHYSICAL PASS; the blocking decoder is marked FUNCTIONAL /
+ROBUSTNESS PENDING until it is replaced by a non-blocking edge/state-machine
+driver.
 
 ## Output notes
 
