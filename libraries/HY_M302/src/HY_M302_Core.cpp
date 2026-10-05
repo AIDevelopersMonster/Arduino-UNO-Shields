@@ -28,11 +28,6 @@ void HY_M302::begin() {
   digitalWrite(_pins.led2, LOW);
 }
 
-void HY_M302::service() {
-  // Each async service is responsible for returning immediately when disabled.
-  serviceIrNec();
-}
-
 bool HY_M302::button1Pressed() const {
   return digitalRead(_pins.sw1) == LOW;
 }
