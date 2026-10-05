@@ -45,9 +45,14 @@ public:
   bool button1Pressed() const;
   bool button2Pressed() const;
 
-  void led1(bool on);
-  void led2(bool on);
+  void led1(bool on);   // D13, blue discrete LED on tested sample
+  void led2(bool on);   // D12, red discrete LED on tested sample
+  void ledBlue(bool on);
+  void ledRed(bool on);
 
+  // Bench-certified on our HY-M302 sample:
+  // D9=RED, D10=GREEN, D11=BLUE, direct PWM polarity (0=off, 255=full).
+  void setRGB(uint8_t red, uint8_t green, uint8_t blue);
   void setRgbRaw(uint8_t ch1, uint8_t ch2, uint8_t ch3);
   void rgbOff();
 
