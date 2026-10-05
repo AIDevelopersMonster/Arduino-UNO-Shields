@@ -193,11 +193,14 @@ bool HY_M302::readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs) {
   frame.repeat = false;
   frame.ok = false;
 
+  // NEC begins with an approximately 9 ms LOW leader. The pulseIn timeout
+  // must therefore be longer than that complete pulse, not merely the
+  // pre-frame waiting interval.
   const unsigned long leadLow = pulseIn(_pins.ir, LOW, startTimeoutUs);
   if (leadLow == 0) return false;
   if (!inRange(leadLow, 8000UL, 10000UL)) return false;
 
-  const unsigned long leadHigh = pulseIn(_pins.ir, HIGH, 5000UL);
+  const unsigned long leadHigh = pulseIn(_pins.ir, HIGH, 6000UL);
   if (inRange(leadHigh, 2000UL, 2800UL)) {
     const unsigned long repeatLow = pulseIn(_pins.ir, LOW, 1000UL);
     if (inRange(repeatLow, 300UL, 900UL)) {
