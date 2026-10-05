@@ -1098,7 +1098,24 @@ Physical procedure:
 
 [tests/TEST-08-KAP2-MULTILABEL.md](tests/TEST-08-KAP2-MULTILABEL.md)
 
-Status: **READY FOR BUILD AND PHYSICAL TEST**.
+Verified build:
+
+```text
+Flash: 27568 / 32256 bytes (85%)
+SRAM globals: 1256 / 2048 bytes (61%)
+Linker-reported SRAM remaining: 792 bytes
+```
+
+Delta from KonSol 0.5:
+
+```text
++770 B Flash
++17 B global SRAM
+```
+
+The SRAM increase exactly matches the planned 17-byte persistent label table.
+
+Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
 
 ## Publication
 
