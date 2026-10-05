@@ -9,6 +9,10 @@ static uint8_t cmdLen = 0;
 static bool runMode = false;
 static bool liveOutput = false;
 
+static bool statsTriggerActive = false;
+static bool statsTriggerFired = false;
+static unsigned long statsTriggerStartedMs = 0;
+
 static unsigned long lastSensorsMs = 0;
 static unsigned long lastDhtMs = 0;
 
@@ -44,10 +48,10 @@ static void printStats() {
 static void printHelp() {
   Serial.println(F(""));
   Serial.println(F("HY-M302 TEST-05 INTEGRATED BOARD"));
-  Serial.println(F("Quiet integrated test by default."));
+  Serial.println(F("Quiet integrated test by default; hardware STATS trigger = SW1+SW2."));
   Serial.println(F(""));
   Serial.println(F("  RUN       start integrated test"));
-  Serial.println(F("  ENTER     print STATS"));
+  Serial.println(F("  SW1+SW2   hold both ~150 ms -> print STATS, RUN continues"));
   Serial.println(F("  X / STOP  stop RUN and print STATS"));
   Serial.println(F("  S / STATS print STATS"));
   Serial.println(F("  LIVE ON   enable continuous telemetry"));
@@ -151,6 +155,30 @@ static void resetStats() {
   Serial.println(F("COUNTERS RESET / IR QUEUE FLUSHED"));
 }
 
+static void serviceStatsTrigger() {
+  const bool bothPressed =
+      shield.button1Pressed() && shield.button2Pressed();
+
+  if (!bothPressed) {
+    statsTriggerActive = false;
+    statsTriggerFired = false;
+    return;
+  }
+
+  if (!statsTriggerActive) {
+    statsTriggerActive = true;
+    statsTriggerStartedMs = millis();
+    return;
+  }
+
+  if (!statsTriggerFired &&
+      millis() - statsTriggerStartedMs >= 150UL) {
+    statsTriggerFired = true;
+    Serial.println(F("TRIGGER SW1+SW2"));
+    printStats();
+  }
+}
+
 static void executeCommand(const char* s) {
   if (strcmp(s, "RUN") == 0) {
     runMode = true;
@@ -212,6 +240,7 @@ void setup() {
 void loop() {
   shield.service();
   drainIrFrames();
+  serviceStatsTrigger();
 
   if (runMode) {
     const bool sw1 = shield.button1Pressed();
@@ -252,10 +281,9 @@ void loop() {
         cmd[cmdLen] = '\0';
         executeCommand(cmd);
         cmdLen = 0;
-      } else {
-        // Empty ENTER is the quickest status request during a bench run.
-        printStats();
       }
+      // Empty CR/LF is intentionally ignored. This also makes CR+LF from
+      // arduino-cli monitor a single logical line terminator.
       continue;
     }
 
