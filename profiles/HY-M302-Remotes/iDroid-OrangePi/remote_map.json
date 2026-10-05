@@ -1,0 +1,27 @@
+{
+  "format": "HY_M302_REMOTE_MAP",
+  "version": 1,
+  "profile": "iDroid-OrangePi",
+  "protocol": "NEC",
+  "keys": [
+    {"name":"KEY_0","label":"0","raw":3091725060,"address":4,"command":71},
+    {"name":"KEY_1","label":"1","raw":3960732420,"address":4,"command":19},
+    {"name":"KEY_2","label":"2","raw":4010867460,"address":4,"command":16},
+    {"name":"KEY_3","label":"3","raw":3994155780,"address":4,"command":17},
+    {"name":"KEY_4","label":"4","raw":4027579140,"address":4,"command":15},
+    {"name":"KEY_5","label":"5","raw":4077714180,"address":4,"command":12},
+    {"name":"KEY_6","label":"6","raw":4061002500,"address":4,"command":13},
+    {"name":"KEY_7","label":"7","raw":4094425860,"address":4,"command":11},
+    {"name":"KEY_8","label":"8","raw":4144560900,"address":4,"command":8},
+    {"name":"KEY_9","label":"9","raw":4127849220,"address":4,"command":9},
+    {"name":"KEY_OK","label":"OK","raw":2740779780,"address":4,"command":92},
+    {"name":"KEY_HOME","label":"HOME","raw":3760192260,"address":4,"command":31},
+    {"name":"KEY_RETURN","label":"RETURN","raw":4111137540,"address":4,"command":10},
+    {"name":"KEY_MENU","label":"MENU","raw":2724068100,"address":4,"command":93},
+    {"name":"KEY_UP","label":"UP","raw":3141860100,"address":4,"command":68},
+    {"name":"KEY_DOWN","label":"DOWN","raw":3793615620,"address":4,"command":29},
+    {"name":"KEY_LEFT","label":"LEFT","raw":3810327300,"address":4,"command":28},
+    {"name":"KEY_RIGHT","label":"RIGHT","raw":3075013380,"address":4,"command":72},
+    {"name":"KEY_POWER","label":"POWER","raw":3843750660,"address":4,"command":26}
+  ]
+}
