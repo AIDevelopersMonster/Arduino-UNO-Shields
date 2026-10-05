@@ -56,7 +56,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | SW2 | D3 | **bench verified** |
 | DHT11 DATA | D4 | **bench verified** |
 | Active/self-oscillating buzzer | D5 | **bench verified** |
-| IR receiver | D6 | **bench verified with Arduino-IRremote** |
+| IR receiver / async NEC | D6 | **bench verified, 12/12 exact match** |
 | Free digital breakout | D7 | family reference |
 | Free digital breakout | D8 | family reference |
 | RGB RED | D9 | **bench verified** |
@@ -194,12 +194,18 @@ decoder's leader timing and already-active-pulse handling, all 12 unique Orange
 Pi remote frames matched Arduino-IRremote exactly in RAW value, address and
 command.
 
-The project decoder is therefore functionally correct for the tested NEC frames,
-but robustness is not yet certified: one timeout occurred in the manual
-comparison run and trailing repeat frames had to be filtered. The D6 receiver
-itself remains PHYSICAL PASS; the blocking decoder is marked FUNCTIONAL /
-ROBUSTNESS PENDING until it is replaced by a non-blocking edge/state-machine
-driver.
+The blocking decoder was then replaced by a non-blocking AVR implementation:
+D6/PD6/PCINT22 captures edge timing in a short ISR, while a NEC state machine
+decodes frames outside the ISR.
+
+The new asynchronous decoder was physically tested across all 12 unique Orange
+Pi remote commands. Every decoded full frame matched Arduino-IRremote exactly in
+RAW value, address and command, with no wrong-frame result in the 12-button run.
+
+Status: **ASYNC NEC PHYSICAL PASS — 12/12 functional correctness**.
+
+A separate live/stress run with dropped-edge and dropped-frame counters is still
+reserved as the final robustness certification step.
 
 ## Output notes
 
