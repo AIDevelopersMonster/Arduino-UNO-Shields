@@ -20,6 +20,10 @@ Current repository status:
 - laboratory firmware: **not yet created**;
 - physical PASS status: **not yet assigned**.
 
+## Video
+
+Overview / project-opening video: https://youtube.com/shorts/t4WG9GA9Qws
+
 ## On-board hardware
 
 The HY-M302 / KS0183 family provides:
