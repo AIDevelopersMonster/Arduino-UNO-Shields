@@ -231,3 +231,14 @@ A claim becomes **bench-verified** only after it is reproduced on our own sample
   https://forum.arduino.cc/t/conectar-shield-hy-m302-arduino-uno-e-modulo-cartao-micro-sd/1224288
 - Fritzing community cross-reference HY-M302 / KS0183:
   https://forum.fritzing.org/t/looking-for-a-part-for-the-hy-m302-ks0183-multi-function-shield/22240
+
+
+## Arduino library
+
+Initial low-overhead library:
+
+[HY_M302](../../libraries/HY_M302/)
+
+The first version intentionally uses compact in-house routines for the DHT11 and
+basic NEC IR decoding so Flash/SRAM cost stays visible on ATmega328P. Hardware
+behavior remains subject to physical certification on our shield.
