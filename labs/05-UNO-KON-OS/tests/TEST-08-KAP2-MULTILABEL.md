@@ -138,7 +138,47 @@ arduino-cli compile --fqbn arduino:avr:uno `
   .\labs\05-UNO-KON-OS\sketches\06_KonSol_KAP2_MultiLabel
 ```
 
-Record Flash and SRAM usage before upload.
+Observed build result:
+
+```text
+Flash: 27568 / 32256 bytes (85%)
+SRAM globals: 1256 / 2048 bytes (61%)
+Linker-reported SRAM remaining: 792 bytes
+```
+
+Compared with KonSol 0.5:
+
+```text
+KonSol 0.5
+Flash: 26798 B
+Globals: 1239 B
+
+KonSol 0.6
+Flash: 27568 B
+Globals: 1256 B
+
+Delta:
++770 B Flash
++17 B global SRAM
+```
+
+Compile-time Flash headroom:
+
+```text
+32256 - 27568 = 4688 B
+```
+
+The +17 B global-SRAM delta exactly matches the planned persistent multi-label
+table:
+
+```text
+8 x uint16_t label positions = 16 B
+1 x label mask               =  1 B
+----------------------------------
+total                        = 17 B
+```
+
+Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
 
 ## Physical execution
 
@@ -220,4 +260,4 @@ TEST-08 becomes FULL PHYSICAL PASS only when:
 11. no progressive free-RAM loss is observed.
 12. legacy COUNTER.KAP still runs unchanged.
 
-Status: **READY FOR BUILD AND PHYSICAL TEST**.
+Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
