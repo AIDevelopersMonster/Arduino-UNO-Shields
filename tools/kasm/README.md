@@ -72,3 +72,24 @@ TFT X coordinates must be even because the KAP encoding stores X divided by 2.
 KASM is deliberately a host-side tool. It does not consume UNO Flash or SRAM.
 The resident KonSol VM stays small while applications can be written in a
 readable source form and compiled on the PC.
+
+
+## Verified result
+
+The project reference source:
+
+    labs\05-UNO-KON-OS\apps\KAP2\COUNTER.kasm
+
+was assembled on Windows / PowerShell with the normal Python environment.
+
+Observed:
+
+    KASM PASS: KAP2 -> COUNTER.generated.KAP
+    Instructions/records: 24
+
+The generated output was compared with the physically certified
+COUNTER.KAP reference and the comparison returned:
+
+    True
+
+This closes TEST-07: KASM reproduces the certified KAP2 bytecode exactly.
