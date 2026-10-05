@@ -178,7 +178,7 @@ table:
 total                        = 17 B
 ```
 
-Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+Status: **PHYSICAL CONTROL-FLOW PASS / FINAL EXIT GATE PENDING**.
 
 ## Physical execution
 
@@ -260,4 +260,45 @@ TEST-08 becomes FULL PHYSICAL PASS only when:
 11. no progressive free-RAM loss is observed.
 12. legacy COUNTER.KAP still runs unchanged.
 
-Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+Status: **PHYSICAL CONTROL-FLOW PASS / FINAL EXIT GATE PENDING**.
+
+
+## Physical visual evidence — 2026-10-05
+
+Physical photographs on the Arduino UNO + MAR2406 confirm that the KonSol 0.6
+KAP2 multi-label application now launches and reaches all three named branch
+destinations:
+
+```text
+touch 1 -> RED    / STEP 1 / TOUCH NEXT
+touch 2 -> YELLOW / STEP 2 / TOUCH NEXT
+touch 3 -> GREEN  / STEP 3 / TOUCH TO EXIT
+```
+
+This directly verifies the physical execution of the RED_STATE, YELLOW_STATE
+and GREEN_STATE destinations and the return to LOOP after the RED and YELLOW
+states.
+
+A second physical photograph shows the legacy KonSol 0.5 COUNTER.KAP running
+unchanged under KonSol 0.6, with:
+
+```text
+TOUCH COUNTER
+TAPS 4
+X 168
+Y 163
+```
+
+This is positive backward-compatibility evidence for the legacy MARK/JNZ loop,
+register state, Touch coordinate services and DRAW_REG path under the 0.6 VM.
+
+### Current physical status
+
+**PHYSICAL CONTROL-FLOW PASS / FINAL EXIT GATE PENDING.**
+
+The remaining strict FULL PHYSICAL PASS evidence is:
+
+1. final Touch from the GREEN screen followed by `APP EXIT 0`;
+2. legacy COUNTER.KAP reaching tap 5, DONE, and its own final EXIT;
+3. post-run `MEM` and `DIR /` (or equivalent shell/SD check) showing that the
+   resident environment remains usable without progressive RAM loss.
