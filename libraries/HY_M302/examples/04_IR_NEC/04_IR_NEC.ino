@@ -39,9 +39,9 @@ static void waitOneFrame() {
   while (millis() - started < 10000UL) {
     HY_M302::IrNecFrame frame;
 
-    // Short per-attempt timeout keeps the wait responsive while allowing
-    // a complete NEC frame to be captured when it starts.
-    if (shield.readIrNec(frame, 5000UL)) {
+    // NEC starts with an approximately 9 ms LOW leader, so the per-attempt
+    // timeout must exceed the full leader pulse.
+    if (shield.readIrNec(frame, 15000UL)) {
       printFrame(frame);
       return;
     }
