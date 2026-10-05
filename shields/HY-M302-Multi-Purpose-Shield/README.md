@@ -56,7 +56,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | SW2 | D3 | **bench verified** |
 | DHT11 DATA | D4 | **bench verified** |
 | Active/self-oscillating buzzer | D5 | **bench verified** |
-| IR receiver | D6 | family reference |
+| IR receiver | D6 | **bench verified with Arduino-IRremote** |
 | Free digital breakout | D7 | family reference |
 | Free digital breakout | D8 | family reference |
 | RGB RED | D9 | **bench verified** |
@@ -177,6 +177,22 @@ response, not those exact thresholds.
 
 Documented on A0 and suitable for deterministic analog-input testing across most
 of the 0-1023 ADC range.
+
+### IR receiver
+
+Bench-verified on D6 with the Arduino-IRremote reference library and an Orange
+Pi remote control. The receiver decoded standard NEC frames with address 0x04.
+
+Observed unique commands in one 12-button pass:
+
+```text
+13 10 11 0F 0C 0D 0B 08 09 58 47 53
+```
+
+Repeat frames were also received normally. The initial project NEC decoder
+timed out because its first-pulse timeout was 5000 us, shorter than the
+approximately 9000 us NEC leader LOW pulse. That timeout has been corrected;
+the in-house decoder is pending a physical re-test before certification.
 
 ## Output notes
 
