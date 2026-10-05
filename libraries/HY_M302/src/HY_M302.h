@@ -107,13 +107,6 @@ private:
                                              unsigned long timeoutUs);
   static bool inRange(unsigned long value, unsigned long minUs, unsigned long maxUs);
 
-  enum IrAsyncState : uint8_t {
-    IR_WAIT_LEADER_LOW = 0,
-    IR_WAIT_LEADER_HIGH,
-    IR_WAIT_REPEAT_LOW,
-    IR_WAIT_BIT_LOW,
-    IR_WAIT_BIT_HIGH
-  };
 
   void processIrAsyncPulse(uint8_t level, uint16_t durationUs);
   void queueIrAsyncFrame(const IrNecFrame& frame);
