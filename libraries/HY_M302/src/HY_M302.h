@@ -10,6 +10,14 @@ public:
     bool ok;
   };
 
+  struct IrNecFrame {
+    uint16_t address;
+    uint8_t command;
+    uint32_t raw;
+    bool repeat;
+    bool ok;
+  };
+
   struct PinMap {
     uint8_t sw1 = 2;
     uint8_t sw2 = 3;
@@ -50,10 +58,18 @@ public:
   int readLightRaw() const;
   int readLm35Raw() const;
   int readAnalog3Raw() const;
-
   float readLm35C(float aref = 5.0f) const;
 
   DhtReading readDht11();
+
+  bool readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs = 3000UL);
+
+  void gpio7Mode(uint8_t mode);
+  void gpio8Mode(uint8_t mode);
+  int gpio7Read() const;
+  int gpio8Read() const;
+  void gpio7Write(uint8_t value);
+  void gpio8Write(uint8_t value);
 
   uint8_t irPin() const { return _pins.ir; }
   const PinMap& pins() const { return _pins; }
@@ -62,4 +78,5 @@ private:
   PinMap _pins;
 
   static bool readDhtBit(uint8_t pin, uint8_t& bit);
+  static bool inRange(unsigned long value, unsigned long minUs, unsigned long maxUs);
 };
