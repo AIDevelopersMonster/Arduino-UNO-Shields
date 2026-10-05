@@ -83,3 +83,16 @@ LDR direction is bench-certified on the physical HY-M302 sample:
 
 These are not universal thresholds; they document the verified direction of the
 divider on our sample.
+
+
+## LM35 status on tested shield
+
+The physical LM35 fitted to our HY-M302 sample failed a cooling-response test.
+
+Observed A2 raw readings remained about 93 -> 91 -> 90 -> 89 -> 89 despite
+deliberate cooling, so this specific sensor is treated as defective.
+
+The library retains `readLm35Raw()` and `readLm35C()` because the A2 mapping is
+still valid and other HY-M302 samples or a replacement LM35 may work correctly.
+Do not use the current tested board's LM35 readings as a certified temperature
+measurement.
