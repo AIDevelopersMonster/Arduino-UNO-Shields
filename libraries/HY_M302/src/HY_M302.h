@@ -70,7 +70,7 @@ public:
 
   DhtReading readDht11();
 
-  bool readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs = 3000UL);
+  bool readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs = 15000UL);
 
   void gpio7Mode(uint8_t mode);
   void gpio8Mode(uint8_t mode);
