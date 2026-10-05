@@ -13,7 +13,7 @@ drivers.
 
 - SW1 / SW2
 - LED1 / LED2
-- raw three-channel PWM control for the RGB LED
+- bench-certified RGB control: D9=R, D10=G, D11=B
 - passive buzzer using AVR/Arduino tone support
 - potentiometer
 - LDR
@@ -24,8 +24,18 @@ drivers.
 
 ## Important status
 
-The physical HY-M302 silkscreen confirms the board-level pin allocation. Exact
-RGB color ordering and logic polarity are still being bench-certified.
+The physical HY-M302 silkscreen confirms the board-level pin allocation.
+TEST-01 on the physical shield has now bench-certified the LED mapping:
+
+- D9 = RGB RED;
+- D10 = RGB GREEN;
+- D11 = RGB BLUE;
+- RGB uses direct polarity: 0 = off, 255 = full channel;
+- D12 = red discrete LED;
+- D13 = blue discrete LED.
+
+The library therefore exposes named `setRGB(red, green, blue)`, `ledRed()` and
+`ledBlue()` helpers while retaining the raw channel API for diagnostics.
 
 The DHT11 routine is deliberately small and dependency-free. It must be tested
 on the physical shield before being promoted to PASS.
