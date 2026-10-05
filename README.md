@@ -106,7 +106,7 @@ See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 
 Experimental resident cooperative operating environment for Arduino UNO / ATmega328P.
 
-KonSol 0.4 now provides:
+The published KonSol 0.4 baseline provides:
 
 - resident cooperative kernel and five scheduled tasks;
 - Serial shell and microSD filesystem services;
@@ -131,6 +131,14 @@ Historical KonSol 0.1 publication: https://doi.org/10.5281/zenodo.23139756
 
 KonSol 0.1 video: https://www.youtube.com/watch?v=N3PEQUbUmPM
 
+KonSol 0.5 extends the resident VM with KAP2 registers, Touch-driven loops,
+conditional branching and register rendering. TEST-06 physically passed with
+the interactive COUNTER.KAP application while retaining KAP1 compatibility.
+
+TEST-07 adds the host-side KASM assembler. Human-readable COUNTER.kasm was
+compiled to a generated KAP2 file that compared exactly equal to the physically
+certified COUNTER.KAP bytecode.
+
 See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
 ## Project structure
@@ -147,6 +155,6 @@ See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
-- **LAB-05** — **KonSol 0.4 FULL PHYSICAL PASS + TEST-05 MULTI-APP PASS** on physical Arduino UNO: resident kernel, Serial shell, microSD, direct TFT, direct Touch, File Browser and streamed KAP1 application lifecycle verified. One unchanged resident firmware executed HELLO.KAP, ABOUT.KAP and DEMO.KAP from microSD, including TFT-browser launch, cooperative WAIT/WAIT_TOUCH and clean APP EXIT 0; final free RAM remained 750 B. Current Zenodo DOI 10.5281/zenodo.23144922 (historical 0.1 DOI 10.5281/zenodo.23139756).
+- **LAB-05** — **KonSol 0.5 TEST-06 FULL PHYSICAL PASS + TEST-07 KASM FULL PASS**. KonSol 0.5 runs KAP1/KAP2 from microSD with registers, Touch-driven loops and conditional branching; COUNTER.KAP completed the physical five-touch loop and clean APP EXIT 0. KASM then reproduced the certified COUNTER.KAP bytecode exactly from readable COUNTER.kasm source. The published stable baseline remains KonSol 0.4, DOI 10.5281/zenodo.23144922 (historical 0.1 DOI 10.5281/zenodo.23139756).
 
 Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
