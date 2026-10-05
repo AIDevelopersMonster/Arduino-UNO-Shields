@@ -64,6 +64,26 @@ See: [shields/Multi-Function-Shield](shields/Multi-Function-Shield/)
 
 See: [shields/MAR2406-2.4-TFT](shields/MAR2406-2.4-TFT/)
 
+
+### Shield 04 — HY-M302 Multi-Purpose 9-in-1 Shield
+
+Multi-purpose Arduino UNO learning shield, cross-identified with the
+Keyestudio KS0183 Multi-purpose Shield V1 family:
+
+- DHT11 temperature/humidity sensor
+- LM35 analog temperature sensor
+- LDR light sensor and potentiometer
+- IR receiver and passive buzzer
+- RGB LED plus two indicator LEDs
+- two user buttons
+- D7/D8 digital, A3 analog, I2C and TTL UART expansion
+
+The published family pin map is documented as a working reference. Exact pin
+polarity, RGB channel order and clone-specific wiring remain to be certified on
+our physical HY-M302 sample before they are marked PASS.
+
+See: [shields/HY-M302-Multi-Purpose-Shield](shields/HY-M302-Multi-Purpose-Shield/)
+
 ## Laboratories
 
 ### LAB-01 — Arduino UNO Clone + W5100 + SD 4 GB
