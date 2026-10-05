@@ -136,6 +136,10 @@ The persistent label table costs 17 bytes of SRAM:
 label mask   =  1 B
 ```
 
+The KonSol 0.6 build confirms this exactly: global SRAM increased from 1239 B
+in KonSol 0.5 to 1256 B in KonSol 0.6, a measured compile-time delta of
+**+17 B**. Flash increased by 770 B.
+
 The multi-label implementation limits raw KAP2 file size to 65535 bytes so
 stored SD positions fit in `uint16_t`.
 
