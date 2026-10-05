@@ -123,9 +123,11 @@ KonSol 0.4 physical certification:
 - 1228 / 2048 bytes SRAM globals (59%);
 - measured free RAM: 812 B after boot, 750 B in the active shell.
 
-Current Zenodo publication (KonSol 0.4): https://doi.org/10.5281/zenodo.23144922
+Current Zenodo publication (KonSol 0.5): https://doi.org/10.5281/zenodo.23149141
 
-Zenodo record: https://zenodo.org/records/23144922
+KonSol 0.5 video: https://youtu.be/HVHLsfV9dFY
+
+Previous KonSol 0.4 publication: https://doi.org/10.5281/zenodo.23144922
 
 Historical KonSol 0.1 publication: https://doi.org/10.5281/zenodo.23139756
 
@@ -155,6 +157,6 @@ See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
-- **LAB-05** — **KonSol 0.5 TEST-06 FULL PHYSICAL PASS + TEST-07 KASM FULL PASS**. KonSol 0.5 runs KAP1/KAP2 from microSD with registers, Touch-driven loops and conditional branching; COUNTER.KAP completed the physical five-touch loop and clean APP EXIT 0. KASM then reproduced the certified COUNTER.KAP bytecode exactly from readable COUNTER.kasm source. The published stable baseline remains KonSol 0.4, DOI 10.5281/zenodo.23144922 (historical 0.1 DOI 10.5281/zenodo.23139756).
+- **LAB-05** — **KonSol 0.5 TEST-06 FULL PHYSICAL PASS + TEST-07 KASM FULL PASS**. KonSol 0.5 runs KAP1/KAP2 from microSD with registers, Touch-driven loops and conditional branching; COUNTER.KAP completed the physical five-touch loop and clean APP EXIT 0. KASM then reproduced the certified COUNTER.KAP bytecode exactly from readable COUNTER.kasm source. The current published version is KonSol 0.5, DOI 10.5281/zenodo.23149141, with video demonstration https://youtu.be/HVHLsfV9dFY. Previous version 0.4 remains at DOI 10.5281/zenodo.23144922; historical 0.1 remains at DOI 10.5281/zenodo.23139756.
 
 Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
