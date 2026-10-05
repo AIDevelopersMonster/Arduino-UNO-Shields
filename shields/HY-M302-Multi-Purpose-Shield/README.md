@@ -59,11 +59,11 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | IR receiver | D6 | family reference |
 | Free digital breakout | D7 | family reference |
 | Free digital breakout | D8 | family reference |
-| RGB LED channel | D9 | family reference |
-| RGB LED channel | D10 | family reference |
-| RGB LED channel | D11 | family reference |
-| Indicator LED | D12 | family reference |
-| Indicator LED | D13 | family reference |
+| RGB RED | D9 | **bench verified** |
+| RGB GREEN | D10 | **bench verified** |
+| RGB BLUE | D11 | **bench verified** |
+| Red indicator LED | D12 | **bench verified** |
+| Blue indicator LED | D13 | **bench verified** |
 | Potentiometer | A0 | family reference |
 | LDR / light sensor | A1 | family reference |
 | LM35 | A2 | family reference |
@@ -71,8 +71,10 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | I2C SDA | A4 | family reference |
 | I2C SCL | A5 | family reference |
 
-The exact RGB color-to-pin order on D9-D11 will be verified experimentally rather
-than assumed.
+TEST-01 physically verified D9=RED, D10=GREEN and D11=BLUE. The RGB LED uses
+direct polarity on this sample: HIGH / PWM 255 turns a channel on, LOW / PWM 0
+turns it off. D12 drives the red discrete LED and D13 drives the blue discrete
+LED.
 
 ## Important UNO resource conflicts
 
@@ -155,7 +157,8 @@ The family uses five UNO outputs D9-D13:
 - D9-D11 — RGB LED channels;
 - D12-D13 — two discrete indicator LEDs.
 
-Logic polarity and exact RGB channel order will be bench-verified.
+TEST-01 bench result: D9=RED, D10=GREEN, D11=BLUE with direct polarity; D12 is
+the red discrete LED and D13 is the blue discrete LED.
 
 ## Proposed laboratory sequence
 
