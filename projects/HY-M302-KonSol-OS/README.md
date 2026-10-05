@@ -237,8 +237,16 @@ D6/PD6/PCINT22 edge capture, a fixed ring buffer, and a NEC state machine
 executed outside the ISR.
 
 A 12-button physical run matched Arduino-IRremote exactly for RAW/address/command
-on all 12 unique NEC frames. The remaining certification step is a live stress
-run proving zero dropped edges/frames under sustained input.
+on all 12 unique NEC frames. A subsequent live stress run received full frames
+and NEC repeats with:
+
+```text
+dropped_edges=0
+dropped_frames=0
+```
+
+The non-blocking IR path is therefore the first KonSol-HY resident driver to
+reach both functional and robustness PASS on physical hardware.
 
 The IR receiver therefore becomes a system input driver rather than a one-off
 example.
@@ -397,8 +405,9 @@ test.
 
 The shared HY_M302 library already has physical PASS results for buttons, LEDs,
 RGB, potentiometer, LDR, DHT11, active buzzer and the non-blocking NEC IR path.
-The tested LM35 remains a sample-specific FAIL. Expansion interfaces and the
-final IR stress counters remain open before P0 is closed.
+The IR path has also passed its zero-drop live stress test. The tested LM35
+remains a sample-specific FAIL. Expansion interfaces remain open before P0 is
+closed.
 
 Related:
 
