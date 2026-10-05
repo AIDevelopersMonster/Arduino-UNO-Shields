@@ -11,7 +11,7 @@ static void printHelp() {
   Serial.println(F("HY-M302 TEST-04 IR RECEIVER MANUAL"));
   Serial.println(F("IR receiver = D6"));
   Serial.println(F(""));
-  Serial.println(F("  R   wait up to 10 s for one NEC frame"));
+  Serial.println(F("  R   wait up to 10 s for one full NEC frame"));
   Serial.println(F("  L   print current D6 logic level"));
   Serial.println(F("  ?   help"));
   Serial.println(F(""));
@@ -32,19 +32,39 @@ static void printFrame(const HY_M302::IrNecFrame& frame) {
 }
 
 static void waitOneFrame() {
+  // A short NEC key press can be followed by one or more repeat frames.
+  // Drain any tail left by the previous manual test before arming again.
+  const unsigned long drainStarted = millis();
+  while (millis() - drainStarted < 250UL) {
+    HY_M302::IrNecFrame stale;
+    shield.readIrNec(stale, 15000UL);
+  }
+
   Serial.println(F("IR ARMED 10 s - press one remote button"));
 
   const unsigned long started = millis();
+  uint8_t ignoredRepeats = 0;
 
   while (millis() - started < 10000UL) {
     HY_M302::IrNecFrame frame;
 
-    // The decoder now uses pulseIn() only for the initial LOW leader and
-    // measures all following already-active pulses directly.
-    if (shield.readIrNec(frame, 15000UL)) {
-      printFrame(frame);
-      return;
+    if (!shield.readIrNec(frame, 15000UL)) {
+      continue;
     }
+
+    if (frame.repeat) {
+      ++ignoredRepeats;
+      continue;
+    }
+
+    printFrame(frame);
+
+    if (ignoredRepeats != 0) {
+      Serial.print(F("IR NOTE: ignored "));
+      Serial.print(ignoredRepeats);
+      Serial.println(F(" leading NEC repeat frame(s)"));
+    }
+    return;
   }
 
   Serial.println(F("IR TIMEOUT"));
