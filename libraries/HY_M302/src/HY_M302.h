@@ -41,6 +41,8 @@ public:
   explicit HY_M302(const PinMap& pins);
 
   void begin();
+  // Cooperative service hook. Call from loop/task code when async drivers are used.
+  void service();
 
   bool button1Pressed() const;
   bool button2Pressed() const;
