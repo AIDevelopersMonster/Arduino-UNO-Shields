@@ -56,7 +56,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | SW2 | D3 | **bench verified** |
 | DHT11 DATA | D4 | **bench verified** |
 | Active/self-oscillating buzzer | D5 | **bench verified** |
-| IR receiver / async NEC | D6 | **bench verified, 12/12 exact match** |
+| IR receiver / async NEC | D6 | **bench verified, 12/12 exact match, zero-drop stress PASS** |
 | Free digital breakout | D7 | family reference |
 | Free digital breakout | D8 | family reference |
 | RGB RED | D9 | **bench verified** |
@@ -204,8 +204,14 @@ RAW value, address and command, with no wrong-frame result in the 12-button run.
 
 Status: **ASYNC NEC PHYSICAL PASS — 12/12 functional correctness**.
 
-A separate live/stress run with dropped-edge and dropped-frame counters is still
-reserved as the final robustness certification step.
+A live stress run then exercised full frames plus NEC repeat traffic. The
+non-blocking driver completed the run with:
+
+```text
+IR STATS dropped_edges=0 dropped_frames=0
+```
+
+Status: **ASYNC NEC ROBUSTNESS PASS on the tested sample**.
 
 ## Output notes
 
