@@ -70,7 +70,19 @@ public:
 
   DhtReading readDht11();
 
+  // Legacy blocking NEC decoder retained for comparison/testing.
   bool readIrNec(IrNecFrame& frame, unsigned long startTimeoutUs = 15000UL);
+
+  // Non-blocking NEC receiver for the standard HY-M302 D6 wiring on UNO.
+  // ISR captures edges only; call serviceIrNec() frequently from loop/task code.
+  bool beginIrNecAsync();
+  void endIrNecAsync();
+  void serviceIrNec();
+  bool irNecAvailable() const;
+  bool readIrNecAsync(IrNecFrame& frame);
+  uint16_t irNecDroppedEdges() const;
+  uint16_t irNecDroppedFrames() const;
+  void resetIrNecStats();
 
   void gpio7Mode(uint8_t mode);
   void gpio8Mode(uint8_t mode);
@@ -92,4 +104,29 @@ private:
                                              uint8_t level,
                                              unsigned long timeoutUs);
   static bool inRange(unsigned long value, unsigned long minUs, unsigned long maxUs);
+
+  enum IrAsyncState : uint8_t {
+    IR_WAIT_LEADER_LOW = 0,
+    IR_WAIT_LEADER_HIGH,
+    IR_WAIT_REPEAT_LOW,
+    IR_WAIT_BIT_LOW,
+    IR_WAIT_BIT_HIGH
+  };
+
+  void processIrAsyncPulse(uint8_t level, uint16_t durationUs);
+  void queueIrAsyncFrame(const IrNecFrame& frame);
+  void resetIrAsyncDecoder();
+
+  bool _irAsyncEnabled = false;
+  uint8_t _irAsyncState = IR_WAIT_LEADER_LOW;
+  uint8_t _irAsyncBitIndex = 0;
+  uint32_t _irAsyncRaw = 0;
+
+  static const uint8_t IR_ASYNC_FRAME_QUEUE_SIZE = 4;
+  IrNecFrame _irAsyncFrames[IR_ASYNC_FRAME_QUEUE_SIZE];
+  uint8_t _irAsyncFrameHead = 0;
+  uint8_t _irAsyncFrameTail = 0;
+  uint16_t _irAsyncDroppedFrames = 0;
+
+  IrNecFrame _irAsyncLastFull = {0, 0, 0, false, false};
 };
