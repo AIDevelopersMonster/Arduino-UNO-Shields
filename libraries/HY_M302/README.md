@@ -111,8 +111,15 @@ AC53FB04 / 04 / 53
 
 Status: **ASYNC NEC PHYSICAL PASS — functional correctness 12/12**.
 
-A final stress run using live reception plus `irNecDroppedEdges()` and
-`irNecDroppedFrames()` remains the explicit robustness certification step.
+The live stress run is also complete. Full NEC frames and repeat frames were
+received continuously while the driver reported:
+
+```text
+IR STATS dropped_edges=0 dropped_frames=0
+```
+
+Status: **ASYNC NEC ROBUSTNESS PASS on the tested UNO + HY-M302 sample**.
+
 The old blocking `readIrNec()` remains available only for comparison.
 
 ## Arduino IDE installation
