@@ -107,3 +107,37 @@ machine code.
 Version 0.5 is an experimental compact VM control layer designed to prove that
 an external KonSol application can hold state and make its own control-flow
 decisions while remaining inside the resident service model.
+
+
+## KonSol 0.6 indexed-label extension
+
+TEST-08 extends KAP2 without changing the `KAP2` file header.
+
+New opcodes:
+
+| Opcode | Encoding | Meaning |
+| --- | --- | --- |
+| `4A` | `4A ii` | define indexed LABEL `ii` |
+| `4B` | `4B ii` | unconditional JMP to label `ii` |
+| `4C` | `4C ii` | JZ to label `ii` |
+| `4D` | `4D ii` | JNZ to label `ii` |
+
+The current implementation provides eight label slots, IDs 0..7.
+
+KASM keeps symbolic names in source and encodes them as compact IDs. On
+application start, KonSol scans the KAP2 stream once, records the raw SD-file
+position immediately after each LABEL opcode, then rewinds to the application
+start. Branch instructions subsequently use direct SD `seek()`.
+
+The persistent label table costs 17 bytes of SRAM:
+
+```text
+8 x uint16_t = 16 B
+label mask   =  1 B
+```
+
+The multi-label implementation limits raw KAP2 file size to 65535 bytes so
+stored SD positions fit in `uint16_t`.
+
+Legacy `MARK`, `JNZ MARK`, and `JZ MARK` remain supported for backward
+compatibility with KonSol 0.5 applications.
