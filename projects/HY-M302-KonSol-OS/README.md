@@ -31,7 +31,7 @@ Current silkscreen evidence on our physical sample establishes:
 | SW1 | D2 |
 | SW2 | D3 |
 | DHT11 | D4 |
-| passive buzzer | D5 |
+| active/self-oscillating buzzer | D5 |
 | IR receiver | D6 |
 | expansion GPIO | D7 |
 | expansion GPIO | D8 |
@@ -45,8 +45,9 @@ Current silkscreen evidence on our physical sample establishes:
 | I2C SDA/SCL | A4/A5 |
 | UART / Bluetooth | D0/D1 |
 
-Exact RGB channel ordering and electrical polarity remain subject to physical
-certification.
+Physical bench certification has established D9=RGB red, D10=green, D11=blue
+with direct PWM polarity, D12=red indicator LED, D13=blue indicator LED, and an
+active/self-oscillating buzzer on D5.
 
 ## Driver model
 
@@ -230,7 +231,16 @@ The transport changes; the logical API does not.
 
 ## IR as a resident event driver
 
-The IR receiver on D6 becomes a system input driver rather than a one-off
+The IR receiver on D6 is now the first physically demonstrated KonSol-oriented
+resident driver. The HY_M302 library implements a non-blocking AVR path using
+D6/PD6/PCINT22 edge capture, a fixed ring buffer, and a NEC state machine
+executed outside the ISR.
+
+A 12-button physical run matched Arduino-IRremote exactly for RAW/address/command
+on all 12 unique NEC frames. The remaining certification step is a live stress
+run proving zero dropped edges/frames under sustained input.
+
+The IR receiver therefore becomes a system input driver rather than a one-off
 example.
 
 Possible events:
@@ -383,10 +393,12 @@ test.
 
 ## Current status
 
-**DESIGN OPENED.**
+**DESIGN OPENED / HARDWARE CERTIFICATION IN PROGRESS.**
 
-The first dependency is physical certification of the HY-M302 board and the
-shared Arduino library.
+The shared HY_M302 library already has physical PASS results for buttons, LEDs,
+RGB, potentiometer, LDR, DHT11, active buzzer and the non-blocking NEC IR path.
+The tested LM35 remains a sample-specific FAIL. Expansion interfaces and the
+final IR stress counters remain open before P0 is closed.
 
 Related:
 
