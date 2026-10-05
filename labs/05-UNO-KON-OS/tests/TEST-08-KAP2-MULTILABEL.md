@@ -294,7 +294,7 @@ register state, Touch coordinate services and DRAW_REG path under the 0.6 VM.
 
 ### Current physical status
 
-**PHYSICAL CONTROL-FLOW PASS / FINAL EXIT GATE PENDING.**
+**FULL PHYSICAL PASS.**
 
 The remaining strict FULL PHYSICAL PASS evidence is:
 
@@ -302,3 +302,101 @@ The remaining strict FULL PHYSICAL PASS evidence is:
 2. legacy COUNTER.KAP reaching tap 5, DONE, and its own final EXIT;
 3. post-run `MEM` and `DIR /` (or equivalent shell/SD check) showing that the
    resident environment remains usable without progressive RAM loss.
+
+
+## Final physical closure — 2026-10-05
+
+The remaining TEST-08 exit and post-run stability gates were completed on the
+physical Arduino UNO + MAR2406.
+
+Observed boot/runtime state:
+
+```text
+KonSol 0.6
+SD: READY
+FREE RAM: 784 B
+```
+
+### MULTI.KAP final exit
+
+After the photographed RED -> YELLOW -> GREEN sequence, the final Touch exited
+the application successfully:
+
+```text
+APP RUN /MULTI.KAP
+MULTILABEL KAP2
+APP EXIT 0
+
+APP
+APP: IDLE
+LAST EXIT: 0
+
+MEM
+FREE RAM: 720 B
+```
+
+The root filesystem remained readable immediately afterward:
+
+```text
+DIR /
+F 175 T07LOG.TXT
+F 23 XOLOG.TXT
+D 32768 TEST03
+F 123 HELLO.KAP
+F 197 ABOUT.KAP
+F 171 DEMO.KAP
+F 363 COUNTER.KAP
+F 488 MULTI.KAP
+FILES: 8
+```
+
+### Legacy COUNTER.KAP compatibility
+
+The older KonSol 0.5 COUNTER.KAP then ran unchanged under KonSol 0.6 and exited
+cleanly:
+
+```text
+RUN /COUNTER.KAP
+APP RUN /COUNTER.KAP
+COUNTER KAP2
+APP EXIT 0
+```
+
+Post-run application state:
+
+```text
+APP: IDLE
+LAST EXIT: 0
+FREE RAM: 720 B
+```
+
+Scheduler state remained healthy:
+
+```text
+ID  TASK      PERIOD  RUNS
+0   SERIAL    1 ms    113501
+1   CLOCK     100 ms  1135
+2   DISPLAY   1000 ms 113
+3   TOUCH     30 ms   3783
+4   APP       10 ms   11350
+```
+
+The SD root was again read successfully after the legacy app exited.
+
+### TEST-08 final status
+
+**FULL PHYSICAL PASS.**
+
+TEST-08 now physically certifies:
+
+- KAP2 named multi-label control flow;
+- conditional and unconditional branches;
+- forward/backward label resolution in the generated application;
+- Touch-driven RED -> YELLOW -> GREEN branch selection;
+- return to LOOP from intermediate states;
+- final WAIT_TOUCH -> EXIT path;
+- stable resident-shell recovery;
+- stable observed shell free RAM at 720 B after both application runs;
+- continued SD filesystem access;
+- backward compatibility with the legacy KonSol 0.5 MARK/JNZ application;
+- all five cooperative tasks remaining operational after execution.
