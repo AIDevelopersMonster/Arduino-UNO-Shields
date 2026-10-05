@@ -251,12 +251,31 @@ def transfer_kap(
                     if line:
                         logger(f"< {line}")
 
-            if "ERR " in response or not any(
-                line.startswith("OK ") for line in response.replace("\r", "").split("\n")
-            ):
+            response_lines = [
+                line.strip()
+                for line in response.replace("\r", "").split("\n")
+                if line.strip()
+            ]
+            ok_lines = [line for line in response_lines if line.startswith("OK ")]
+
+            if "ERR " in response or not ok_lines:
                 raise TransferError(
                     f"KonSol rejected transfer command {index}/{len(commands)}: "
                     f"{response!r}"
+                )
+
+            expected_bytes = len(command.rsplit(" ", 1)[1])
+            match = re.fullmatch(r"OK\s+(\d+)\s+B", ok_lines[-1])
+            if not match:
+                raise TransferError(
+                    f"unexpected KonSol acknowledgement at command "
+                    f"{index}/{len(commands)}: {ok_lines[-1]!r}"
+                )
+            written_bytes = int(match.group(1))
+            if written_bytes != expected_bytes:
+                raise TransferError(
+                    f"short SD write at command {index}/{len(commands)}: "
+                    f"expected {expected_bytes} B, KonSol reported {written_bytes} B"
                 )
 
             if progress:
@@ -269,6 +288,10 @@ def transfer_kap(
             payload = extract_type_payload(response)
             remote = "".join(payload.split()).upper()
             verified = remote == normalized
+            logger(
+                f"VERIFY: local={len(normalized) // 2} decoded B, "
+                f"remote={len(remote) // 2} decoded B"
+            )
             logger("VERIFY: PASS" if verified else "VERIFY: FAIL")
             if not verified:
                 raise TransferError("remote KAP content differs from local byte stream")
