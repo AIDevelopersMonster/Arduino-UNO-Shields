@@ -52,8 +52,8 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | Function | UNO pin | Status |
 | --- | ---: | --- |
 | TTL UART RX/TX | D0 / D1 | family reference |
-| SW1 | D2 | family reference |
-| SW2 | D3 | family reference |
+| SW1 | D2 | **bench verified** |
+| SW2 | D3 | **bench verified** |
 | DHT11 DATA | D4 | family reference |
 | Passive buzzer | D5 | family reference |
 | IR receiver | D6 | family reference |
@@ -64,7 +64,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | RGB BLUE | D11 | **bench verified** |
 | Red indicator LED | D12 | **bench verified** |
 | Blue indicator LED | D13 | **bench verified** |
-| Potentiometer | A0 | family reference |
+| Potentiometer | A0 | **bench verified, 0..1023** |
 | LDR / light sensor | A1 | family reference |
 | LM35 | A2 | family reference |
 | Free analog breakout | A3 | family reference |
@@ -245,3 +245,32 @@ Initial low-overhead library:
 The first version intentionally uses compact in-house routines for the DHT11 and
 basic NEC IR decoding so Flash/SRAM cost stays visible on ATmega328P. Hardware
 behavior remains subject to physical certification on our shield.
+
+
+## Physical bench results
+
+### TEST-01 / manual bench results
+
+Verified on the physical HY-M302 sample:
+
+- SW1 on D2: idle -> library reports 0, pressed -> 1;
+- SW2 on D3: idle -> library reports 0, pressed -> 1;
+- button electrical behavior is active LOW; the library exposes logical
+  `pressed=true`;
+- potentiometer on A0 reached the full ADC endpoints 0 and 1023 and stable
+  intermediate values;
+- LDR on A1 produces a live analog signal, but direction/range under controlled
+  dark/bright conditions is still pending;
+- LM35 on A2 produces a stable live analog signal, but temperature calibration is
+  not yet certified;
+- A3 is currently unconnected, so raw values from it are expected to float and
+  are not treated as measurements.
+
+Previously in the same manual test:
+
+- D9 = RGB RED;
+- D10 = RGB GREEN;
+- D11 = RGB BLUE;
+- RGB polarity is direct: 0=off, 255=full;
+- D12 = red discrete LED;
+- D13 = blue discrete LED.
