@@ -1041,10 +1041,34 @@ microSD
 resident KonSol VM
 ```
 
-The assembler was locally checked against the existing COUNTER.KAP bytecode and
-produced the same instruction stream.
+The assembler was then tested in the project Windows/PowerShell environment:
 
-Status: **READY FOR CLI TEST**.
+```text
+KASM PASS: KAP2 -> COUNTER.generated.KAP
+Instructions/records: 24
+```
+
+PowerShell comparison of the generated output against the physically certified
+COUNTER.KAP reference returned:
+
+```text
+True
+```
+
+Because the generated normalized ASCII-hex stream is identical to the
+COUNTER.KAP already exercised on physical KonSol 0.5 in TEST-06, a duplicate
+hardware execution is not required for the assembler reproducibility claim.
+
+Status: **TEST-07 FULL PASS**.
+
+The application-development path is now physically anchored at both ends:
+
+```text
+readable .kasm
+   -> KASM
+   -> exact KAP2 bytecode
+   -> previously certified KonSol 0.5 execution
+```
 
 ## Publication
 
