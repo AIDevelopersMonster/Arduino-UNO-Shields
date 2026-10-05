@@ -65,7 +65,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | Red indicator LED | D12 | **bench verified** |
 | Blue indicator LED | D13 | **bench verified** |
 | Potentiometer | A0 | **bench verified, 0..1023** |
-| LDR / light sensor | A1 | family reference |
+| LDR / light sensor | A1 | **bench verified** |
 | LM35 | A2 | family reference |
 | Free analog breakout | A3 | family reference |
 | I2C SDA | A4 | family reference |
@@ -131,9 +131,11 @@ calculated temperature instead of hiding the conversion.
 
 ### LDR
 
-Documented on A1. It is an analog light-level channel. Because the exact divider
-values and orientation may vary between clones, the first test should record
-whether ADC counts rise or fall with increasing illumination.
+Bench-verified on A1. On our physical HY-M302 sample the ADC code rises with
+illumination and falls in darkness. Observed manual TEST-01 values were about
+368 under ordinary room light and about 56-61 when the LDR was covered. These
+values are sample/lighting dependent; the verified property is the direction of
+response, not those exact thresholds.
 
 ### Potentiometer
 
@@ -259,8 +261,8 @@ Verified on the physical HY-M302 sample:
   `pressed=true`;
 - potentiometer on A0 reached the full ADC endpoints 0 and 1023 and stable
   intermediate values;
-- LDR on A1 produces a live analog signal, but direction/range under controlled
-  dark/bright conditions is still pending;
+- LDR on A1 is bench-verified: ordinary room light produced about 368, while
+  covering the sensor produced about 56-61; brighter -> higher ADC code;
 - LM35 on A2 produces a stable live analog signal, but temperature calibration is
   not yet certified;
 - A3 is currently unconnected, so raw values from it are expected to float and
