@@ -145,3 +145,19 @@ stored SD positions fit in `uint16_t`.
 
 Legacy `MARK`, `JNZ MARK`, and `JZ MARK` remain supported for backward
 compatibility with KonSol 0.5 applications.
+
+
+## Current application I/O model
+
+The detailed current interface is documented in
+[KAP2_IO_MODEL.md](KAP2_IO_MODEL.md).
+
+In summary, external KAP2 applications currently receive Touch events and Touch
+X/Y coordinates and can output through resident TFT and Serial services.
+microSD stores and streams applications, but arbitrary application-level
+filesystem syscalls are not yet exposed.
+
+Generic GPIO, ADC, PWM, I2C, controlled SPI-device access and additional UART
+are future System-API work, not current KAP2 claims. KON-Boot/native Flash
+programming is also a separate execution model and is intentionally outside the
+KonSol 0.6 multi-label result.
