@@ -66,7 +66,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | Blue indicator LED | D13 | **bench verified** |
 | Potentiometer | A0 | **bench verified, 0..1023** |
 | LDR / light sensor | A1 | **bench verified** |
-| LM35 | A2 | family reference |
+| LM35 | A2 | **bench FAIL on tested sample** |
 | Free analog breakout | A3 | family reference |
 | I2C SDA | A4 | family reference |
 | I2C SCL | A5 | family reference |
@@ -125,9 +125,25 @@ library compatibility before certification.
 
 ### LM35
 
-Documented on A2. The raw ADC value must be converted using the actual ADC
-reference voltage. A first laboratory should report both raw ADC counts and the
-calculated temperature instead of hiding the conversion.
+The LM35 channel is connected to A2, but the sensor on our physical HY-M302
+sample failed the temperature-response test.
+
+Observed raw values during the bench session remained approximately:
+
+```text
+93 -> 91 -> 90 -> 89 -> 89
+```
+
+despite deliberate cooling of the sensor.
+
+An operating LM35 should show a clear output-voltage decrease when cooled and a
+progressive recovery while warming. That behavior was not observed.
+
+Status for the tested sample: **PHYSICAL FAIL / sensor treated as defective**.
+
+This does not establish that the HY-M302 design or all production batches have a
+faulty LM35. The A2 pin assignment remains valid, and the library keeps generic
+LM35 raw/conversion support for other boards or replacement sensors.
 
 ### LDR
 
@@ -263,8 +279,8 @@ Verified on the physical HY-M302 sample:
   intermediate values;
 - LDR on A1 is bench-verified: ordinary room light produced about 368, while
   covering the sensor produced about 56-61; brighter -> higher ADC code;
-- LM35 on A2 produces a stable live analog signal, but temperature calibration is
-  not yet certified;
+- LM35 on A2 failed the physical cooling-response test on this sample and is
+  treated as defective;
 - A3 is currently unconnected, so raw values from it are expected to float and
   are not treated as measurements.
 
