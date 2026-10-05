@@ -4,7 +4,7 @@
   Arduino UNO R3 + MAR2406 2.4" TFT Touch + microSD
 
   Goal:
-    Extend the physically certified KonSol 0.5 KAP1 multi-app environment with
+    Extend the physically certified KonSol 0.4 KAP1 multi-app environment with
     a backward-compatible KAP2 control layer:
       - 4 x 16-bit VM registers
       - compare + zero flag
