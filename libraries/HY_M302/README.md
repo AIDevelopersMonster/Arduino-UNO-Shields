@@ -2,7 +2,7 @@
 
 Low-overhead Arduino UNO library for the HY-M302 multi-purpose shield.
 
-Status: **v0.1 experimental**.
+Status: **v0.1 experimental / modular refactor complete, integrated physical test pending**.
 
 The library intentionally starts with its own small hardware routines instead of
 pulling in large third-party dependencies. This keeps the Flash/SRAM cost visible
@@ -121,6 +121,44 @@ IR STATS dropped_edges=0 dropped_frames=0
 Status: **ASYNC NEC ROBUSTNESS PASS on the tested UNO + HY-M302 sample**.
 
 The old blocking `readIrNec()` remains available only for comparison.
+
+
+## Modular source layout
+
+The library is no longer implemented as one monolithic `HY_M302.cpp`.
+Drivers are split so the AVR linker can omit modules that an application does
+not reference:
+
+```text
+src/
+  HY_M302.h
+  HY_M302_Core.cpp
+  HY_M302_Service.cpp
+  HY_M302_Analog.cpp
+  HY_M302_DHT11.cpp
+  HY_M302_Buzzer.cpp
+  HY_M302_RGB.cpp
+  HY_M302_IR_NEC.cpp
+```
+
+The asynchronous IR ring buffer and ISR state live inside the IR translation
+unit rather than inside every `HY_M302` object. A sketch that does not use the
+IR API therefore does not pay the IR SRAM cost.
+
+`service()` is the common cooperative hook for asynchronous drivers:
+
+```cpp
+HY_M302 shield;
+
+void setup() {
+  shield.begin();
+  shield.beginIrNecAsync();
+}
+
+void loop() {
+  shield.service();
+}
+```
 
 ## Arduino IDE installation
 
@@ -253,3 +291,41 @@ shield.resetIrNecStats();
 
 The interrupt handler records only edge duration/level into a fixed ring buffer.
 Protocol decoding and frame validation are performed outside the ISR.
+
+
+## TEST-05 integrated-board certification
+
+The new example `05_Integrated_Board` is the physical integration gate for the
+modular library.
+
+It runs the already certified functions through one `HY_M302` instance:
+
+- SW1 -> red discrete LED;
+- SW2 -> blue discrete LED;
+- potentiometer -> red RGB brightness;
+- LDR/POT/analog snapshot once per second;
+- DHT11 read every 3 seconds;
+- non-blocking NEC reception continuously through `service()`;
+- active buzzer through explicit commands.
+
+Commands:
+
+```text
+RUN
+STOP
+DHT
+SNAP
+BUZZ ON
+BUZZ OFF
+STATS
+ZERO
+?
+```
+
+The important integration question is DHT11 versus asynchronous IR. The current
+DHT11 implementation briefly disables interrupts for its timing-critical read.
+TEST-05 is intentionally designed to expose any resulting IR loss instead of
+hiding it.
+
+The library remains at 0.1.0 until TEST-05 compiles and passes on the physical
+UNO + HY-M302. After that result, the planned promotion is 0.2.0.
