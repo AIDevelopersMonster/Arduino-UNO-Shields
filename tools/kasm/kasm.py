@@ -24,6 +24,8 @@ COLORS = {
     "GRAY": 7,
 }
 
+MAX_LABELS = 8
+
 
 class AsmError(ValueError):
     pass
@@ -53,6 +55,22 @@ def parse_reg(token: str) -> int:
     if len(token) != 2 or token[0] != "R" or token[1] not in "0123":
         raise AsmError("register must be R0..R3")
     return int(token[1])
+
+
+def parse_label_name(token: str) -> str:
+    name = token.upper()
+    if not name:
+        raise AsmError("empty label name")
+
+    first = name[0]
+    if not (first == "_" or "A" <= first <= "Z"):
+        raise AsmError("label must start with A-Z or _")
+
+    for ch in name[1:]:
+        if not (ch == "_" or "A" <= ch <= "Z" or "0" <= ch <= "9"):
+            raise AsmError("label may contain only A-Z, 0-9 and _")
+
+    return name
 
 
 def parse_color(token: str) -> int:
@@ -105,9 +123,7 @@ def encode_draw_reg(x_px: int, y: int, scale: int, color: int, reg: int) -> byte
 
 
 def assemble(source: str) -> tuple[int, list[str]]:
-    version = None
-    output: list[str] = []
-    mark_name = None
+    statements: list[tuple[int, list[str]]] = []
 
     for lineno, original in enumerate(source.splitlines(), 1):
         line = original.strip()
@@ -119,9 +135,39 @@ def assemble(source: str) -> tuple[int, list[str]]:
         except ValueError as exc:
             raise AsmError(f"line {lineno}: {exc}") from exc
 
-        if not parts:
+        if parts:
+            statements.append((lineno, parts))
+
+    label_ids: dict[str, int] = {}
+
+    for lineno, parts in statements:
+        if parts[0].upper() != "LABEL":
             continue
 
+        args = parts[1:]
+        if len(args) != 1:
+            raise AsmError(f"line {lineno}: usage: LABEL <name>")
+
+        try:
+            name = parse_label_name(args[0])
+        except AsmError as exc:
+            raise AsmError(f"line {lineno}: {exc}") from exc
+
+        if name in label_ids:
+            raise AsmError(f"line {lineno}: duplicate label: {name}")
+
+        if len(label_ids) >= MAX_LABELS:
+            raise AsmError(
+                f"line {lineno}: KAP2 supports at most {MAX_LABELS} indexed labels"
+            )
+
+        label_ids[name] = len(label_ids)
+
+    version = None
+    output: list[str] = []
+    mark_name = None
+
+    for lineno, parts in statements:
         op = parts[0].upper()
         args = parts[1:]
 
@@ -212,22 +258,51 @@ def assemble(source: str) -> tuple[int, list[str]]:
                 if len(args) != 1:
                     raise AsmError("usage: MARK <name>")
                 if mark_name is not None:
-                    raise AsmError("current KAP2 VM supports only one MARK")
-                mark_name = args[0].upper()
+                    raise AsmError("legacy KAP2 supports only one MARK")
+
+                name = parse_label_name(args[0])
+                if name in label_ids:
+                    raise AsmError("MARK name conflicts with indexed LABEL")
+
+                mark_name = name
                 output.append("44")
+
+            elif op == "LABEL":
+                if version != 2:
+                    raise AsmError("LABEL requires KAP2")
+                if len(args) != 1:
+                    raise AsmError("usage: LABEL <name>")
+
+                name = parse_label_name(args[0])
+                output.append(hx(bytes([0x4A, label_ids[name]])))
+
+            elif op == "JMP":
+                if version != 2:
+                    raise AsmError("JMP requires KAP2")
+                if len(args) != 1:
+                    raise AsmError("usage: JMP <label>")
+
+                name = parse_label_name(args[0])
+                if name not in label_ids:
+                    raise AsmError(f"unknown indexed label: {name}")
+
+                output.append(hx(bytes([0x4B, label_ids[name]])))
 
             elif op in ("JNZ", "JZ"):
                 if version != 2:
                     raise AsmError(f"{op} requires KAP2")
                 if len(args) != 1:
-                    raise AsmError(f"usage: {op} <mark-name>")
-                if mark_name is None:
-                    raise AsmError(f"{op} used before MARK")
-                if args[0].upper() != mark_name:
-                    raise AsmError(
-                        f"{op} target must be the active MARK '{mark_name}'"
-                    )
-                output.append("45" if op == "JNZ" else "49")
+                    raise AsmError(f"usage: {op} <target>")
+
+                name = parse_label_name(args[0])
+
+                if name in label_ids:
+                    opcode = 0x4D if op == "JNZ" else 0x4C
+                    output.append(hx(bytes([opcode, label_ids[name]])))
+                elif mark_name == name:
+                    output.append("45" if op == "JNZ" else "49")
+                else:
+                    raise AsmError(f"unknown branch target: {name}")
 
             elif op == "DRAW_REG":
                 if version != 2:
@@ -255,7 +330,6 @@ def assemble(source: str) -> tuple[int, list[str]]:
         raise AsmError("program must end with EXIT")
 
     return version, output
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(
