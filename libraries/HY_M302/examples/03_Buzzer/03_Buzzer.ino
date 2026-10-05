@@ -12,17 +12,16 @@ static void printHelp() {
   Serial.println(F("HY-M302 TEST-03 BUZZER MANUAL"));
   Serial.println(F("One command = one stable state."));
   Serial.println(F(""));
-  Serial.println(F("  F500    continuous 500 Hz tone"));
-  Serial.println(F("  F1000   continuous 1000 Hz tone"));
-  Serial.println(F("  F2000   continuous 2000 Hz tone"));
-  Serial.println(F("  F4000   continuous 4000 Hz tone"));
-  Serial.println(F("  OFF     stop tone / drive LOW"));
-  Serial.println(F("  HIGH    constant HIGH on D5"));
-  Serial.println(F("  LOW     constant LOW on D5"));
+  Serial.println(F("  ON      active buzzer ON (constant HIGH on D5)"));
+  Serial.println(F("  OFF     active buzzer OFF (LOW on D5)"));
+  Serial.println(F("  F500    optional 500 Hz tone drive"));
+  Serial.println(F("  F1000   optional 1000 Hz tone drive"));
+  Serial.println(F("  F2000   optional 2000 Hz tone drive"));
+  Serial.println(F("  F4000   optional 4000 Hz tone drive"));
   Serial.println(F("  ?       help"));
   Serial.println(F(""));
-  Serial.println(F("Expected passive-buzzer behavior:"));
-  Serial.println(F("tone frequency changes pitch; constant HIGH is not a sustained tone."));
+  Serial.println(F("Bench result on this sample: active/self-oscillating buzzer."));
+  Serial.println(F("Constant HIGH gives the strongest sustained sound."));
   Serial.println(F(""));
 }
 
@@ -49,17 +48,12 @@ static void executeCommand(const char* s) {
     return;
   }
 
-  if (strcmp(s, "OFF") == 0) {
+  if (strcmp(s, "ON") == 0 || strcmp(s, "HIGH") == 0) {
+    shield.buzzerOn();
+    Serial.println(F("BUZZER ON / D5 HIGH"));
+  } else if (strcmp(s, "OFF") == 0 || strcmp(s, "LOW") == 0) {
     stopBuzzer();
-    Serial.println(F("BUZZER OFF"));
-  } else if (strcmp(s, "HIGH") == 0) {
-    noTone(shield.pins().buzzer);
-    pinMode(shield.pins().buzzer, OUTPUT);
-    digitalWrite(shield.pins().buzzer, HIGH);
-    Serial.println(F("D5 CONSTANT HIGH"));
-  } else if (strcmp(s, "LOW") == 0) {
-    stopBuzzer();
-    Serial.println(F("D5 CONSTANT LOW"));
+    Serial.println(F("BUZZER OFF / D5 LOW"));
   } else if (strcmp(s, "?") == 0 || strcmp(s, "HELP") == 0) {
     printHelp();
   } else {
