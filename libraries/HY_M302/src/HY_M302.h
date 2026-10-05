@@ -82,6 +82,7 @@ public:
 private:
   PinMap _pins;
 
-  static bool readDhtBit(uint8_t pin, uint8_t& bit);
+  static uint32_t expectPulse(volatile uint8_t* inputReg, uint8_t bitMask,
+                              uint8_t level, uint32_t maxLoops);
   static bool inRange(unsigned long value, unsigned long minUs, unsigned long maxUs);
 };
