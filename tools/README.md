@@ -20,3 +20,14 @@ The [konsol-transfer](konsol-transfer/) utility automates the already verified
 KonSol Serial Shell transfer path. It reads a local KAP file and sends it to the
 UNO as sequential `WRITE` / `APPEND` commands, waiting for the resident shell
 acknowledgement after every chunk. A Tk GUI and CLI are provided.
+
+
+## HY-M302 Remote Mapper — CLI + GUI
+
+The [HY-M302-Remote-Mapper](HY-M302-Remote-Mapper/) utility automates learning
+the NEC key map of a physical remote through the HY-M302 onboard IR receiver.
+
+It can compile/upload the dedicated mapper firmware, guide the user through
+named buttons, capture verified full NEC frames, reject duplicate assignments,
+and generate JSON plus reusable C++ `HY_M302_RemoteMap.h/.cpp` files for the
+test framework and KonSol-HY.
