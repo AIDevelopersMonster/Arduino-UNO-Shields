@@ -1136,18 +1136,26 @@ control-flow path and backward compatibility verified on the physical UNO.
 
 ## Publication
 
-KonSol 0.5 is published as the current Zenodo version of the KonSol line.
+KonSol 0.6 TEST-08 is published as a **standalone technical article**, not as a
+replacement/version update of the KonSol 0.5 record.
 
+- Standalone KonSol 0.6 article DOI: https://doi.org/10.5281/zenodo.23161379
 - KonSol 0.5 DOI: https://doi.org/10.5281/zenodo.23149141
 - KonSol 0.5 video: https://youtu.be/HVHLsfV9dFY
 - Previous KonSol 0.4 DOI: https://doi.org/10.5281/zenodo.23144922
 - Historical KonSol 0.1 DOI: https://doi.org/10.5281/zenodo.23139756
 - KonSol 0.1 video demonstration: https://www.youtube.com/watch?v=N3PEQUbUmPM
 
-The 0.5 version adds the physically verified KAP2 state/control-flow layer and
-the reproducibly verified KASM source-to-bytecode toolchain. KonSol 0.4 remains
-the previous published KAP1 external-application baseline, and KonSol 0.1 remains
-the historical kernel/Shell/microSD milestone.
+The standalone 0.6 article records the TEST-08 multi-label result: indexed
+labels, LABEL/JMP/JZ/JNZ, KASM symbolic labels, the physically verified
+RED -> YELLOW -> GREEN control-flow sequence, clean APP EXIT 0, stable 720 B
+post-run shell free RAM, continued SD access and backward compatibility with the
+legacy KonSol 0.5 COUNTER.KAP application.
+
+KonSol 0.5 remains a separate publication for the first register-based KAP2
+state/control-flow layer and KASM reproducibility result. KonSol 0.4 remains the
+earlier KAP1 external-application baseline, and KonSol 0.1 remains the
+historical kernel/Shell/microSD milestone.
 
 ## Documentation
 
