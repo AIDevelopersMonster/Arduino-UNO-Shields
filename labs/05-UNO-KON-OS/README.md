@@ -1115,7 +1115,19 @@ Delta from KonSol 0.5:
 
 The SRAM increase exactly matches the planned 17-byte persistent label table.
 
-Status: **BUILD PASS / READY FOR UPLOAD AND PHYSICAL TEST**.
+Status: **PHYSICAL CONTROL-FLOW PASS / FINAL EXIT GATE PENDING**.
+
+Physical TFT evidence now confirms the complete named-branch display sequence:
+
+```text
+RED -> YELLOW -> GREEN
+```
+
+with STEP 1/2/3 reached by successive Touch events. The legacy KonSol 0.5
+`COUNTER.KAP` also runs unchanged under KonSol 0.6 and was photographed at
+`TAPS 4` with live Touch coordinates, confirming compatibility of the older
+MARK/JNZ control-flow path. The final certification gate is the explicit
+application EXIT path plus post-run MEM/SD stability check.
 
 ## Publication
 
