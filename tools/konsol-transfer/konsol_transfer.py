@@ -397,11 +397,14 @@ def run_gui() -> int:
             root.after(0, done)
 
         except Exception as exc:
-            def failed() -> None:
+            error_message = str(exc)
+
+            def failed(message: str = error_message) -> None:
                 status_var.set("FAIL")
                 transfer_button.configure(state="normal")
-                messagebox.showerror("KonSol SD Writer", str(exc))
-            gui_log(f"ERROR: {exc}")
+                messagebox.showerror("KonSol SD Writer", message)
+
+            gui_log(f"ERROR: {error_message}")
             root.after(0, failed)
 
     def start_transfer() -> None:
