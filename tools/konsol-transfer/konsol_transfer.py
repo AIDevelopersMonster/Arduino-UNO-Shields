@@ -183,6 +183,13 @@ class KonSolLink:
         self.ser.write(b"\n")
         self.ser.flush()
         self._read_until_prompt(self.timeout)
+
+        # The UNO may emit its normal boot prompt and the prompt caused by the
+        # synchronization newline very close together. _read_until_prompt()
+        # returns at the first prompt, so discard any second stale prompt before
+        # the first real transfer command.
+        time.sleep(0.12)
+        self.ser.reset_input_buffer()
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
@@ -218,6 +225,11 @@ class KonSolLink:
             raise TransferError(
                 f"command is {len(command)} chars; KonSol limit is {MAX_KONSOL_COMMAND}"
             )
+
+        # Never let a stale prompt from reset/synchronization satisfy the next
+        # command immediately with an empty response.
+        if self.ser.in_waiting:
+            self.ser.reset_input_buffer()
 
         self.ser.write(command.encode("ascii") + b"\n")
         self.ser.flush()
