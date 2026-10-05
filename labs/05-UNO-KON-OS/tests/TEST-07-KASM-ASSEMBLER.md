@@ -26,10 +26,12 @@ From the repository root:
       .\labs\05-UNO-KON-OS\apps\KAP2\COUNTER.kasm `
       -o .\COUNTER.generated.KAP
 
-Expected:
+Observed on Windows / PowerShell:
 
     KASM PASS: KAP2 -> COUNTER.generated.KAP
     Instructions/records: 24
+
+Result: **PASS**.
 
 ## Equivalence check
 
@@ -39,24 +41,36 @@ Compare the generated ASCII-hex program with the repository reference:
     $B = (Get-Content -Raw .\labs\05-UNO-KON-OS\apps\KAP2\COUNTER.KAP).Replace("`r","").Trim()
     $A -eq $B
 
-Expected:
+Observed:
 
     True
 
-## Physical check
+Result: **EXACT SOURCE-TO-BYTECODE EQUIVALENCE PASS**.
 
-Copy the generated KAP to the same microSD and run it with the existing KonSol
-0.5 firmware.
+## Physical check policy
 
-No firmware rebuild is part of TEST-07.
+A second hardware execution is not required when the generated file is proven
+identical to the already physically verified COUNTER.KAP reference.
+
+TEST-06 physically executed that reference on KonSol 0.5. TEST-07 then produced
+the same normalized ASCII-hex bytecode stream from COUNTER.kasm and PowerShell
+reported exact equality.
+
+Therefore a duplicate hardware run would test file transfer rather than the
+assembler transformation itself. A physical rerun remains useful whenever a
+future KASM output differs from an already certified reference program.
 
 ## PASS criteria
 
-1. KASM runs with the user's normal Python environment.
-2. COUNTER.kasm assembles without error.
-3. Generated .KAP is bytecode-equivalent to the known COUNTER.KAP.
-4. KonSol 0.5 runs the generated program without firmware changes.
+1. KASM runs with the user's normal Python environment. **PASS**
+2. COUNTER.kasm assembles without error. **PASS**
+3. Generated .KAP is bytecode-equivalent to the known COUNTER.KAP. **PASS**
+4. The equivalent reference COUNTER.KAP is already physically certified on
+   unchanged KonSol 0.5 by TEST-06. **PASS BY IDENTICAL BYTECODE**
 5. No manual opcode or ASCII-to-hex conversion is required for normal KAP2
-   application development.
+   application development. **PASS**
 
-Status: **READY FOR CLI TEST**.
+Final result:
+
+**TEST-07 FULL PASS — readable KASM source reproduces the physically certified
+KAP2 bytecode exactly.**
