@@ -54,7 +54,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | TTL UART RX/TX | D0 / D1 | family reference |
 | SW1 | D2 | **bench verified** |
 | SW2 | D3 | **bench verified** |
-| DHT11 DATA | D4 | family reference |
+| DHT11 DATA | D4 | **bench verified** |
 | Passive buzzer | D5 | family reference |
 | IR receiver | D6 | family reference |
 | Free digital breakout | D7 | family reference |
@@ -119,9 +119,29 @@ managed appropriately during programming.
 
 ### DHT11
 
-Documented on D4. It provides digital temperature and humidity readings. The
-physical sample will be checked for signal polarity, pull-up implementation and
-library compatibility before certification.
+Bench-verified on D4.
+
+The physical sensor was first tested independently with the established Adafruit
+DHT library:
+
+```text
+DHT11 OK T=30.3 C RH=39.0 %
+DHT11 OK T=30.3 C RH=41.0 %
+```
+
+The project then retested the same physical sensor using the dependency-free
+low-level driver in the HY_M302 library:
+
+```text
+DHT11 OK T=30.2 C RH=39.0 %
+READ 1: T=30.2 C RH=40.0 %
+READ 2: T=30.2 C RH=40.0 %
+READ 3: T=30.2 C RH=40.0 %
+```
+
+The independent reference and in-house driver agree closely, so the D4 mapping,
+the physical DHT11 and the project low-level decoder are all treated as
+**PHYSICAL PASS** on this sample.
 
 ### LM35
 
