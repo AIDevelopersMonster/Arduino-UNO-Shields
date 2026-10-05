@@ -33,7 +33,7 @@ The HY-M302 / KS0183 family provides:
 - LDR / photocell light sensor;
 - rotary potentiometer;
 - IR receiver;
-- passive buzzer;
+- active/self-oscillating buzzer on the tested sample;
 - RGB LED;
 - two additional indicator LEDs;
 - two user push-buttons;
@@ -55,7 +55,7 @@ Keyestudio documents the corresponding KS0183 board as approximately
 | SW1 | D2 | **bench verified** |
 | SW2 | D3 | **bench verified** |
 | DHT11 DATA | D4 | **bench verified** |
-| Passive buzzer | D5 | family reference |
+| Active/self-oscillating buzzer | D5 | **bench verified** |
 | IR receiver | D6 | family reference |
 | Free digital breakout | D7 | family reference |
 | Free digital breakout | D8 | family reference |
@@ -180,13 +180,19 @@ of the 0-1023 ADC range.
 
 ## Output notes
 
-### Passive buzzer
+### Buzzer
 
-Unlike the active buzzer verified on our earlier classic Multi-Function Shield,
-the HY-M302 / KS0183 family is documented with a **passive buzzer on D5**.
+Family-level documentation commonly describes the D5 device as passive, but our
+physical HY-M302 sample behaves as an **active/self-oscillating buzzer**.
 
-The first test should therefore use tone/frequency drive, not assume that a
-constant HIGH level will generate a sustained tone.
+Bench result:
+
+- D5 HIGH -> strongest sustained sound;
+- D5 LOW -> silence;
+- frequency-driven tone output is weaker.
+
+For this tested sample the primary operating mode is therefore direct digital
+ON/OFF, not frequency drive. This is recorded as **PHYSICAL PASS: ACTIVE BUZZER**.
 
 ### LEDs
 
@@ -228,10 +234,10 @@ Recommended sequence:
    - repeated-read stability;
    - timeout/error handling.
 
-5. **TEST-05 — Passive buzzer**
-   - tone generation;
-   - frequency sweep within a conservative audible range;
-   - OFF state.
+5. **TEST-05 — Buzzer**
+   - verify direct HIGH/LOW behavior;
+   - compare optional tone drive;
+   - certify active/passive behavior.
 
 6. **TEST-06 — IR receiver**
    - carrier reception;
