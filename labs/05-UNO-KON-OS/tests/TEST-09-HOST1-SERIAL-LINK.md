@@ -109,123 +109,66 @@ Physically observed:
 The complete task and directory records are emitted as machine-readable
 `@TASK`, `@F` and `@D` lines.
 
-## 5. Install an application from the PC
+## 5. Reliable video path: one transfer script
 
-Close Serial Monitor first so COM4 is free.
+For the video, do **not** type PUTD records manually.
 
-The test source is:
+Close Serial Monitor first so COM4 is free, then run the repository test script:
 
-```text
-labs/05-UNO-KON-OS/apps/KAP2/MULTI.KAP
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\konsol-host1\test09-transfer.ps1
 ```
 
-The host computes size and CRC from the exact local bytes, then sends:
+The script performs the complete deterministic transfer test:
+
+1. reads the local `MULTI.KAP`;
+2. computes its exact byte size, CRC16 and SHA-256;
+3. opens COM4 at 115200;
+4. verifies HOST1 with `@PING`;
+5. uploads the application as `/HOSTAPP.KAP`;
+6. verifies the uploaded file with `@PUTE`;
+7. downloads the same file with `@GET`;
+8. writes `HOSTAPP.roundtrip.KAP` in the repository root;
+9. compares source and returned SHA-256;
+10. lists the SD root and leaves `/HOSTAPP.KAP` installed for the next RUN test.
+
+On the current Windows checkout the expected tested values are:
 
 ```text
-@PUTB /HOSTAPP.KAP
-@PUTD /HOSTAPP.KAP <hex data>
-...
-@PUTE /HOSTAPP.KAP <size> <crc16>
+SIZE   = 524
+CRC    = 85BD
+SHA256 = DD2740D4C8F770839F01969B0C9BBACE4CD18386A2AD8464108B3FE0449FAF5A
 ```
 
-On the current Windows checkout the physically tested file is:
+The important successful ending is:
 
 ```text
-size 524 B
-CRC16-CCITT 85BD
-```
-
-The GitHub LF-only copy may have a different byte size and CRC. That is not a
-protocol error: KAP ignores whitespace, while HOST1 transfers and verifies the
-exact local bytes.
-
-Observed physical result:
-
-```text
-@OK PUTB
-@OK PUTD ...
-@OK PUTE 524 85BD
-@F 524 HOSTAPP.KAP
-```
-
-
-
-### Important manual-test note
-
-`@PUTD` is not a standalone command. It requires a hexadecimal payload:
-
-```text
-@PUTD /HOSTAPP.KAP <hex-bytes>
-```
-
-For example:
-
-```text
-@PUTD /HOSTAPP.KAP 34423431353033320D0A313030300D0A
-```
-
-Running only:
-
-```text
-@PUTD /HOSTAPP.KAP
-```
-
-correctly returns:
-
-```text
-@ERR ARGS
-```
-
-Also note that `@PUTB /HOSTAPP.KAP` truncates or creates the destination file.
-Therefore, if `PUTB` is followed by an invalid/empty `PUTD`, the destination
-remains zero bytes and a later verification such as:
-
-```text
-@PUTE /HOSTAPP.KAP 524 85BD
-```
-
-correctly fails with the observed empty-file state:
-
-```text
-@ERR VERIFY 0 FFFF
-```
-
-For the full application transfer, use the PowerShell chunk uploader or another
-HOST1 client that sends every `PUTD` line with actual hex data.
-
-## 6. Download round-trip
-
-Request:
-
-```text
-@GET /HOSTAPP.KAP
-```
-
-Observed framing:
-
-```text
-@BEGIN GET 524
-@DATA ...
-@END GET 524 85BD
-```
-
-The downloaded bytes were written to `HOSTAPP.roundtrip.KAP` and compared by
-SHA-256 with the original local MULTI.KAP.
-
-Observed:
-
-```text
+BEGIN SIZE = 524
+END SIZE   = 524
+RX SIZE    = 524
+END CRC    = 85BD
 SRC SHA256 = DD2740D4C8F770839F01969B0C9BBACE4CD18386A2AD8464108B3FE0449FAF5A
 RX  SHA256 = DD2740D4C8F770839F01969B0C9BBACE4CD18386A2AD8464108B3FE0449FAF5A
 MATCH      = True
+
+TEST-09 HOST1 TRANSFER ROUND-TRIP: PASS
 ```
 
-This certifies an exact bidirectional path:
+The exact size/CRC may differ on another checkout if text line endings differ.
+The script always verifies the exact local source bytes, so `MATCH = True` is
+the decisive round-trip result.
+
+## 6. What the transfer script certifies
+
+The script certifies an exact bidirectional path:
 
 ```text
 PC -> USB-TTL -> KonSol -> microSD
 microSD -> KonSol -> USB-TTL -> PC
 ```
+
+The returned file must be byte-for-byte identical to the local source according
+to SHA-256.
 
 ## 7. Remote application launch
 
