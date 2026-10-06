@@ -71,4 +71,18 @@ PC
            KonSol 0.7
 ```
 
-Status: **IMPLEMENTED / PHYSICAL TEST PENDING**.
+Status: **TEST-10 FULL PHYSICAL PASS**.
+
+Verified on physical KonSol 0.7 hardware:
+
+- COM4 connection and HOST1 PING;
+- parsed INFO / RAM / TASKS state;
+- microSD browsing;
+- GUI Install / Download / Run / Stop / Delete;
+- exact GUI round-trip with matching SHA-256;
+- KASM -> KAP build from the GUI;
+- execution of the GUI-built application on TFT/Touch;
+- clean APP EXIT 0 and remote APP EXIT 254 via Stop;
+- RAM recovery to 652 B after application termination;
+- FAT 8.3 destination-name validation;
+- safe short PUTD records below the UNO HardwareSerial RX-buffer limit.
