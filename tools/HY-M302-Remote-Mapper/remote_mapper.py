@@ -202,10 +202,16 @@ def upload_mapper(
 
 
 class MapperLink:
-    def __init__(self, port: str, baud: int = BAUD):
+    def __init__(
+        self,
+        port: str,
+        baud: int = BAUD,
+        require_mapper: bool = True,
+    ):
         require_pyserial()
         self.port = port
         self.baud = baud
+        self.require_mapper = require_mapper
         self.ser = None
 
     def __enter__(self) -> "MapperLink":
@@ -221,22 +227,40 @@ class MapperLink:
 
         # Classic UNO resets when the serial port opens.
         time.sleep(2.2)
-        self.ser.reset_input_buffer()
-        self.ser.write(b"ID\n")
-        self.ser.flush()
 
-        deadline = time.monotonic() + 3.0
+        if self.require_mapper and not self.probe_mapper():
+            # The COM port DID open. This is a firmware/protocol mismatch,
+            # not a transport connection failure.
+            raise MapperError(
+                f"{self.port} opened, but RemoteMapper firmware did not answer READY"
+            )
+
+        return self
+
+    def probe_mapper(self, timeout: float = 2.0) -> bool:
+        if self.ser is None:
+            raise MapperError("serial port is not open")
+
+        try:
+            self.ser.reset_input_buffer()
+            self.ser.write(b"ID\n")
+            self.ser.flush()
+        except serial.SerialException as exc:
+            raise MapperError(f"serial I/O failed on {self.port}: {exc}") from exc
+
+        deadline = time.monotonic() + timeout
         seen_id = False
+
         while time.monotonic() < deadline:
-            line = self.readline(0.4)
+            line = self.readline(0.25)
             if not line:
                 continue
             if line.startswith("HY_M302_REMOTE_MAPPER"):
                 seen_id = True
             if seen_id and line == "READY":
-                return self
+                return True
 
-        raise MapperError("mapper firmware did not answer with READY")
+        return False
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self.ser is not None:
@@ -537,6 +561,7 @@ class MapperGUI:
         self.learned: list[KeyCode] = []
         self.worker_events: queue.Queue = queue.Queue()
         self.link: MapperLink | None = None
+        self.mapper_ready = False
         self.step_index = 0
 
         top = ttk.Frame(self.window, padding=10)
@@ -640,7 +665,8 @@ class MapperGUI:
                 self.link.__exit__(None, None, None)
             finally:
                 self.link = None
-        self.connect_btn.config(text="Connect")
+        self.mapper_ready = False
+        self.connect_btn.config(text="Connect", state="normal")
 
     def toggle_connection(self) -> None:
         if self.link is not None:
@@ -658,10 +684,16 @@ class MapperGUI:
         self.status_var.set(f"Connecting to {port}...")
 
         def work():
-            link = MapperLink(port)
+            link = MapperLink(port, require_mapper=False)
             try:
                 link.__enter__()
-                self.log_event("connected", link)
+                mapper_ready = False
+                try:
+                    mapper_ready = link.probe_mapper(timeout=1.5)
+                except MapperError:
+                    # Port is already open; mapper probe is a separate status.
+                    mapper_ready = False
+                self.log_event("connected", (link, mapper_ready))
             except Exception as exc:
                 try:
                     link.__exit__(None, None, None)
@@ -702,18 +734,23 @@ class MapperGUI:
             self.status_var.set(str(exc))
             return
 
-        if self.link is not None:
+        if self.link is not None and self.mapper_ready:
             self.learned.clear()
             self.step_index = 0
             for item in self.tree.get_children():
                 self.tree.delete(item)
             self._update_step_label()
             self.status_var.set(
-                "Mapper connected - click Capture, then press the requested key"
+                "COM CONNECTED / MAPPER READY - click Capture, then press the requested key"
             )
             return
 
-        self.status_var.set("Checking mapper firmware...")
+        if self.link is not None:
+            # COM is connected but another firmware is running.
+            # Release the port before arduino-cli uploads RemoteMapper.
+            self._disconnect_link()
+
+        self.status_var.set("Checking / preparing RemoteMapper firmware...")
 
         def work():
             link = None
@@ -828,17 +865,23 @@ class MapperGUI:
                 if kind == "flash_ok":
                     self.status_var.set("Mapper firmware uploaded")
                 elif kind == "connected":
-                    self.link = payload
+                    link, mapper_ready = payload
+                    self.link = link
+                    self.mapper_ready = mapper_ready
                     self.connect_btn.config(text="Disconnect", state="normal")
-                    self.status_var.set(
-                        f"Connected to {self.port_var.get()} - mapper READY"
-                    )
+                    if mapper_ready:
+                        self.status_var.set(
+                            f"COM CONNECTED: {self.port_var.get()} / MAPPER READY"
+                        )
+                    else:
+                        self.status_var.set(
+                            f"COM CONNECTED: {self.port_var.get()} / OTHER FIRMWARE"
+                        )
                 elif kind == "connect_error":
+                    self.mapper_ready = False
                     self.connect_btn.config(text="Connect", state="normal")
                     self.status_var.set(
-                        "Connection failed: "
-                        + str(payload)
-                        + " | Use Start learning (auto prepare) if another firmware is loaded."
+                        "COM OPEN FAILED: " + str(payload)
                     )
                 elif kind == "log":
                     self.status_var.set(str(payload))
@@ -846,6 +889,7 @@ class MapperGUI:
                     self.status_var.set(str(payload))
                 elif kind == "learning_ready":
                     self.link = payload
+                    self.mapper_ready = True
                     self.connect_btn.config(text="Disconnect", state="normal")
                     self.learned.clear()
                     self.step_index = 0
@@ -853,7 +897,7 @@ class MapperGUI:
                         self.tree.delete(item)
                     self._update_step_label()
                     self.status_var.set(
-                        "Mapper connected - click Capture, then press the requested key"
+                        "COM CONNECTED / MAPPER READY - click Capture, then press the requested key"
                     )
                 elif kind == "frame":
                     frame: KeyCode = payload
