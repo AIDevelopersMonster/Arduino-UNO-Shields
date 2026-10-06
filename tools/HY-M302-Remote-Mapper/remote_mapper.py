@@ -230,7 +230,10 @@ class MapperLink:
 
         if self.require_mapper and not self.probe_mapper():
             # The COM port DID open. This is a firmware/protocol mismatch,
-            # not a transport connection failure.
+            # not a transport connection failure. Close it before raising so
+            # arduino-cli can immediately take ownership for a firmware upload.
+            self.ser.close()
+            self.ser = None
             raise MapperError(
                 f"{self.port} opened, but RemoteMapper firmware did not answer READY"
             )
@@ -668,6 +671,13 @@ class MapperGUI:
         self.mapper_ready = False
         self.connect_btn.config(text="Connect", state="normal")
 
+    def _release_port_for_upload(self) -> None:
+        # pyserial and avrdude/arduino-cli cannot own the same Windows COM port.
+        # Always close our handle first and allow the driver to release it.
+        self._disconnect_link()
+        self.status_var.set("COM RELEASED FOR UPLOAD")
+        time.sleep(0.8)
+
     def toggle_connection(self) -> None:
         if self.link is not None:
             self._disconnect_link()
@@ -710,8 +720,8 @@ class MapperGUI:
             self.status_var.set(str(exc))
             return
 
-        self._disconnect_link()
-        self.status_var.set("Compiling/uploading mapper...")
+        self._release_port_for_upload()
+        self.status_var.set("COM FREE - compiling/uploading mapper...")
 
         def work():
             try:
@@ -748,7 +758,7 @@ class MapperGUI:
         if self.link is not None:
             # COM is connected but another firmware is running.
             # Release the port before arduino-cli uploads RemoteMapper.
-            self._disconnect_link()
+            self._release_port_for_upload()
 
         self.status_var.set("Checking / preparing RemoteMapper firmware...")
 
@@ -762,6 +772,7 @@ class MapperGUI:
                 except MapperError:
                     link.__exit__(None, None, None)
                     link = None
+                    time.sleep(0.8)
 
                     self.log_event(
                         "log",
