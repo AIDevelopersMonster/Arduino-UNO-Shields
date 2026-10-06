@@ -1134,7 +1134,93 @@ five cooperative tasks remained active, and `DIR /` succeeded again.
 TEST-08 therefore closes as FULL PHYSICAL PASS with both the new multi-label
 control-flow path and backward compatibility verified on the physical UNO.
 
+### TEST-09 — KonSol 0.7 / HOST1 Serial Link
+
+KonSol 0.7 adds a machine-oriented protocol over the existing USB-TTL Serial
+connection while preserving the human Shell and KAP1/KAP2 compatibility.
+
+Verified build:
+
+```text
+Flash: 30442 / 32256 bytes (94%)
+SRAM globals: 1316 / 2048 bytes (64%)
+Linker-reported SRAM remaining: 732 bytes
+Boot free RAM: 724 B
+Resident shell free RAM: 652 B
+```
+
+HOST1 physically verified:
+
+```text
+@PING
+@INFO
+@MEM
+@PS
+@LS
+@PUTB / @PUTD / @PUTE
+@GET
+@RUN
+@APP
+@STOP
+@DEL
+```
+
+The PC -> HOST1 -> microSD -> HOST1 -> PC file round-trip was verified by CRC
+and matching SHA-256. A transferred KAP2 application was launched without
+reflashing the UNO or removing the microSD card and returned through APP EXIT 0.
+
+Procedure:
+
+[tests/TEST-09-HOST1-SERIAL-LINK.md](tests/TEST-09-HOST1-SERIAL-LINK.md)
+
+Status: **FULL PHYSICAL PASS**.
+
+### TEST-10 — KonSol Host Manager
+
+TEST-10 moves the next layer to the PC rather than spending the remaining
+ATmega328P Flash headroom. The Windows/Tkinter Host Manager wraps HOST1 in a
+normal desktop operator interface.
+
+Verified functions:
+
+- COM-port discovery and connection;
+- parsed INFO / RAM / TASKS state;
+- microSD file browser;
+- Install / Download / Run / Stop / Delete;
+- safe transfer chunking for the UNO Serial RX limit;
+- CRC verification and SHA-256 round-trip;
+- KASM -> KAP build from the GUI;
+- execution of a GUI-built KAP2 application on TFT/Touch.
+
+Physical runtime evidence:
+
+```text
+resident: APP=0 RAM=652 TASKS=5
+running:  APP=1 RAM=621 TASKS=5
+EXIT 0:   APP=0 RAM=652 TASKS=5
+STOP:     APP EXIT 254 -> APP=0 RAM=652 TASKS=5
+```
+
+The exact GUI Install -> Download round-trip produced matching SHA-256 values.
+
+Program:
+
+[../../tools/konsol-host-manager](../../tools/konsol-host-manager/)
+
+Procedure:
+
+[tests/TEST-10-HOST-MANAGER.md](tests/TEST-10-HOST-MANAGER.md)
+
+Status: **FULL PHYSICAL PASS**.
+
 ## Publication
+
+KonSol 0.7 TEST-09/TEST-10 publication is the next planned standalone technical
+article. It will cover HOST1, exact host/device file round-trip, remote
+application lifecycle control and the Host Manager/KASM desktop toolchain.
+KonSol 0.6 remains an immutable earlier publication for the TEST-08 multi-label
+result.
+
 
 KonSol 0.6 TEST-08 is published as a **standalone technical article**, not as a
 replacement/version update of the KonSol 0.5 record.
