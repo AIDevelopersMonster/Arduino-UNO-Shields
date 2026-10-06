@@ -1,0 +1,93 @@
+# LAB-05 / TEST-10 — KonSol Host Manager
+
+Status: **IMPLEMENTED / PHYSICAL TEST PENDING**.
+
+## Purpose
+
+TEST-09 physically proved the HOST1 machine protocol. TEST-10 moves the next
+layer to the PC: a normal desktop manager for the assembled KonSol device.
+
+This is deliberately host-side work. KonSol 0.7 already occupies about 94% of
+ATmega328P Flash, so TEST-10 should improve usability without spending the last
+UNO firmware headroom.
+
+## Program
+
+`tools/konsol-host-manager/konsol_host_manager.py`
+
+## Start
+
+```powershell
+cd C:\GitHub\Arduino-UNO-Shields
+git pull
+python -m pip install pyserial
+python .\tools\konsol-host-manager\konsol_host_manager.py
+```
+
+## What TEST-10 must verify
+
+1. COM port discovery.
+2. Connect to KonSol 0.7 and receive HOST1 PONG.
+3. INFO line is parsed into version / HOST / SD / APP / RAM / TASKS.
+4. SD root appears as a desktop file list.
+5. `Install KAP` transfers a local application and verifies size + CRC.
+6. `Download` retrieves the selected file and verifies CRC.
+7. `Run` starts a selected .KAP application on KonSol.
+8. TFT/Touch application still works while the manager remains connected.
+9. `APP`, status and asynchronous Serial output remain visible in the log.
+10. `Stop` can terminate a running application.
+11. `Delete` removes a selected file from microSD.
+12. `Build KASM -> KAP` invokes the existing repository KASM assembler.
+
+## First physical test
+
+Keep Serial Monitor closed because the manager needs exclusive access to COM4.
+
+Start:
+
+```powershell
+python .\tools\konsol-host-manager\konsol_host_manager.py
+```
+
+Then in the GUI:
+
+```text
+Refresh ports
+-> select COM4
+-> Connect
+-> Refresh status
+-> Refresh files
+```
+
+Expected top status:
+
+```text
+KonSol: 0.7
+HOST: 1
+SD: READY
+APP: IDLE
+RAM: about 652 B
+TASKS: 5
+```
+
+Expected file table: the same microSD root previously observed through
+`@LS /`.
+
+## Why this matters
+
+TEST-09 proved that another computer *can* manage KonSol through HOST1.
+
+TEST-10 checks the stronger practical result: an operator can manage the device
+without manually typing protocol records.
+
+The intended transition is:
+
+```text
+TEST-09
+raw HOST1 protocol
+
+        ->
+
+TEST-10
+desktop KonSol Host Manager
+```
