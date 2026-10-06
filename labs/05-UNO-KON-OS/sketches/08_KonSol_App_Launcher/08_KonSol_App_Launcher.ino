@@ -1,23 +1,20 @@
 /*
   KonSol 0.8
-  LAB-05 / TEST-09
+  LAB-05 / TEST-11
   Arduino UNO R3 + MAR2406 2.4" TFT Touch + microSD
 
   Goal:
-    Keep the physically certified KonSol 0.8 KAP2 runtime intact and add a
-    machine-oriented USB-TTL Serial host link for another computer.
+    Preserve the physically certified KonSol 0.7 HOST1/KAP2 runtime and add
+    the first on-device application launcher without requiring the PC manager.
 
-    TEST-09 adds HOST1:
-      - framed @ commands that coexist with the human A:/> shell
-      - machine-readable INFO / MEM / PS / LS / APP status
-      - GET file transfer from microSD as ASCII hex
-      - PUTB / PUTD / PUTE verified file upload to microSD
-      - DEL, RUN and STOP from a host computer
-      - no exposed GPIO assumption: TFT, Touch, microSD and USB-TTL define the
-        physical boundary of this assembled KonSol device
+    TEST-11 / KonSol 0.8 adds:
+      - APPS button on the resident dashboard
+      - KAP-only application view on microSD
+      - Touch launch of an external KAP1/KAP2 application
+      - separate FILES browser retained for general filesystem access
+      - no new external hardware assumptions
 
-  Existing KAP1/KAP2 bytecode and KonSol 0.8 multi-label execution are retained.
-  Host file transfer is synchronous and is rejected while an application runs.
+  Existing KAP1/KAP2 bytecode, HOST1 and the normal file browser are retained.
 
   No MCUFRIEND_kbv.
   No Adafruit_GFX.
@@ -43,7 +40,7 @@
 #include <avr/wdt.h>
 #include <avr/pgmspace.h>
 
-#define KONSOL_VERSION "0.7"
+#define KONSOL_VERSION "0.8"
 
 const uint8_t SD_CS = 10;
 const uint32_t SERIAL_BAUD = 115200UL;
@@ -566,8 +563,11 @@ static void browserDraw() {
            browserKapOnly ? PSTR("KONSOL 0.8 APP LAUNCHER")
                           : PSTR("KONSOL 0.8 FILE BROWSER"),
            2, LCD_CYAN);
-  lcdText(8, 28, browserKapOnly ? "KAP APPLICATIONS" : currentPath,
-          1, LCD_YELLOW);
+  if (browserKapOnly) {
+    lcdTextP(8, 28, PSTR("KAP APPLICATIONS"), 1, LCD_YELLOW);
+  } else {
+    lcdText(8, 28, currentPath, 1, LCD_YELLOW);
+  }
   lcdHLine(6, 40, 308, LCD_BLUE);
 
   browserHasNext = false;
