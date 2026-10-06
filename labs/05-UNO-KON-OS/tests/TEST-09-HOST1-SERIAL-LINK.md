@@ -148,6 +148,51 @@ Observed physical result:
 @F 524 HOSTAPP.KAP
 ```
 
+
+
+### Important manual-test note
+
+`@PUTD` is not a standalone command. It requires a hexadecimal payload:
+
+```text
+@PUTD /HOSTAPP.KAP <hex-bytes>
+```
+
+For example:
+
+```text
+@PUTD /HOSTAPP.KAP 34423431353033320D0A313030300D0A
+```
+
+Running only:
+
+```text
+@PUTD /HOSTAPP.KAP
+```
+
+correctly returns:
+
+```text
+@ERR ARGS
+```
+
+Also note that `@PUTB /HOSTAPP.KAP` truncates or creates the destination file.
+Therefore, if `PUTB` is followed by an invalid/empty `PUTD`, the destination
+remains zero bytes and a later verification such as:
+
+```text
+@PUTE /HOSTAPP.KAP 524 85BD
+```
+
+correctly fails with the observed empty-file state:
+
+```text
+@ERR VERIFY 0 FFFF
+```
+
+For the full application transfer, use the PowerShell chunk uploader or another
+HOST1 client that sends every `PUTD` line with actual hex data.
+
 ## 6. Download round-trip
 
 Request:
