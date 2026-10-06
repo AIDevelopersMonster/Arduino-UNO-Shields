@@ -8,8 +8,8 @@ The tool targets Arduino UNO + HY-M302 with the onboard IR receiver on D6.
 
 The mapper automates the bench workflow:
 
-1. uses the bundled UNO mapper firmware from the tool folder;
-2. downloads the repository copy only if that bundled firmware is missing locally;
+1. locates the dedicated \`06_Remote_Mapper\` sketch;
+2. downloads the repository copy if the sketch is missing locally;
 3. compiles it with \`arduino-cli\`;
 4. uploads it to the selected Arduino UNO;
 5. opens the serial port at 115200 baud;
@@ -174,26 +174,3 @@ The host tool ignores repeat lines while learning keys.
 ## Scope
 
 This first version learns NEC remotes because NEC is physically verified on the tested HY-M302 and iDroid remote. The generated symbolic-key layer is intentionally independent of raw protocol details so other remote protocols can be added later.
-
-
-## Bundled firmware
-
-The host tool is self-contained with its UNO mapper sketch:
-
-```text
-tools/HY-M302-Remote-Mapper/
-  remote_mapper.py
-  run_gui.cmd
-  generate_from_json.cmd
-  firmware/
-    RemoteMapper/
-      RemoteMapper.ino
-```
-
-The GUI/CLI compiles this bundled sketch directly. The library example
-`libraries/HY_M302/examples/06_Remote_Mapper/` remains useful as an Arduino
-example, but the host mapper no longer depends on that example being present.
-
-When **Start learning (auto prepare)** is pressed, the tool first checks whether
-the UNO already runs the mapper firmware. If not, it compiles and uploads the
-bundled `RemoteMapper.ino` automatically.
