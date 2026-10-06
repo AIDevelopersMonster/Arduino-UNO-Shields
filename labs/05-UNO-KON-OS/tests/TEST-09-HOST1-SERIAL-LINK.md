@@ -111,8 +111,6 @@ The complete task and directory records are emitted as machine-readable
 
 ## 5. Reliable video path: one transfer script
 
-For the video, do **not** type PUTD records manually.
-
 Close Serial Monitor first so COM4 is free, then run the repository test script:
 
 ```powershell
