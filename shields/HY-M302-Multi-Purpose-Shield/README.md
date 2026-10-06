@@ -16,9 +16,11 @@ bench-certified before family-level assumptions are promoted to verified facts.
 Current repository status:
 
 - family identification: **documented / high confidence**;
-- pin-map below: **working reference, not yet bench-certified on our sample**;
-- laboratory firmware: **not yet created**;
-- physical PASS status: **not yet assigned**.
+- primary onboard pin map: **bench-certified on the tested sample**;
+- DHT11, buttons, LEDs, RGB, potentiometer, LDR, active buzzer and async NEC IR: **PHYSICAL PASS**;
+- LM35 on A2: **PHYSICAL FAIL on this individual sample**;
+- remote mapper + remote-controlled diagnostic menu: **PHYSICAL PASS**;
+- D7/D8, I2C and TTL UART expansion remain separate future compatibility tests.
 
 ## Video
 
@@ -212,6 +214,33 @@ IR STATS dropped_edges=0 dropped_frames=0
 ```
 
 Status: **ASYNC NEC ROBUSTNESS PASS on the tested sample**.
+
+### Learned remote control profile
+
+The project now includes a learned NEC profile for the tested iDroid / Orange
+Pi remote. The host mapper captured 19 named keys and generated symbolic C++
+bindings instead of relying on raw command values in application code.
+
+The profile is stored in:
+
+```text
+profiles/HY-M302-Remotes/iDroid-OrangePi/
+```
+
+The remote-controlled diagnostic example uses:
+
+```text
+0..9       select test
+OK         start / confirm
+RETURN     stop / cancel
+HOME       main menu
+MENU       help
+arrows     previous / next test
+POWER      safe OFF
+```
+
+The menu path was physically verified on the real UNO + HY-M302 and is recorded
+as **PHYSICAL PASS**.
 
 ## Output notes
 
