@@ -2,7 +2,7 @@
 
 Low-overhead Arduino UNO library for the HY-M302 multi-purpose shield.
 
-Status: **v0.1 experimental / modular refactor complete, integrated physical test pending**.
+Status: **v0.1 experimental / modular refactor complete / remote-controlled test menu PHYSICAL PASS; full integrated certification remains open**.
 
 The library intentionally starts with its own small hardware routines instead of
 pulling in large third-party dependencies. This keeps the Flash/SRAM cost visible
@@ -329,3 +329,46 @@ hiding it.
 
 The library remains at 0.1.0 until TEST-05 compiles and passes on the physical
 UNO + HY-M302. After that result, the planned promotion is 0.2.0.
+
+
+## Remote Mapper and TEST-07 physical pass
+
+A host-side CLI/GUI mapper now learns a physical NEC remote through the onboard
+D6 receiver and generates a reusable symbolic key profile.
+
+The tested iDroid / Orange Pi remote profile contains 19 learned keys:
+
+```text
+0 1 2 3 4 5 6 7 8 9
+OK HOME RETURN MENU
+UP DOWN LEFT RIGHT
+POWER
+```
+
+The independently checked OK key is:
+
+```text
+RAW=0xA35CFB04 ADDR=0x04 CMD=0x5C
+```
+
+The generated profile is stored under:
+
+```text
+profiles/HY-M302-Remotes/iDroid-OrangePi/
+```
+
+Example `07_Remote_Test_Menu` was compiled and physically exercised on the
+UNO + HY-M302. The remote selection/command path works on hardware.
+
+Observed build size before the fully cooperative follow-up refactor:
+
+```text
+Flash: 10786 / 32256 bytes (33%)
+SRAM:    747 / 2048 bytes (36%)
+free SRAM reported by the build: 1301 bytes
+```
+
+Status: **REMOTE TEST MENU PHYSICAL PASS**.
+
+The follow-up implementation removes long blocking test loops so RETURN, HOME
+and POWER remain responsive while a test is active.
