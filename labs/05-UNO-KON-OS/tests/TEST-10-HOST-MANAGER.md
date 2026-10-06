@@ -119,3 +119,20 @@ and TFT/Touch execution.
 
 Next gate: complete APP EXIT, verify APP returns IDLE, then test GUI Download and
 byte-integrity verification.
+
+
+## Physical evidence — clean APP exit and resident recovery
+
+Observed on physical hardware after GUI launch of `/HOSTMGR.KAP`:
+
+```text
+@OK INFO V=0.7 HOST=1 SD=1 APP=1 RAM=621 TASKS=5
+TEST10 HOST MANAGER
+HOST MANAGER APP PASS
+APP EXIT 0
+@OK INFO V=0.7 HOST=1 SD=1 APP=0 RAM=652 TASKS=5
+```
+
+This verifies clean return from the external KAP2 application to resident KonSol:
+APP returns to IDLE, RAM returns from 621 B to the normal 652 B shell value, and
+all five cooperative tasks remain present.
