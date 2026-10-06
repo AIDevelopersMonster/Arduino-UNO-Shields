@@ -546,7 +546,7 @@ class MapperGUI:
         ttk.Button(actions, text="1. Flash mapper", command=self.flash).pack(
             side="left", padx=(0, 8)
         )
-        ttk.Button(actions, text="2. Start learning", command=self.start_learning).pack(
+        ttk.Button(actions, text="2. Start learning (auto prepare)", command=self.start_learning).pack(
             side="left", padx=(0, 8)
         )
         self.capture_btn = ttk.Button(
@@ -643,18 +643,51 @@ class MapperGUI:
     def start_learning(self) -> None:
         try:
             port = self._require_port()
-            if self.link is not None:
-                self.link.__exit__(None, None, None)
-            self.link = MapperLink(port)
-            self.link.__enter__()
-            self.learned.clear()
-            self.step_index = 0
-            for item in self.tree.get_children():
-                self.tree.delete(item)
-            self._update_step_label()
-            self.status_var.set("Mapper connected")
         except Exception as exc:
             self.status_var.set(str(exc))
+            return
+
+        if self.link is not None:
+            self.link.__exit__(None, None, None)
+            self.link = None
+
+        self.status_var.set("Checking mapper firmware...")
+
+        def work():
+            link = None
+            try:
+                # First try the firmware already present on the UNO.
+                link = MapperLink(port)
+                try:
+                    link.__enter__()
+                except MapperError:
+                    link.__exit__(None, None, None)
+                    link = None
+
+                    self.log_event(
+                        "log",
+                        "Mapper firmware not detected; compiling/uploading it automatically...",
+                    )
+                    upload_mapper(
+                        self.root_path,
+                        port,
+                        DEFAULT_FQBN,
+                        lambda msg: self.log_event("log", msg),
+                    )
+
+                    link = MapperLink(port)
+                    link.__enter__()
+
+                self.log_event("learning_ready", link)
+            except Exception as exc:
+                if link is not None:
+                    try:
+                        link.__exit__(None, None, None)
+                    except Exception:
+                        pass
+                self.log_event("error", str(exc))
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _update_step_label(self) -> None:
         if self.step_index >= len(DEFAULT_KEYS):
@@ -736,6 +769,16 @@ class MapperGUI:
                     self.status_var.set(str(payload))
                 elif kind == "error":
                     self.status_var.set(str(payload))
+                elif kind == "learning_ready":
+                    self.link = payload
+                    self.learned.clear()
+                    self.step_index = 0
+                    for item in self.tree.get_children():
+                        self.tree.delete(item)
+                    self._update_step_label()
+                    self.status_var.set(
+                        "Mapper connected - click Capture, then press the requested key"
+                    )
                 elif kind == "frame":
                     frame: KeyCode = payload
                     self.learned.append(frame)
