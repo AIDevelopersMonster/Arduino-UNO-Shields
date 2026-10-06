@@ -118,6 +118,21 @@ class Host1Client:
         del self.rx[: pos + 1]
         return raw.rstrip(b"\r").decode("utf-8", "replace").strip()
 
+    @staticmethod
+    def _normalize_line(line: str) -> str:
+        # After opening the USB serial port, DTR resets the UNO. The KonSol
+        # human prompt "A:/> " has no trailing newline, so the first HOST1
+        # response can legally arrive as:
+        #
+        #     A:/> @OK PONG HOST1
+        #
+        # Keep boot text visible in the log, but strip only this known prompt
+        # prefix before HOST1 matching.
+        marker = "A:/> "
+        if line.startswith(marker + "@"):
+            return line[len(marker):]
+        return line
+
     def _next_line_unlocked(self, timeout: float = HOST_TIMEOUT) -> str:
         ser = self._require()
         deadline = time.monotonic() + timeout
@@ -127,7 +142,7 @@ class Host1Client:
             if line is not None:
                 if line:
                     self._emit(line)
-                    return line
+                    return self._normalize_line(line)
                 continue
 
             waiting = ser.in_waiting
@@ -477,6 +492,8 @@ class HostManager(tk.Tk):
                         callback(result)
                 elif kind == "error":
                     self.progress_var.set(0.0)
+                    if self.status_var.get().startswith("CONNECTING"):
+                        self.status_var.set("DISCONNECTED")
                     self._append_log("ERROR: " + event[1])
                     messagebox.showerror("KonSol Host Manager", event[1])
         except queue.Empty:
