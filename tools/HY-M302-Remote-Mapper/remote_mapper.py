@@ -38,7 +38,7 @@ except ImportError:
 BAUD = 115200
 DEFAULT_FQBN = "arduino:avr:uno"
 SKETCH_REL = pathlib.Path(
-    "libraries/HY_M302/examples/06_Remote_Mapper/06_Remote_Mapper.ino"
+    "tools/HY-M302-Remote-Mapper/firmware/RemoteMapper/RemoteMapper.ino"
 )
 SKETCH_DIR_REL = SKETCH_REL.parent
 LIB_REL = pathlib.Path("libraries")
@@ -46,7 +46,7 @@ OUT_REL = pathlib.Path("build/HY-M302/REMOTE-MAPPER")
 RAW_SKETCH_URL = (
     "https://raw.githubusercontent.com/AIDevelopersMonster/"
     "Arduino-UNO-Shields/main/"
-    "libraries/HY_M302/examples/06_Remote_Mapper/06_Remote_Mapper.ino"
+    "tools/HY-M302-Remote-Mapper/firmware/RemoteMapper/RemoteMapper.ino"
 )
 
 DEFAULT_KEYS = [
@@ -128,7 +128,7 @@ def ensure_mapper_sketch(root: pathlib.Path, log: Callable[[str], None]) -> path
         return sketch
 
     sketch.parent.mkdir(parents=True, exist_ok=True)
-    log("Mapper sketch is missing locally; downloading repository copy...")
+    log("Bundled mapper firmware is missing locally; downloading repository copy...")
     try:
         with urllib.request.urlopen(RAW_SKETCH_URL, timeout=20) as response:
             data = response.read()
