@@ -41,7 +41,7 @@ static void safeOff() {
 
 static void printMainMenu() {
   Serial.println(F(""));
-  Serial.println(F("HY-M302 REMOTE TEST MENU"));
+  Serial.println(F("HY-M302 TEST MENU - IR + SERIAL"));
   Serial.println(F(""));
   Serial.println(F("0  SUMMARY / ALL STATUS"));
   Serial.println(F("1  BUTTONS + DISCRETE LEDS"));
@@ -54,16 +54,14 @@ static void printMainMenu() {
   Serial.println(F("8  INTEGRATED RUN"));
   Serial.println(F("9  STATS"));
   Serial.println(F(""));
-  Serial.println(F("OK      start / confirm selected test"));
-  Serial.println(F("RETURN  stop / cancel immediately"));
-  Serial.println(F("HOME    stop + main menu"));
-  Serial.println(F("MENU    help"));
-  Serial.println(F("UP/DOWN or LEFT/RIGHT  change test"));
-  Serial.println(F("POWER   immediate safe OFF"));
+  Serial.println(F("IR REMOTE:"));
+  Serial.println(F("0..9 select | OK start | RETURN cancel"));
+  Serial.println(F("HOME menu | MENU help | arrows change test | POWER safe OFF"));
   Serial.println(F(""));
-  Serial.println(F("SERIAL / CLI mirrors the remote:"));
-  Serial.println(F("0..9, OK/RUN, RETURN/STOP/X, HOME, MENU/HELP/?"));
-  Serial.println(F("UP, DOWN, LEFT, RIGHT, POWER/OFF, STATS, ZERO"));
+  Serial.println(F("SERIAL / CLI (type command, then Enter):"));
+  Serial.println(F("0..9 select | OK or RUN start | RETURN/STOP/X cancel"));
+  Serial.println(F("HOME | MENU/HELP/? | UP/DOWN/LEFT/RIGHT | POWER/OFF"));
+  Serial.println(F("STATS/S | ZERO/Z"));
   Serial.println(F(""));
 }
 
@@ -133,7 +131,8 @@ static void printSelection(uint8_t n) {
       break;
   }
 
-  Serial.println(F("Press OK to start/confirm, RETURN to cancel."));
+  Serial.println(F("IR: OK=start, RETURN=cancel"));
+  Serial.println(F("SERIAL: type OK/RUN or RETURN/STOP/X, then Enter"));
 }
 
 static void printSummary() {
@@ -166,7 +165,7 @@ static void completeActiveTest(uint8_t number) {
 
 static void startSelectedTest() {
   if (activeTest != ACTIVE_NONE) {
-    Serial.println(F("TEST ALREADY RUNNING - RETURN TO STOP"));
+    Serial.println(F("TEST ALREADY RUNNING - IR RETURN or SERIAL STOP/X"));
     return;
   }
 
@@ -179,7 +178,7 @@ static void startSelectedTest() {
 
     case 1:
       Serial.println(F("TEST-01 RUNNING"));
-      Serial.println(F("Press SW1/SW2. RETURN stops immediately."));
+      Serial.println(F("Press SW1/SW2. IR RETURN or SERIAL STOP/X stops immediately."));
       stateStartedMs = now;
       activeTest = ACTIVE_1_BUTTONS;
       break;
@@ -195,7 +194,7 @@ static void startSelectedTest() {
 
     case 3:
       Serial.println(F("TEST-03 POT"));
-      Serial.println(F("Rotate POT now. RETURN stops immediately."));
+      Serial.println(F("Rotate POT now. IR RETURN or SERIAL STOP/X stops immediately."));
       sampleMin = 1023;
       sampleMax = 0;
       stateStartedMs = now;
@@ -204,7 +203,7 @@ static void startSelectedTest() {
 
     case 4:
       Serial.println(F("TEST-04 LDR"));
-      Serial.println(F("Cover/uncover sensor now. RETURN stops immediately."));
+      Serial.println(F("Cover/uncover sensor. IR RETURN or SERIAL STOP/X stops immediately."));
       sampleMin = 1023;
       sampleMax = 0;
       stateStartedMs = now;
@@ -228,14 +227,14 @@ static void startSelectedTest() {
 
     case 7:
       Serial.println(F("TEST-07 IR DIAGNOSTICS"));
-      Serial.println(F("Press remote buttons. RETURN stops immediately."));
+      Serial.println(F("Press remote buttons. IR RETURN or SERIAL STOP/X stops immediately."));
       stateStartedMs = now;
       activeTest = ACTIVE_7_IR;
       break;
 
     case 8:
       Serial.println(F("TEST-08 INTEGRATED RUN"));
-      Serial.println(F("RUNNING until RETURN / HOME / POWER."));
+      Serial.println(F("RUNNING until IR RETURN/HOME/POWER or SERIAL STOP/X/HOME/OFF."));
       activeTest = ACTIVE_8_INTEGRATED;
       break;
 
