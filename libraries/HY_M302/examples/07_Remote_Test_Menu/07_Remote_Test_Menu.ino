@@ -1,6 +1,7 @@
 #include <HY_M302.h>
 #include <HY_M302_Remote.h>
 #include <HY_M302_Remote_iDroid_OrangePi.h>
+#include <string.h>
 
 using namespace HY_M302_Remote;
 using HY_M302_Remote::IDroidOrangePi::decode;
@@ -26,6 +27,9 @@ static uint8_t statePhase = 0;
 static uint8_t dhtReadCount = 0;
 static int sampleMin = 1023;
 static int sampleMax = 0;
+
+static char serialCmd[20];
+static uint8_t serialCmdLen = 0;
 
 static void safeOff() {
   shield.rgbOff();
@@ -56,6 +60,10 @@ static void printMainMenu() {
   Serial.println(F("MENU    help"));
   Serial.println(F("UP/DOWN or LEFT/RIGHT  change test"));
   Serial.println(F("POWER   immediate safe OFF"));
+  Serial.println(F(""));
+  Serial.println(F("SERIAL / CLI mirrors the remote:"));
+  Serial.println(F("0..9, OK/RUN, RETURN/STOP/X, HOME, MENU/HELP/?"));
+  Serial.println(F("UP, DOWN, LEFT, RIGHT, POWER/OFF, STATS, ZERO"));
   Serial.println(F(""));
 }
 
@@ -421,6 +429,86 @@ static void handleKey(Key key) {
   }
 }
 
+
+static void resetIrStatsAndQueue() {
+  shield.service();
+
+  HY_M302::IrNecFrame stale;
+  while (shield.readIrNecAsync(stale)) {
+    // Flush frames captured before the reset command.
+  }
+
+  shield.resetIrNecStats();
+  Serial.println(F("IR COUNTERS RESET / QUEUE FLUSHED"));
+}
+
+static void executeSerialCommand(const char* s) {
+  if (s[0] >= '0' && s[0] <= '9' && s[1] == '\0') {
+    const uint8_t n = static_cast<uint8_t>(s[0] - '0');
+    handleKey(static_cast<Key>(static_cast<uint8_t>(KEY_0) + n));
+    return;
+  }
+
+  if (strcmp(s, "OK") == 0 || strcmp(s, "RUN") == 0) {
+    handleKey(KEY_OK);
+  } else if (strcmp(s, "RETURN") == 0 ||
+             strcmp(s, "STOP") == 0 ||
+             strcmp(s, "X") == 0) {
+    handleKey(KEY_RETURN);
+  } else if (strcmp(s, "HOME") == 0) {
+    handleKey(KEY_HOME);
+  } else if (strcmp(s, "MENU") == 0 ||
+             strcmp(s, "HELP") == 0 ||
+             strcmp(s, "?") == 0) {
+    handleKey(KEY_MENU);
+  } else if (strcmp(s, "UP") == 0) {
+    handleKey(KEY_UP);
+  } else if (strcmp(s, "DOWN") == 0) {
+    handleKey(KEY_DOWN);
+  } else if (strcmp(s, "LEFT") == 0) {
+    handleKey(KEY_LEFT);
+  } else if (strcmp(s, "RIGHT") == 0) {
+    handleKey(KEY_RIGHT);
+  } else if (strcmp(s, "POWER") == 0 ||
+             strcmp(s, "OFF") == 0) {
+    handleKey(KEY_POWER);
+  } else if (strcmp(s, "STATS") == 0 ||
+             strcmp(s, "S") == 0) {
+    printIrStats();
+  } else if (strcmp(s, "ZERO") == 0 ||
+             strcmp(s, "Z") == 0) {
+    resetIrStatsAndQueue();
+  } else {
+    Serial.print(F("ERR UNKNOWN SERIAL COMMAND: "));
+    Serial.println(s);
+  }
+}
+
+static void serviceSerialCommands() {
+  while (Serial.available()) {
+    const char c = static_cast<char>(Serial.read());
+
+    if (c == '\r' || c == '\n') {
+      if (serialCmdLen != 0) {
+        serialCmd[serialCmdLen] = '\0';
+        executeSerialCommand(serialCmd);
+        serialCmdLen = 0;
+      }
+      continue;
+    }
+
+    if (serialCmdLen >= sizeof(serialCmd) - 1) {
+      continue;
+    }
+
+    if (c >= 'a' && c <= 'z') {
+      serialCmd[serialCmdLen++] = c - ('a' - 'A');
+    } else {
+      serialCmd[serialCmdLen++] = c;
+    }
+  }
+}
+
 static void printIrFrame(const HY_M302::IrNecFrame& frame) {
   Serial.print(F("IR RAW=0x"));
   Serial.print(frame.raw, HEX);
@@ -446,6 +534,7 @@ void setup() {
 
 void loop() {
   shield.service();
+  serviceSerialCommands();
   serviceActiveTest();
 
   HY_M302::IrNecFrame frame;
