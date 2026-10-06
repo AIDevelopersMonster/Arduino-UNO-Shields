@@ -1,5 +1,5 @@
 #include <HY_M302.h>
-#include "../../../../profiles/HY-M302-Remotes/iDroid-OrangePi/HY_M302_RemoteMap.h"
+#include "HY_M302_RemoteMap.h"
 
 using namespace HY_M302_RemoteMap;
 
