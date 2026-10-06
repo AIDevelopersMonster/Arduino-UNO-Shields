@@ -464,6 +464,10 @@ class HostManager(tk.Tk):
         self.log.see("end")
         self.log.configure(state="disabled")
 
+    def _finish_progress(self) -> None:
+        self.progress_var.set(100.0)
+        self.after(900, lambda: self.progress_var.set(0.0))
+
     def _worker(self, fn, on_done=None) -> None:
         def run():
             try:
@@ -647,7 +651,7 @@ class HostManager(tk.Tk):
             return self.client.put_file(local, remote, progress)
 
         def done(result):
-            self.progress_var.set(100.0)
+            self._finish_progress()
             self._append_log(
                 "INSTALL PASS: {remote}  size={size}  CRC={crc}  SHA256={sha256}".format(
                     **result
@@ -676,7 +680,7 @@ class HostManager(tk.Tk):
             self.events.put(("progress", done, total))
 
         def done(result):
-            self.progress_var.set(100.0)
+            self._finish_progress()
             self._append_log(
                 "DOWNLOAD PASS: {local}  size={size}  CRC={crc}  SHA256={sha256}".format(
                     **result
