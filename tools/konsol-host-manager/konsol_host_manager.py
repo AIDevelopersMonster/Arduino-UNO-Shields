@@ -622,6 +622,37 @@ class HostManager(tk.Tk):
         self.current_path.set(parent)
         self.refresh_files()
 
+    @staticmethod
+    def _make_fat83_name(filename: str) -> str:
+        p = pathlib.PurePosixPath(filename)
+        stem = re.sub(r"[^A-Z0-9]", "", p.stem.upper()) or "APP"
+        ext = re.sub(r"[^A-Z0-9]", "", p.suffix[1:].upper()) or "KAP"
+        return stem[:8] + "." + ext[:3]
+
+    @staticmethod
+    def _is_fat83_path(path: str) -> bool:
+        if not path.startswith("/"):
+            return False
+        parts = [part for part in path.split("/") if part]
+        if not parts:
+            return False
+
+        for part in parts:
+            if "." in part:
+                stem, ext = part.rsplit(".", 1)
+                if not (1 <= len(stem) <= 8 and 1 <= len(ext) <= 3):
+                    return False
+                if not re.fullmatch(r"[A-Za-z0-9_]+", stem):
+                    return False
+                if not re.fullmatch(r"[A-Za-z0-9]+", ext):
+                    return False
+            else:
+                if not (1 <= len(part) <= 8):
+                    return False
+                if not re.fullmatch(r"[A-Za-z0-9_]+", part):
+                    return False
+        return True
+
     def install_kap(self) -> None:
         local_name = filedialog.askopenfilename(
             title="Select KAP application",
@@ -633,13 +664,24 @@ class HostManager(tk.Tk):
         if not local_name:
             return
         local = pathlib.Path(local_name)
-        default_remote = self._remote_for_name(local.name.upper())
+        safe_name = self._make_fat83_name(local.name)
+        default_remote = self._remote_for_name(safe_name)
         remote = simpledialog.askstring(
             "Install KAP",
-            "Destination on KonSol microSD:",
+            "Destination on KonSol microSD (FAT 8.3):",
             initialvalue=default_remote,
         )
         if not remote:
+            return
+
+        remote = remote.strip()
+        if not self._is_fat83_path(remote):
+            messagebox.showwarning(
+                "KonSol Host Manager",
+                "KonSol microSD requires FAT 8.3 names.\n\n"
+                "Use at most 8 characters before the dot and 3 after it.\n"
+                "Example: /HOSTGUI.KAP",
+            )
             return
 
         self.progress_var.set(0.0)
