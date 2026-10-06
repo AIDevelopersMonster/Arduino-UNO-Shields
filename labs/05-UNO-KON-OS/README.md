@@ -1215,11 +1215,14 @@ Status: **FULL PHYSICAL PASS**.
 
 ## Publication
 
-KonSol 0.7 TEST-09/TEST-10 publication is the next planned standalone technical
-article. It will cover HOST1, exact host/device file round-trip, remote
-application lifecycle control and the Host Manager/KASM desktop toolchain.
-KonSol 0.6 remains an immutable earlier publication for the TEST-08 multi-label
-result.
+KonSol 0.7 TEST-09/TEST-10 is published as a **standalone technical article**:
+
+- KonSol 0.7 article DOI: https://doi.org/10.5281/zenodo.23197956
+
+The 0.7 article records the HOST1 protocol, exact host/device file round-trip,
+remote RUN/STOP/DELETE lifecycle control, the Host Manager GUI and the
+KASM -> KAP desktop toolchain. KonSol 0.6 remains an immutable earlier
+publication for the TEST-08 multi-label result.
 
 
 KonSol 0.6 TEST-08 is published as a **standalone technical article**, not as a
