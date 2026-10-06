@@ -190,6 +190,12 @@ LABEL/JMP/JZ/JNZ source-level control flow. The physical RED -> YELLOW -> GREEN
 sequence, clean APP EXIT 0, 720 B post-run shell free RAM, readable SD filesystem
 and unchanged legacy COUNTER.KAP execution were all verified on Arduino UNO.
 
+KonSol 0.7 / TEST-09 adds HOST1, a machine protocol over the existing
+USB-TTL Serial link. It supports status inspection, verified file transfer and
+remote application lifecycle control. TEST-10 adds the KonSol Host Manager GUI,
+including KASM -> KAP build, Install, Download, Run, Stop and Delete without
+consuming additional UNO firmware resources.
+
 See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
 ## Projects
@@ -228,6 +234,6 @@ See: [projects/HY-M302-KonSol-OS](projects/HY-M302-KonSol-OS/)
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
-- **LAB-05** — **KonSol 0.6 TEST-08 FULL PHYSICAL PASS**. KAP2 now supports indexed multi-label control flow with LABEL/JMP/JZ/JNZ while retaining legacy KonSol 0.5 MARK/JNZ compatibility. MULTI.KAP physically completed RED -> YELLOW -> GREEN -> APP EXIT 0, the old COUNTER.KAP still ran unchanged, post-run shell free RAM remained 720 B, all five cooperative tasks stayed active, and DIR / remained operational. Standalone KonSol 0.6 article: DOI 10.5281/zenodo.23161379. KonSol 0.5 remains a separate publication at DOI 10.5281/zenodo.23149141 with video https://youtu.be/HVHLsfV9dFY.
+- **LAB-05** — **KonSol 0.7 TEST-09 + TEST-10 FULL PHYSICAL PASS**. TEST-09 adds HOST1 over the existing USB-TTL Serial link: machine-readable INFO/MEM/PS/LS, verified PUT/GET file transfer, RUN/STOP/DELETE and an exact SHA-256 round-trip without removing microSD or reflashing the ATmega328P. TEST-10 adds the host-side KonSol Host Manager GUI with SD browsing, Install/Download/Run/Stop/Delete and KASM -> KAP integration. Verified KonSol 0.7 resources: 30442 / 32256 B Flash (94%), 1316 / 2048 B globals (64%), 724 B free RAM at boot, 652 B resident shell RAM, 621 B while a KAP app is active, returning to 652 B after EXIT/STOP. KonSol 0.6 remains published separately at DOI 10.5281/zenodo.23161379; KonSol 0.5 remains at DOI 10.5281/zenodo.23149141.
 
 Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
