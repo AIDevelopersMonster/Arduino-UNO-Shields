@@ -38,17 +38,15 @@ except ImportError:
 BAUD = 115200
 DEFAULT_FQBN = "arduino:avr:uno"
 SKETCH_REL = pathlib.Path(
-    "tools/HY-M302-Remote-Mapper/RemoteMapper.ino"
+    "libraries/HY_M302/examples/06_Remote_Mapper/06_Remote_Mapper.ino"
 )
-STAGED_SKETCH_DIR_REL = pathlib.Path(
-    "build/HY-M302/REMOTE-MAPPER-SKETCH/RemoteMapper"
-)
+SKETCH_DIR_REL = SKETCH_REL.parent
 LIB_REL = pathlib.Path("libraries")
 OUT_REL = pathlib.Path("build/HY-M302/REMOTE-MAPPER")
 RAW_SKETCH_URL = (
     "https://raw.githubusercontent.com/AIDevelopersMonster/"
     "Arduino-UNO-Shields/main/"
-    "tools/HY-M302-Remote-Mapper/RemoteMapper.ino"
+    "libraries/HY_M302/examples/06_Remote_Mapper/06_Remote_Mapper.ino"
 )
 
 DEFAULT_KEYS = [
@@ -130,7 +128,7 @@ def ensure_mapper_sketch(root: pathlib.Path, log: Callable[[str], None]) -> path
         return sketch
 
     sketch.parent.mkdir(parents=True, exist_ok=True)
-    log("Bundled mapper firmware is missing locally; downloading repository copy...")
+    log("Mapper sketch is missing locally; downloading repository copy...")
     try:
         with urllib.request.urlopen(RAW_SKETCH_URL, timeout=20) as response:
             data = response.read()
@@ -147,16 +145,7 @@ def compile_mapper(
     fqbn: str,
     log: Callable[[str], None],
 ) -> pathlib.Path:
-    source = ensure_mapper_sketch(root, log)
-
-    # Keep RemoteMapper.ino visible beside the host tool, but stage a normal
-    # Arduino sketch directory for arduino-cli (folder and .ino share a name).
-    staged_dir = root / STAGED_SKETCH_DIR_REL
-    staged_dir.mkdir(parents=True, exist_ok=True)
-    staged_ino = staged_dir / "RemoteMapper.ino"
-    staged_ino.write_bytes(source.read_bytes())
-    log(f"Staged Arduino sketch: {staged_ino}")
-
+    ensure_mapper_sketch(root, log)
     out = root / OUT_REL
     out.mkdir(parents=True, exist_ok=True)
 
@@ -170,7 +159,7 @@ def compile_mapper(
             str(root / LIB_REL),
             "--output-dir",
             str(out),
-            str(staged_dir),
+            str(root / SKETCH_DIR_REL),
         ],
         root,
         log,
@@ -202,16 +191,10 @@ def upload_mapper(
 
 
 class MapperLink:
-    def __init__(
-        self,
-        port: str,
-        baud: int = BAUD,
-        require_mapper: bool = True,
-    ):
+    def __init__(self, port: str, baud: int = BAUD):
         require_pyserial()
         self.port = port
         self.baud = baud
-        self.require_mapper = require_mapper
         self.ser = None
 
     def __enter__(self) -> "MapperLink":
@@ -227,43 +210,22 @@ class MapperLink:
 
         # Classic UNO resets when the serial port opens.
         time.sleep(2.2)
+        self.ser.reset_input_buffer()
+        self.ser.write(b"ID\n")
+        self.ser.flush()
 
-        if self.require_mapper and not self.probe_mapper():
-            # The COM port DID open. This is a firmware/protocol mismatch,
-            # not a transport connection failure. Close it before raising so
-            # arduino-cli can immediately take ownership for a firmware upload.
-            self.ser.close()
-            self.ser = None
-            raise MapperError(
-                f"{self.port} opened, but RemoteMapper firmware did not answer READY"
-            )
-
-        return self
-
-    def probe_mapper(self, timeout: float = 2.0) -> bool:
-        if self.ser is None:
-            raise MapperError("serial port is not open")
-
-        try:
-            self.ser.reset_input_buffer()
-            self.ser.write(b"ID\n")
-            self.ser.flush()
-        except serial.SerialException as exc:
-            raise MapperError(f"serial I/O failed on {self.port}: {exc}") from exc
-
-        deadline = time.monotonic() + timeout
+        deadline = time.monotonic() + 3.0
         seen_id = False
-
         while time.monotonic() < deadline:
-            line = self.readline(0.25)
+            line = self.readline(0.4)
             if not line:
                 continue
             if line.startswith("HY_M302_REMOTE_MAPPER"):
                 seen_id = True
             if seen_id and line == "READY":
-                return True
+                return self
 
-        return False
+        raise MapperError("mapper firmware did not answer with READY")
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self.ser is not None:
@@ -314,81 +276,21 @@ def ensure_unique(result: list[KeyCode], candidate: KeyCode) -> None:
             )
 
 
-def validate_keys(keys: list[KeyCode]) -> None:
-    seen_names: set[str] = set()
-    seen_codes: set[tuple[int, int]] = set()
-
-    for item in keys:
-        if not re.fullmatch(r"KEY_[A-Z0-9_]+", item.name):
-            raise MapperError(f"invalid key name: {item.name}")
-
-        if item.name in seen_names:
-            raise MapperError(f"duplicate key name: {item.name}")
-        seen_names.add(item.name)
-
-        code = (item.address, item.command)
-        if code in seen_codes:
-            raise MapperError(
-                f"duplicate address/command: ADDR=0x{item.address:X} "
-                f"CMD=0x{item.command:X}"
-            )
-        seen_codes.add(code)
-
-        if not (0 <= item.address <= 0xFFFF):
-            raise MapperError(f"address out of range for {item.name}")
-        if not (0 <= item.command <= 0xFF):
-            raise MapperError(f"command out of range for {item.name}")
-        if not (0 <= item.raw <= 0xFFFFFFFF):
-            raise MapperError(f"raw code out of range for {item.name}")
-
-
-def load_profile_json(json_path: pathlib.Path) -> tuple[str, list[KeyCode]]:
-    try:
-        payload = json.loads(json_path.read_text(encoding="utf-8"))
-    except FileNotFoundError as exc:
-        raise MapperError(f"JSON file not found: {json_path}") from exc
-    except json.JSONDecodeError as exc:
-        raise MapperError(
-            f"invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}"
-        ) from exc
-
-    if payload.get("format") != "HY_M302_REMOTE_MAP":
-        raise MapperError("unsupported JSON format; expected HY_M302_REMOTE_MAP")
-    if payload.get("version") != 1:
-        raise MapperError(f"unsupported profile version: {payload.get('version')!r}")
-    if payload.get("protocol") != "NEC":
-        raise MapperError(
-            f"unsupported protocol: {payload.get('protocol')!r}; expected NEC"
-        )
-
-    profile_name = str(payload.get("profile", "")).strip() or json_path.parent.name
-    raw_keys = payload.get("keys")
-    if not isinstance(raw_keys, list) or not raw_keys:
-        raise MapperError("profile contains no keys")
-
-    keys: list[KeyCode] = []
-    for index, item in enumerate(raw_keys, 1):
-        if not isinstance(item, dict):
-            raise MapperError(f"keys[{index}] must be an object")
-        try:
-            key = KeyCode(
-                name=str(item["name"]),
-                label=str(item.get("label", item["name"])),
-                raw=int(item["raw"]),
-                address=int(item["address"]),
-                command=int(item["command"]),
-            )
-        except (KeyError, TypeError, ValueError) as exc:
-            raise MapperError(f"invalid keys[{index}] entry") from exc
-        keys.append(key)
-
-    validate_keys(keys)
-    return profile_name, keys
-
-
-def write_cpp_map(out: pathlib.Path, keys: list[KeyCode]) -> tuple[pathlib.Path, pathlib.Path]:
-    validate_keys(keys)
+def save_profile(root: pathlib.Path, profile_name: str, keys: list[KeyCode]) -> pathlib.Path:
+    safe = re.sub(r"[^A-Za-z0-9_-]+", "_", profile_name).strip("_") or "remote"
+    out = root / "profiles" / "HY-M302-Remotes" / safe
     out.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "format": "HY_M302_REMOTE_MAP",
+        "version": 1,
+        "profile": profile_name,
+        "protocol": "NEC",
+        "keys": [asdict(k) for k in keys],
+    }
+    (out / "remote_map.json").write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
 
     header = [
         "#pragma once",
@@ -418,9 +320,7 @@ def write_cpp_map(out: pathlib.Path, keys: list[KeyCode]) -> tuple[pathlib.Path,
         "}  // namespace HY_M302_RemoteMap",
         "",
     ]
-
-    header_path = out / "HY_M302_RemoteMap.h"
-    header_path.write_text("\n".join(header), encoding="utf-8")
+    (out / "HY_M302_RemoteMap.h").write_text("\n".join(header), encoding="utf-8")
 
     source = [
         '#include "HY_M302_RemoteMap.h"',
@@ -452,39 +352,9 @@ def write_cpp_map(out: pathlib.Path, keys: list[KeyCode]) -> tuple[pathlib.Path,
         "}  // namespace HY_M302_RemoteMap",
         "",
     ]
-
-    source_path = out / "HY_M302_RemoteMap.cpp"
-    source_path.write_text("\n".join(source), encoding="utf-8")
-
-    return header_path, source_path
-
-
-def generate_from_json(
-    json_path: pathlib.Path,
-    out_dir: pathlib.Path | None = None,
-) -> tuple[pathlib.Path, pathlib.Path]:
-    _profile_name, keys = load_profile_json(json_path)
-    target = out_dir if out_dir is not None else json_path.parent
-    return write_cpp_map(target, keys)
-
-
-def save_profile(root: pathlib.Path, profile_name: str, keys: list[KeyCode]) -> pathlib.Path:
-    safe = re.sub(r"[^A-Za-z0-9_-]+", "_", profile_name).strip("_") or "remote"
-    out = root / "profiles" / "HY-M302-Remotes" / safe
-    out.mkdir(parents=True, exist_ok=True)
-
-    payload = {
-        "format": "HY_M302_REMOTE_MAP",
-        "version": 1,
-        "profile": profile_name,
-        "protocol": "NEC",
-        "keys": [asdict(k) for k in keys],
-    }
-    (out / "remote_map.json").write_text(
-        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    (out / "HY_M302_RemoteMap.cpp").write_text(
+        "\n".join(source), encoding="utf-8"
     )
-
-    write_cpp_map(out, keys)
 
     return out
 
@@ -564,7 +434,6 @@ class MapperGUI:
         self.learned: list[KeyCode] = []
         self.worker_events: queue.Queue = queue.Queue()
         self.link: MapperLink | None = None
-        self.mapper_ready = False
         self.step_index = 0
 
         top = ttk.Frame(self.window, padding=10)
@@ -573,13 +442,7 @@ class MapperGUI:
         ttk.Label(top, text="COM port").grid(row=0, column=0, sticky="w")
         self.port_combo = ttk.Combobox(top, textvariable=self.port_var, width=18)
         self.port_combo.grid(row=0, column=1, padx=6)
-        ttk.Button(top, text="Refresh", command=self.refresh_ports).grid(
-            row=0, column=2, padx=(0, 6)
-        )
-        self.connect_btn = ttk.Button(
-            top, text="Connect", command=self.toggle_connection
-        )
-        self.connect_btn.grid(row=0, column=3)
+        ttk.Button(top, text="Refresh", command=self.refresh_ports).grid(row=0, column=2)
 
         ttk.Label(top, text="Profile").grid(row=1, column=0, sticky="w", pady=(8, 0))
         ttk.Entry(top, textvariable=self.name_var, width=28).grid(
@@ -591,7 +454,7 @@ class MapperGUI:
         ttk.Button(actions, text="1. Flash mapper", command=self.flash).pack(
             side="left", padx=(0, 8)
         )
-        ttk.Button(actions, text="2. Start learning (auto prepare)", command=self.start_learning).pack(
+        ttk.Button(actions, text="2. Start learning", command=self.start_learning).pack(
             side="left", padx=(0, 8)
         )
         self.capture_btn = ttk.Button(
@@ -628,14 +491,7 @@ class MapperGUI:
 
         bottom = ttk.Frame(self.window, padding=10)
         bottom.pack(fill="x")
-        ttk.Button(bottom, text="Save learned profile", command=self.save).pack(
-            side="right"
-        )
-        ttk.Button(
-            bottom,
-            text="Generate .h/.cpp from JSON",
-            command=self.generate_from_json_gui,
-        ).pack(side="right", padx=(0, 8))
+        ttk.Button(bottom, text="Save files", command=self.save).pack(side="right")
         ttk.Label(bottom, textvariable=self.status_var).pack(side="left")
 
         self.refresh_ports()
@@ -662,57 +518,6 @@ class MapperGUI:
             raise MapperError("Select a COM port")
         return port
 
-    def _disconnect_link(self) -> None:
-        if self.link is not None:
-            try:
-                self.link.__exit__(None, None, None)
-            finally:
-                self.link = None
-        self.mapper_ready = False
-        self.connect_btn.config(text="Connect", state="normal")
-
-    def _release_port_for_upload(self) -> None:
-        # pyserial and avrdude/arduino-cli cannot own the same Windows COM port.
-        # Always close our handle first and allow the driver to release it.
-        self._disconnect_link()
-        self.status_var.set("COM RELEASED FOR UPLOAD")
-        time.sleep(0.8)
-
-    def toggle_connection(self) -> None:
-        if self.link is not None:
-            self._disconnect_link()
-            self.status_var.set("Disconnected")
-            return
-
-        try:
-            port = self._require_port()
-        except Exception as exc:
-            self.status_var.set(str(exc))
-            return
-
-        self.connect_btn.config(state="disabled")
-        self.status_var.set(f"Connecting to {port}...")
-
-        def work():
-            link = MapperLink(port, require_mapper=False)
-            try:
-                link.__enter__()
-                mapper_ready = False
-                try:
-                    mapper_ready = link.probe_mapper(timeout=1.5)
-                except MapperError:
-                    # Port is already open; mapper probe is a separate status.
-                    mapper_ready = False
-                self.log_event("connected", (link, mapper_ready))
-            except Exception as exc:
-                try:
-                    link.__exit__(None, None, None)
-                except Exception:
-                    pass
-                self.log_event("connect_error", str(exc))
-
-        threading.Thread(target=work, daemon=True).start()
-
     def flash(self) -> None:
         try:
             port = self._require_port()
@@ -720,8 +525,7 @@ class MapperGUI:
             self.status_var.set(str(exc))
             return
 
-        self._release_port_for_upload()
-        self.status_var.set("COM FREE - compiling/uploading mapper...")
+        self.status_var.set("Compiling/uploading mapper...")
 
         def work():
             try:
@@ -740,64 +544,18 @@ class MapperGUI:
     def start_learning(self) -> None:
         try:
             port = self._require_port()
-        except Exception as exc:
-            self.status_var.set(str(exc))
-            return
-
-        if self.link is not None and self.mapper_ready:
+            if self.link is not None:
+                self.link.__exit__(None, None, None)
+            self.link = MapperLink(port)
+            self.link.__enter__()
             self.learned.clear()
             self.step_index = 0
             for item in self.tree.get_children():
                 self.tree.delete(item)
             self._update_step_label()
-            self.status_var.set(
-                "COM CONNECTED / MAPPER READY - click Capture, then press the requested key"
-            )
-            return
-
-        if self.link is not None:
-            # COM is connected but another firmware is running.
-            # Release the port before arduino-cli uploads RemoteMapper.
-            self._release_port_for_upload()
-
-        self.status_var.set("Checking / preparing RemoteMapper firmware...")
-
-        def work():
-            link = None
-            try:
-                # First try the firmware already present on the UNO.
-                link = MapperLink(port)
-                try:
-                    link.__enter__()
-                except MapperError:
-                    link.__exit__(None, None, None)
-                    link = None
-                    time.sleep(0.8)
-
-                    self.log_event(
-                        "log",
-                        "Mapper firmware not detected; compiling/uploading it automatically...",
-                    )
-                    upload_mapper(
-                        self.root_path,
-                        port,
-                        DEFAULT_FQBN,
-                        lambda msg: self.log_event("log", msg),
-                    )
-
-                    link = MapperLink(port)
-                    link.__enter__()
-
-                self.log_event("learning_ready", link)
-            except Exception as exc:
-                if link is not None:
-                    try:
-                        link.__exit__(None, None, None)
-                    except Exception:
-                        pass
-                self.log_event("error", str(exc))
-
-        threading.Thread(target=work, daemon=True).start()
+            self.status_var.set("Mapper connected")
+        except Exception as exc:
+            self.status_var.set(str(exc))
 
     def _update_step_label(self) -> None:
         if self.step_index >= len(DEFAULT_KEYS):
@@ -845,71 +603,16 @@ class MapperGUI:
         except Exception as exc:
             self.status_var.set(str(exc))
 
-    def generate_from_json_gui(self) -> None:
-        from tkinter import filedialog
-
-        initial_dir = self.root_path / "profiles" / "HY-M302-Remotes"
-        json_name = filedialog.askopenfilename(
-            title="Select HY-M302 remote_map.json",
-            initialdir=str(initial_dir),
-            filetypes=[
-                ("HY-M302 remote profile", "remote_map.json"),
-                ("JSON files", "*.json"),
-                ("All files", "*.*"),
-            ],
-        )
-        if not json_name:
-            return
-
-        try:
-            header, source = generate_from_json(pathlib.Path(json_name))
-            self.status_var.set(
-                f"Generated: {header.name} + {source.name}"
-            )
-        except Exception as exc:
-            self.status_var.set(str(exc))
-
     def poll_events(self) -> None:
         try:
             while True:
                 kind, payload = self.worker_events.get_nowait()
                 if kind == "flash_ok":
                     self.status_var.set("Mapper firmware uploaded")
-                elif kind == "connected":
-                    link, mapper_ready = payload
-                    self.link = link
-                    self.mapper_ready = mapper_ready
-                    self.connect_btn.config(text="Disconnect", state="normal")
-                    if mapper_ready:
-                        self.status_var.set(
-                            f"COM CONNECTED: {self.port_var.get()} / MAPPER READY"
-                        )
-                    else:
-                        self.status_var.set(
-                            f"COM CONNECTED: {self.port_var.get()} / OTHER FIRMWARE"
-                        )
-                elif kind == "connect_error":
-                    self.mapper_ready = False
-                    self.connect_btn.config(text="Connect", state="normal")
-                    self.status_var.set(
-                        "COM OPEN FAILED: " + str(payload)
-                    )
                 elif kind == "log":
                     self.status_var.set(str(payload))
                 elif kind == "error":
                     self.status_var.set(str(payload))
-                elif kind == "learning_ready":
-                    self.link = payload
-                    self.mapper_ready = True
-                    self.connect_btn.config(text="Disconnect", state="normal")
-                    self.learned.clear()
-                    self.step_index = 0
-                    for item in self.tree.get_children():
-                        self.tree.delete(item)
-                    self._update_step_label()
-                    self.status_var.set(
-                        "COM CONNECTED / MAPPER READY - click Capture, then press the requested key"
-                    )
                 elif kind == "frame":
                     frame: KeyCode = payload
                     self.learned.append(frame)
@@ -933,7 +636,9 @@ class MapperGUI:
         self.window.after(100, self.poll_events)
 
     def close(self) -> None:
-        self._disconnect_link()
+        if self.link is not None:
+            self.link.__exit__(None, None, None)
+            self.link = None
         self.window.destroy()
 
     def run(self) -> int:
@@ -963,16 +668,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="compile/upload mapper before learning",
     )
 
-    generate = sub.add_parser(
-        "generate",
-        help="generate HY_M302_RemoteMap.h/.cpp from an existing remote_map.json",
-    )
-    generate.add_argument("--json", required=True, help="path to remote_map.json")
-    generate.add_argument(
-        "--out",
-        help="output directory; defaults to the JSON file directory",
-    )
-
     sub.add_parser("gui", help="open Tk GUI")
     return p
 
@@ -999,15 +694,6 @@ def main() -> int:
 
         if args.command == "learn":
             return learn_cli(args)
-
-        if args.command == "generate":
-            json_path = pathlib.Path(args.json).resolve()
-            out_dir = pathlib.Path(args.out).resolve() if args.out else None
-            header, source = generate_from_json(json_path, out_dir)
-            print("Generated C++ map:")
-            print(f"  {header}")
-            print(f"  {source}")
-            return 0
 
         parser.print_help()
         return 2
