@@ -430,3 +430,34 @@ profile.
 
 TEST-07 now consumes the library profile directly. Its former private
 `HY_M302_RemoteMap.h/.cpp` copies have been removed.
+
+
+## Unified IR + Serial test controller
+
+TEST-07 uses one shared test controller with two equivalent input paths:
+
+```text
+USB Serial / CLI ----+
+                     +--> one Test Controller --> HY_M302
+IR remote -----------+
+```
+
+Serial commands mirror the learned remote:
+
+```text
+0..9
+OK / RUN
+RETURN / STOP / X
+HOME
+MENU / HELP / ?
+UP
+DOWN
+LEFT
+RIGHT
+POWER / OFF
+STATS / S
+ZERO / Z
+```
+
+Both paths call the same control logic, so a test selected or stopped from the
+terminal behaves the same way as the corresponding physical remote command.
