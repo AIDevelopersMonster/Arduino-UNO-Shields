@@ -38,15 +38,17 @@ except ImportError:
 BAUD = 115200
 DEFAULT_FQBN = "arduino:avr:uno"
 SKETCH_REL = pathlib.Path(
-    "tools/HY-M302-Remote-Mapper/firmware/RemoteMapper/RemoteMapper.ino"
+    "tools/HY-M302-Remote-Mapper/RemoteMapper.ino"
 )
-SKETCH_DIR_REL = SKETCH_REL.parent
+STAGED_SKETCH_DIR_REL = pathlib.Path(
+    "build/HY-M302/REMOTE-MAPPER-SKETCH/RemoteMapper"
+)
 LIB_REL = pathlib.Path("libraries")
 OUT_REL = pathlib.Path("build/HY-M302/REMOTE-MAPPER")
 RAW_SKETCH_URL = (
     "https://raw.githubusercontent.com/AIDevelopersMonster/"
     "Arduino-UNO-Shields/main/"
-    "tools/HY-M302-Remote-Mapper/firmware/RemoteMapper/RemoteMapper.ino"
+    "tools/HY-M302-Remote-Mapper/RemoteMapper.ino"
 )
 
 DEFAULT_KEYS = [
@@ -145,7 +147,16 @@ def compile_mapper(
     fqbn: str,
     log: Callable[[str], None],
 ) -> pathlib.Path:
-    ensure_mapper_sketch(root, log)
+    source = ensure_mapper_sketch(root, log)
+
+    # Keep RemoteMapper.ino visible beside the host tool, but stage a normal
+    # Arduino sketch directory for arduino-cli (folder and .ino share a name).
+    staged_dir = root / STAGED_SKETCH_DIR_REL
+    staged_dir.mkdir(parents=True, exist_ok=True)
+    staged_ino = staged_dir / "RemoteMapper.ino"
+    staged_ino.write_bytes(source.read_bytes())
+    log(f"Staged Arduino sketch: {staged_ino}")
+
     out = root / OUT_REL
     out.mkdir(parents=True, exist_ok=True)
 
@@ -159,7 +170,7 @@ def compile_mapper(
             str(root / LIB_REL),
             "--output-dir",
             str(out),
-            str(root / SKETCH_DIR_REL),
+            str(staged_dir),
         ],
         root,
         log,
