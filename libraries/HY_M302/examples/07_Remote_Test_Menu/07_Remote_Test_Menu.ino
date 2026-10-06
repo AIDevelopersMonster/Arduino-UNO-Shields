@@ -1,7 +1,9 @@
 #include <HY_M302.h>
-#include "HY_M302_RemoteMap.h"
+#include <HY_M302_Remote.h>
+#include <HY_M302_Remote_iDroid_OrangePi.h>
 
-using namespace HY_M302_RemoteMap;
+using namespace HY_M302_Remote;
+using HY_M302_Remote::IDroidOrangePi::decode;
 
 HY_M302 shield;
 
@@ -352,21 +354,6 @@ static void serviceActiveTest() {
   }
 }
 
-static int8_t keyToDigit(Key key) {
-  switch (key) {
-    case KEY_0: return 0;
-    case KEY_1: return 1;
-    case KEY_2: return 2;
-    case KEY_3: return 3;
-    case KEY_4: return 4;
-    case KEY_5: return 5;
-    case KEY_6: return 6;
-    case KEY_7: return 7;
-    case KEY_8: return 8;
-    case KEY_9: return 9;
-    default: return -1;
-  }
-}
 
 static void stopForSelection() {
   if (activeTest != ACTIVE_NONE) {
@@ -376,7 +363,7 @@ static void stopForSelection() {
 }
 
 static void handleKey(Key key) {
-  const int8_t digit = keyToDigit(key);
+  const int8_t digit = HY_M302_Remote::digit(key);
 
   if (digit >= 0) {
     stopForSelection();
