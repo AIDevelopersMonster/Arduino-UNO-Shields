@@ -238,3 +238,262 @@ TEST-09 is FULL PHYSICAL PASS when all of the following are verified:
 10. stable post-run RAM and five cooperative tasks;
 11. readable filesystem after execution;
 12. remote deletion of the transferred application.
+
+
+## Video procedure — what we test and why
+
+This sequence is intended to be read and executed directly during the video.
+
+### Step 1 — Build KonSol 0.7
+
+Command:
+
+```powershell
+arduino-cli compile --fqbn arduino:avr:uno `
+  .\labs\05-UNO-KON-OS\sketches\07_KonSol_Host_Link
+```
+
+**What we test:** that the complete KonSol 0.7 firmware with HOST1 still fits
+inside the ATmega328P Flash/SRAM limits and compiles cleanly.
+
+**Why:** HOST1 adds a second machine-oriented interface to an already dense
+firmware. Before any physical test, we must prove that the result still fits
+inside the real Arduino UNO resource envelope.
+
+Expected measured build:
+
+```text
+Flash: 30442 / 32256 B (94%)
+Global SRAM: 1316 / 2048 B (64%)
+```
+
+### Step 2 — Upload and boot
+
+Commands:
+
+```powershell
+arduino-cli upload -p COM4 --fqbn arduino:avr:uno `
+  .\labs\05-UNO-KON-OS\sketches\07_KonSol_Host_Link
+
+arduino-cli monitor -p COM4 -c baudrate=115200
+```
+
+**What we test:** that KonSol 0.7 starts on the physical UNO, initializes TFT,
+kernel and microSD, and reports runtime free RAM.
+
+**Why:** successful compilation alone does not prove that the firmware is stable
+on the real 2 KB SRAM device.
+
+Expected boot reference:
+
+```text
+KonSol 0.7
+SD: READY
+FREE RAM: 724 B
+```
+
+### Step 3 — Verify the original human shell
+
+Run:
+
+```text
+INFO
+MEM
+PS
+DIR /
+```
+
+**What we test:** that the old interactive KonSol interface still works after
+HOST1 was added.
+
+**Why:** KonSol 0.7 must extend KonSol 0.6, not replace or break it. We verify
+system information, runtime memory, all five cooperative tasks, and normal SD
+filesystem access.
+
+Expected reference:
+
+```text
+FREE RAM: 652 B
+TASKS: 5
+DIR / readable
+```
+
+### Step 4 — Verify the HOST1 control plane
+
+Run:
+
+```text
+@PING
+@INFO
+@MEM
+@PS
+@LS /
+```
+
+**What we test:** that the same USB-TTL Serial link now also provides a
+machine-readable protocol.
+
+**Why:** the purpose of HOST1 is communication with another computer, not only
+manual terminal use. The host must be able to identify the system, read memory
+status, inspect scheduler tasks and enumerate files in a deterministic format.
+
+Expected examples:
+
+```text
+@OK PONG HOST1
+@OK INFO V=0.7 HOST=1 SD=1 APP=0 RAM=652 TASKS=5
+@OK MEM 652
+@END PS 5
+@END LS ...
+```
+
+### Step 5 — Install an application from the PC without removing microSD
+
+Close Serial Monitor and run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File `
+  .\tools\konsol-host1\test09-transfer.ps1
+```
+
+**What we test:** a complete PC -> USB-TTL -> KonSol -> microSD application
+installation path.
+
+**Why:** this is the main practical goal of TEST-09. A new KAP2 application
+must be installable from another computer without reflashing the UNO and without
+physically removing the microSD card.
+
+The script automatically:
+
+1. reads the local `MULTI.KAP`;
+2. calculates its exact size, CRC16 and SHA-256;
+3. uploads it as `/HOSTAPP.KAP`;
+4. verifies the file on the device;
+5. downloads it back;
+6. compares the returned bytes against the original.
+
+### Step 6 — Verify transfer integrity
+
+The successful script ending must include:
+
+```text
+MATCH      = True
+TEST-09 HOST1 TRANSFER ROUND-TRIP: PASS
+```
+
+**What we test:** exact byte preservation in both directions.
+
+**Why:** a file appearing on the SD card is not enough. We must prove that no
+byte was lost or altered during:
+
+```text
+PC -> USB-TTL -> KonSol -> microSD
+microSD -> KonSol -> USB-TTL -> PC
+```
+
+CRC verifies the protocol transfer, while matching SHA-256 confirms that the
+returned file is byte-for-byte identical to the original host file.
+
+### Step 7 — Run the application that was installed through HOST1
+
+Open Serial Monitor again:
+
+```powershell
+arduino-cli monitor -p COM4 -c baudrate=115200
+```
+
+Run:
+
+```text
+@RUN /HOSTAPP.KAP
+```
+
+Then on the TFT:
+
+```text
+Touch 1 -> RED
+Touch 2 -> YELLOW
+Touch 3 -> GREEN
+Touch 4 -> EXIT
+```
+
+**What we test:** that the transferred file is not merely stored correctly but
+is a valid executable KAP2 application that the resident VM can launch.
+
+**Why:** this closes the full application-delivery chain. The file came from the
+PC, crossed HOST1, was stored on microSD, and is now executed by KonSol without
+MCU reflashing.
+
+Expected Serial completion:
+
+```text
+APP EXIT 0
+```
+
+### Step 8 — Verify system recovery after the application exits
+
+Run:
+
+```text
+@APP
+@MEM
+@PS
+@LS /
+```
+
+**What we test:** that the resident KonSol environment remains healthy after a
+remotely installed application completes.
+
+**Why:** a successful application run is insufficient if it damages the shell,
+scheduler, filesystem or runtime memory. The OS boundary requires clean return
+to the resident environment.
+
+Required evidence:
+
+- APP is IDLE with exit code 0;
+- free RAM remains near the normal shell value;
+- all five tasks continue running;
+- microSD remains readable;
+- `HOSTAPP.KAP` is still present.
+
+### Step 9 — Remove the transferred application remotely
+
+Run:
+
+```text
+@DEL /HOSTAPP.KAP
+@LS /
+```
+
+**What we test:** remote lifecycle completion.
+
+**Why:** HOST1 should not only install and run applications; the host must also
+be able to remove an installed application without touching the SD card.
+
+Expected:
+
+```text
+@OK DEL
+```
+
+and `HOSTAPP.KAP` must be absent from the final directory listing.
+
+### TEST-09 meaning
+
+If all steps pass, TEST-09 proves the complete external software-delivery path:
+
+```text
+PC
+ -> USB-TTL
+ -> HOST1
+ -> microSD
+ -> KAP2 VM
+ -> TFT/Touch application
+ -> APP EXIT 0
+ -> resident KonSol
+```
+
+The key result is not simply Serial file transfer. It is that the assembled
+KonSol device can receive, verify, execute and remove external applications from
+another computer without reflashing the ATmega328P and without removing the
+microSD card.
