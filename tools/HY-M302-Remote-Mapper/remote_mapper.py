@@ -42,7 +42,7 @@ SKETCH_REL = pathlib.Path(
 )
 SKETCH_DIR_REL = SKETCH_REL.parent
 LIB_REL = pathlib.Path("libraries")
-OUT_REL = pathlib.Path("build/HY-M302/REMOTE-MAPPER")
+OUT_REL = pathlib.Path("build/HY-M302/REMOTE-MAPPER-06")
 RAW_SKETCH_URL = (
     "https://raw.githubusercontent.com/AIDevelopersMonster/"
     "Arduino-UNO-Shields/main/"
