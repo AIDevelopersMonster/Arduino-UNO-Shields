@@ -2,7 +2,7 @@
 
 Low-overhead Arduino UNO library for the HY-M302 multi-purpose shield.
 
-Status: **v0.1 experimental / modular refactor complete / remote-controlled test menu PHYSICAL PASS; full integrated certification remains open**.
+Status: **v0.2.0 / modular driver architecture / async NEC + symbolic remote-key layer / TEST-07 cooperative control PHYSICAL PASS**.
 
 The library intentionally starts with its own small hardware routines instead of
 pulling in large third-party dependencies. This keeps the Flash/SRAM cost visible
@@ -327,8 +327,8 @@ DHT11 implementation briefly disables interrupts for its timing-critical read.
 TEST-05 is intentionally designed to expose any resulting IR loss instead of
 hiding it.
 
-The library remains at 0.1.0 until TEST-05 compiles and passes on the physical
-UNO + HY-M302. After that result, the planned promotion is 0.2.0.
+The original 0.1.0 promotion gate has been superseded by the later physical
+remote-menu integration tests. The library is now promoted to **0.2.0**.
 
 
 ## Remote Mapper and TEST-07 physical pass
@@ -375,3 +375,45 @@ RETURN, HOME and POWER remain responsive while a test is active, including the
 timed button, POT, LDR, RGB, buzzer and IR diagnostic paths.
 
 Status: **TEST-07 COOPERATIVE CONTROL PHYSICAL PASS**.
+
+
+## Built-in remote-key layer
+
+Starting with library 0.2.0, application sketches no longer need to carry a
+private generated remote map beside the sketch.
+
+Generic logical keys are provided by:
+
+```cpp
+#include <HY_M302_Remote.h>
+```
+
+The physically learned iDroid / Orange Pi profile is provided by:
+
+```cpp
+#include <HY_M302_Remote_iDroid_OrangePi.h>
+```
+
+Typical decode path:
+
+```cpp
+using namespace HY_M302_Remote;
+
+Key key = IDroidOrangePi::decode(frame.address, frame.command);
+
+if (key == KEY_OK) {
+  // logical action
+}
+```
+
+The generic layer also exposes `isDigit()`, `digit()` and `keyName()`.
+The learned command table is stored in AVR program memory (`PROGMEM`) rather
+than ordinary SRAM.
+
+The canonical reproducible mapper output remains under
+`profiles/HY-M302-Remotes/iDroid-OrangePi/`. That directory is the learned
+source profile; the library module is the runtime integration of that verified
+profile.
+
+TEST-07 now consumes the library profile directly. Its former private
+`HY_M302_RemoteMap.h/.cpp` copies have been removed.
