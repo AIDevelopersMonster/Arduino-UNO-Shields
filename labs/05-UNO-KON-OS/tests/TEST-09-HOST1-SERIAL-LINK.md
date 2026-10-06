@@ -1,6 +1,6 @@
 # LAB-05 / TEST-09 — KonSol 0.7 HOST1 Serial Link
 
-Status: **PHYSICAL TEST IN PROGRESS**.
+Status: **FULL PHYSICAL PASS**.
 
 ## Purpose
 
