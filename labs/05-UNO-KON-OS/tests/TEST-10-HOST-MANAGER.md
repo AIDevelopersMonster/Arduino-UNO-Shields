@@ -1,6 +1,6 @@
 # LAB-05 / TEST-10 — KonSol Host Manager
 
-Status: **IMPLEMENTED / PHYSICAL TEST PENDING**.
+Status: **FULL PHYSICAL PASS**.
 
 ## Purpose
 
@@ -185,3 +185,65 @@ PC source
 
 The GUI install/download path is therefore physically verified independently of
 the TEST-09 PowerShell transfer script.
+
+
+## Physical evidence — scheduler and remote STOP
+
+Final TEST-10 gates were verified on the physical KonSol 0.7 device.
+
+Scheduler inspection from the Host Manager:
+
+```text
+@PS
+@TASK 0 SERIAL 1 1930105
+@TASK 1 CLOCK 100 19301
+@TASK 2 DISPLAY 1000 1930
+@TASK 3 TOUCH 30 64336
+@TASK 4 APP 10 193010
+@END PS 5
+```
+
+The GUI-built and GUI-installed `/HOSTGUI.KAP` was then launched and stopped
+remotely:
+
+```text
+@RUN /HOSTGUI.KAP
+APP RUN /HOSTGUI.KAP
+@OK RUN
+@INFO
+TEST10 HOST MANAGER
+@OK INFO V=0.7 HOST=1 SD=1 APP=1 RAM=621 TASKS=5
+@STOP
+APP EXIT 254
+@OK STOP
+@INFO
+@OK INFO V=0.7 HOST=1 SD=1 APP=0 RAM=652 TASKS=5
+```
+
+This proves that all five cooperative tasks remain active, HOST1 can interrupt a
+running external application, the VM returns to IDLE, and free RAM returns from
+621 B during execution to the normal 652 B resident value.
+
+## TEST-10 result
+
+TEST-10 is **FULL PHYSICAL PASS**.
+
+Physically verified desktop workflow:
+
+```text
+KASM source
+ -> Build KASM -> KAP
+ -> GUI Install
+ -> HOST1
+ -> microSD
+ -> GUI Run
+ -> TFT/Touch
+ -> APP EXIT or GUI Stop
+ -> resident KonSol
+ -> GUI Download
+ -> SHA-256 MATCH
+ -> GUI Delete
+```
+
+The Host Manager therefore closes the practical host-side application lifecycle
+without requiring Arduino reflashing or physical removal of the microSD card.
