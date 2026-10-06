@@ -91,3 +91,31 @@ raw HOST1 protocol
 TEST-10
 desktop KonSol Host Manager
 ```
+
+
+## Physical evidence — GUI install and run
+
+Observed on the physical KonSol 0.7 device through the TEST-10 Host Manager:
+
+- GUI connected to COM4 successfully;
+- parsed status: KonSol 0.7 / HOST1 / SD READY / TASKS 5;
+- SD root listing displayed in the desktop table;
+- new application `HOSTMGR.KAP` appeared on microSD after GUI installation;
+- observed Windows-side installed size: 454 B;
+- GUI launched `/HOSTMGR.KAP` with `@RUN`;
+- while the application was running, `@INFO` reported `APP=1` and `RAM=621`;
+- application Serial output was visible in the manager log:
+  - `TEST10 HOST MANAGER`
+  - `HOST MANAGER APP PASS`
+- TFT displayed `INSTALL PASS`;
+- resident Touch service returned real coordinates:
+  - X = 69
+  - Y = 156
+- TFT displayed `TOUCH TO EXIT`.
+
+This closes the TEST-10 gates for GUI connection, SD browsing, GUI-side KAP
+installation, remote RUN, live APP state, asynchronous application Serial output
+and TFT/Touch execution.
+
+Next gate: complete APP EXIT, verify APP returns IDLE, then test GUI Download and
+byte-integrity verification.
