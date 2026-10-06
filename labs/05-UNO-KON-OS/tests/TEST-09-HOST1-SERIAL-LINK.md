@@ -347,6 +347,22 @@ Expected examples:
 @END LS ...
 ```
 
+### HOST1 transfer reliability note
+
+The TEST-09 script deliberately sends **20 data bytes per PUTD record** and uses
+a single LF line terminator. This keeps the complete Serial command at about 60
+bytes, below the classic ATmega328P HardwareSerial 64-byte receive buffer.
+
+The earlier 24-byte chunk form could produce a roughly 69-byte CRLF-terminated
+line. If that line arrived while a display task temporarily occupied the CPU,
+the AVR UART receive buffer could overflow and the host would wait for a reply
+that never arrived. TEST-09 therefore uses 20-byte chunks as part of the
+protocol test procedure, not 24-byte chunks.
+
+The host read timeout is 10 seconds to tolerate occasional SD-card write
+latency. A failed run can simply be restarted: the script begins with PUTB,
+which recreates the test destination before sending data.
+
 ### Step 5 — Install an application from the PC without removing microSD
 
 Close Serial Monitor and run:
