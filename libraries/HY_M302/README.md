@@ -360,13 +360,26 @@ profiles/HY-M302-Remotes/iDroid-OrangePi/
 Example `07_Remote_Test_Menu` was compiled and physically exercised on the
 UNO + HY-M302. The remote selection/command path works on hardware.
 
-Observed build size before the fully cooperative follow-up refactor:
+Observed build size before the library-integrated remote profile:
 
 ```text
 Flash: 10786 / 32256 bytes (33%)
 SRAM:    747 / 2048 bytes (36%)
 free SRAM reported by the build: 1301 bytes
 ```
+
+After moving the learned remote profile into the 0.2.0 library and storing the
+command table in AVR program memory (PROGMEM), TEST-07 builds as:
+
+```text
+Flash: 11234 / 32256 bytes (34%)
+SRAM:    595 / 2048 bytes (29%)
+free SRAM reported by the build: 1453 bytes
+```
+
+Compared with the earlier build, the library-integrated profile costs 448 bytes
+of Flash but saves 152 bytes of SRAM. On ATmega328P this is the intended trade:
+Flash is relatively abundant while SRAM is the tighter resource.
 
 Status: **REMOTE TEST MENU PHYSICAL PASS**.
 
