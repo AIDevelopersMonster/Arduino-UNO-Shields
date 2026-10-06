@@ -68,8 +68,8 @@ $sp = [System.IO.Ports.SerialPort]::new(
 
 $sp.DtrEnable = $true
 $sp.RtsEnable = $true
-$sp.NewLine = [System.Environment]::NewLine
-$sp.ReadTimeout = 4000
+$sp.NewLine = [string][char]10
+$sp.ReadTimeout = 10000
 
 try {
     $sp.Open()
@@ -79,8 +79,13 @@ try {
     [void](Send-Expect "@PING" '^@OK PONG HOST1$')
     [void](Send-Expect "@PUTB $Remote" '^@OK PUTB$')
 
-    for ($off = 0; $off -lt $data.Length; $off += 24) {
-        $count = [Math]::Min(24, $data.Length - $off)
+    # Keep the complete PUTD line below the AVR HardwareSerial RX buffer.
+    # 20 data bytes -> 40 hex chars; complete line including command/path/LF is
+    # about 60 bytes, safely below the 64-byte ATmega328P RX buffer.
+    $chunkSize = 20
+
+    for ($off = 0; $off -lt $data.Length; $off += $chunkSize) {
+        $count = [Math]::Min($chunkSize, $data.Length - $off)
         $hex = ""
 
         for ($i = 0; $i -lt $count; $i++) {
