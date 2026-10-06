@@ -162,7 +162,7 @@ KonSol 0.4 physical certification:
 - 1228 / 2048 bytes SRAM globals (59%);
 - measured free RAM: 812 B after boot, 750 B in the active shell.
 
-Standalone KonSol 0.6 article: https://doi.org/10.5281/zenodo.23161379
+KonSol 0.7 article: https://doi.org/10.5281/zenodo.23197956\n\nStandalone KonSol 0.6 article: https://doi.org/10.5281/zenodo.23161379
 
 This 0.6 record is a separate technical article for the TEST-08 multi-label result,
 not a replacement/version update of the KonSol 0.5 publication.
