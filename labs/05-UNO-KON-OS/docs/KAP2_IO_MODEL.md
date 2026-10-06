@@ -1,6 +1,6 @@
-# KonSol 0.6 — KAP2 input/output model
+# KonSol 0.7 — KAP2 and device input/output model
 
-Status: **current physically verified interface through TEST-08**.
+Status: **current physically verified interface through TEST-10**.
 
 This document separates resident KonSol services from operations that are
 already exposed to external KAP1/KAP2 applications.
@@ -92,26 +92,39 @@ D0 / D1
 The LCD and Touch share pins. The resident driver restores pin direction after
 Touch sampling before display writes.
 
-Because the shield consumes or shares most UNO pins, a future generic I/O API
-must include explicit ownership/conflict rules rather than simply exposing raw
-Arduino pin functions to applications.
-
-## 6. Not yet part of the KAP System API
-
-The following are planned/research directions, not current KAP2 capabilities:
+For the assembled KonSol appliance used in LAB-05, these pins are not treated
+as externally available application I/O. The physical device boundary is:
 
 ```text
-GPIO read/write
-ADC read
-PWM write
-I2C transactions
-controlled SPI device access
-additional UART where hardware allows
-application filesystem API
+Input:       resistive Touch + USB-TTL Serial
+Output:      TFT + USB-TTL Serial
+Storage:     microSD
+Host link:   HOST1 over USB-TTL Serial
 ```
 
-These services should be added only with a defined resident API, memory budget,
-pin-ownership rules and physical certification.
+The device is therefore developed as a small self-contained computer, not as a
+general Arduino GPIO controller.
+
+## 6. System-level directions
+
+Raw GPIO / ADC / PWM / I2C exposure is **out of scope for this assembled
+LAB-05 device** because those interfaces are not brought out as part of its
+external contract.
+
+The next system-level services are host/application-platform features:
+
+```text
+HOST1 machine protocol
+verified file transfer
+remote application lifecycle
+Host Manager
+application metadata/catalog
+on-device application launcher
+future application-level filesystem API
+```
+
+TEST-09 physically verifies HOST1 and TEST-10 physically verifies the Host
+Manager layer.
 
 ## 7. KON-Boot / Flash Writer is separate
 
