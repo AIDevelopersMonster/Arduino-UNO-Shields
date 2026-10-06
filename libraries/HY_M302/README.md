@@ -370,5 +370,8 @@ free SRAM reported by the build: 1301 bytes
 
 Status: **REMOTE TEST MENU PHYSICAL PASS**.
 
-The follow-up implementation removes long blocking test loops so RETURN, HOME
-and POWER remain responsive while a test is active.
+The fully cooperative follow-up implementation was then physically retested.
+RETURN, HOME and POWER remain responsive while a test is active, including the
+timed button, POT, LDR, RGB, buzzer and IR diagnostic paths.
+
+Status: **TEST-07 COOPERATIVE CONTROL PHYSICAL PASS**.
