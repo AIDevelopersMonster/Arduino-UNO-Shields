@@ -136,3 +136,23 @@ APP EXIT 0
 This verifies clean return from the external KAP2 application to resident KonSol:
 APP returns to IDLE, RAM returns from 621 B to the normal 652 B shell value, and
 all five cooperative tasks remain present.
+
+
+## Physical evidence — GUI download
+
+The TEST-10 Host Manager downloaded the GUI-installed application back from the
+physical KonSol microSD.
+
+Observed:
+
+```text
+DOWNLOAD PASS:
+C:\GitHub\Arduino-UNO-Shields\labs\05-UNO-KON-OS\apps\KAP2\HOSTMGR.downloaded.KAP
+size=454
+CRC=6C3D
+SHA256=D44507C76C80C80584DFB58593F9A6765467B4A8575860DFE5D2114EF52AFE5A
+```
+
+This closes the GUI-side GET + CRC verification gate. Final byte-for-byte
+round-trip certification requires comparing this SHA-256 with the local source
+`HOSTMGR.KAP`.
