@@ -242,6 +242,12 @@ POWER      safe OFF
 The menu path was physically verified on the real UNO + HY-M302 and is recorded
 as **PHYSICAL PASS**.
 
+The later cooperative version was also physically verified: active tests can be
+cancelled immediately from the remote, and RETURN / HOME / POWER stay responsive
+without waiting for long test loops to finish.
+
+Status: **TEST-07 COOPERATIVE REMOTE CONTROL PHYSICAL PASS**.
+
 ## Output notes
 
 ### Buzzer
