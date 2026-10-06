@@ -276,21 +276,81 @@ def ensure_unique(result: list[KeyCode], candidate: KeyCode) -> None:
             )
 
 
-def save_profile(root: pathlib.Path, profile_name: str, keys: list[KeyCode]) -> pathlib.Path:
-    safe = re.sub(r"[^A-Za-z0-9_-]+", "_", profile_name).strip("_") or "remote"
-    out = root / "profiles" / "HY-M302-Remotes" / safe
-    out.mkdir(parents=True, exist_ok=True)
+def validate_keys(keys: list[KeyCode]) -> None:
+    seen_names: set[str] = set()
+    seen_codes: set[tuple[int, int]] = set()
 
-    payload = {
-        "format": "HY_M302_REMOTE_MAP",
-        "version": 1,
-        "profile": profile_name,
-        "protocol": "NEC",
-        "keys": [asdict(k) for k in keys],
-    }
-    (out / "remote_map.json").write_text(
-        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
-    )
+    for item in keys:
+        if not re.fullmatch(r"KEY_[A-Z0-9_]+", item.name):
+            raise MapperError(f"invalid key name: {item.name}")
+
+        if item.name in seen_names:
+            raise MapperError(f"duplicate key name: {item.name}")
+        seen_names.add(item.name)
+
+        code = (item.address, item.command)
+        if code in seen_codes:
+            raise MapperError(
+                f"duplicate address/command: ADDR=0x{item.address:X} "
+                f"CMD=0x{item.command:X}"
+            )
+        seen_codes.add(code)
+
+        if not (0 <= item.address <= 0xFFFF):
+            raise MapperError(f"address out of range for {item.name}")
+        if not (0 <= item.command <= 0xFF):
+            raise MapperError(f"command out of range for {item.name}")
+        if not (0 <= item.raw <= 0xFFFFFFFF):
+            raise MapperError(f"raw code out of range for {item.name}")
+
+
+def load_profile_json(json_path: pathlib.Path) -> tuple[str, list[KeyCode]]:
+    try:
+        payload = json.loads(json_path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise MapperError(f"JSON file not found: {json_path}") from exc
+    except json.JSONDecodeError as exc:
+        raise MapperError(
+            f"invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}"
+        ) from exc
+
+    if payload.get("format") != "HY_M302_REMOTE_MAP":
+        raise MapperError("unsupported JSON format; expected HY_M302_REMOTE_MAP")
+    if payload.get("version") != 1:
+        raise MapperError(f"unsupported profile version: {payload.get('version')!r}")
+    if payload.get("protocol") != "NEC":
+        raise MapperError(
+            f"unsupported protocol: {payload.get('protocol')!r}; expected NEC"
+        )
+
+    profile_name = str(payload.get("profile", "")).strip() or json_path.parent.name
+    raw_keys = payload.get("keys")
+    if not isinstance(raw_keys, list) or not raw_keys:
+        raise MapperError("profile contains no keys")
+
+    keys: list[KeyCode] = []
+    for index, item in enumerate(raw_keys, 1):
+        if not isinstance(item, dict):
+            raise MapperError(f"keys[{index}] must be an object")
+        try:
+            key = KeyCode(
+                name=str(item["name"]),
+                label=str(item.get("label", item["name"])),
+                raw=int(item["raw"]),
+                address=int(item["address"]),
+                command=int(item["command"]),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise MapperError(f"invalid keys[{index}] entry") from exc
+        keys.append(key)
+
+    validate_keys(keys)
+    return profile_name, keys
+
+
+def write_cpp_map(out: pathlib.Path, keys: list[KeyCode]) -> tuple[pathlib.Path, pathlib.Path]:
+    validate_keys(keys)
+    out.mkdir(parents=True, exist_ok=True)
 
     header = [
         "#pragma once",
@@ -320,7 +380,9 @@ def save_profile(root: pathlib.Path, profile_name: str, keys: list[KeyCode]) -> 
         "}  // namespace HY_M302_RemoteMap",
         "",
     ]
-    (out / "HY_M302_RemoteMap.h").write_text("\n".join(header), encoding="utf-8")
+
+    header_path = out / "HY_M302_RemoteMap.h"
+    header_path.write_text("\n".join(header), encoding="utf-8")
 
     source = [
         '#include "HY_M302_RemoteMap.h"',
@@ -352,9 +414,39 @@ def save_profile(root: pathlib.Path, profile_name: str, keys: list[KeyCode]) -> 
         "}  // namespace HY_M302_RemoteMap",
         "",
     ]
-    (out / "HY_M302_RemoteMap.cpp").write_text(
-        "\n".join(source), encoding="utf-8"
+
+    source_path = out / "HY_M302_RemoteMap.cpp"
+    source_path.write_text("\n".join(source), encoding="utf-8")
+
+    return header_path, source_path
+
+
+def generate_from_json(
+    json_path: pathlib.Path,
+    out_dir: pathlib.Path | None = None,
+) -> tuple[pathlib.Path, pathlib.Path]:
+    _profile_name, keys = load_profile_json(json_path)
+    target = out_dir if out_dir is not None else json_path.parent
+    return write_cpp_map(target, keys)
+
+
+def save_profile(root: pathlib.Path, profile_name: str, keys: list[KeyCode]) -> pathlib.Path:
+    safe = re.sub(r"[^A-Za-z0-9_-]+", "_", profile_name).strip("_") or "remote"
+    out = root / "profiles" / "HY-M302-Remotes" / safe
+    out.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "format": "HY_M302_REMOTE_MAP",
+        "version": 1,
+        "profile": profile_name,
+        "protocol": "NEC",
+        "keys": [asdict(k) for k in keys],
+    }
+    (out / "remote_map.json").write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
+
+    write_cpp_map(out, keys)
 
     return out
 
@@ -491,7 +583,14 @@ class MapperGUI:
 
         bottom = ttk.Frame(self.window, padding=10)
         bottom.pack(fill="x")
-        ttk.Button(bottom, text="Save files", command=self.save).pack(side="right")
+        ttk.Button(bottom, text="Save learned profile", command=self.save).pack(
+            side="right"
+        )
+        ttk.Button(
+            bottom,
+            text="Generate .h/.cpp from JSON",
+            command=self.generate_from_json_gui,
+        ).pack(side="right", padx=(0, 8))
         ttk.Label(bottom, textvariable=self.status_var).pack(side="left")
 
         self.refresh_ports()
@@ -603,6 +702,30 @@ class MapperGUI:
         except Exception as exc:
             self.status_var.set(str(exc))
 
+    def generate_from_json_gui(self) -> None:
+        from tkinter import filedialog
+
+        initial_dir = self.root_path / "profiles" / "HY-M302-Remotes"
+        json_name = filedialog.askopenfilename(
+            title="Select HY-M302 remote_map.json",
+            initialdir=str(initial_dir),
+            filetypes=[
+                ("HY-M302 remote profile", "remote_map.json"),
+                ("JSON files", "*.json"),
+                ("All files", "*.*"),
+            ],
+        )
+        if not json_name:
+            return
+
+        try:
+            header, source = generate_from_json(pathlib.Path(json_name))
+            self.status_var.set(
+                f"Generated: {header.name} + {source.name}"
+            )
+        except Exception as exc:
+            self.status_var.set(str(exc))
+
     def poll_events(self) -> None:
         try:
             while True:
@@ -668,6 +791,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="compile/upload mapper before learning",
     )
 
+    generate = sub.add_parser(
+        "generate",
+        help="generate HY_M302_RemoteMap.h/.cpp from an existing remote_map.json",
+    )
+    generate.add_argument("--json", required=True, help="path to remote_map.json")
+    generate.add_argument(
+        "--out",
+        help="output directory; defaults to the JSON file directory",
+    )
+
     sub.add_parser("gui", help="open Tk GUI")
     return p
 
@@ -694,6 +827,15 @@ def main() -> int:
 
         if args.command == "learn":
             return learn_cli(args)
+
+        if args.command == "generate":
+            json_path = pathlib.Path(args.json).resolve()
+            out_dir = pathlib.Path(args.out).resolve() if args.out else None
+            header, source = generate_from_json(json_path, out_dir)
+            print("Generated C++ map:")
+            print(f"  {header}")
+            print(f"  {source}")
+            return 0
 
         parser.print_help()
         return 2
