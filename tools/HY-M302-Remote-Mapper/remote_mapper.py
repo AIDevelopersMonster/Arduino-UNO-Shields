@@ -545,7 +545,13 @@ class MapperGUI:
         ttk.Label(top, text="COM port").grid(row=0, column=0, sticky="w")
         self.port_combo = ttk.Combobox(top, textvariable=self.port_var, width=18)
         self.port_combo.grid(row=0, column=1, padx=6)
-        ttk.Button(top, text="Refresh", command=self.refresh_ports).grid(row=0, column=2)
+        ttk.Button(top, text="Refresh", command=self.refresh_ports).grid(
+            row=0, column=2, padx=(0, 6)
+        )
+        self.connect_btn = ttk.Button(
+            top, text="Connect", command=self.toggle_connection
+        )
+        self.connect_btn.grid(row=0, column=3)
 
         ttk.Label(top, text="Profile").grid(row=1, column=0, sticky="w", pady=(8, 0))
         ttk.Entry(top, textvariable=self.name_var, width=28).grid(
@@ -628,6 +634,43 @@ class MapperGUI:
             raise MapperError("Select a COM port")
         return port
 
+    def _disconnect_link(self) -> None:
+        if self.link is not None:
+            try:
+                self.link.__exit__(None, None, None)
+            finally:
+                self.link = None
+        self.connect_btn.config(text="Connect")
+
+    def toggle_connection(self) -> None:
+        if self.link is not None:
+            self._disconnect_link()
+            self.status_var.set("Disconnected")
+            return
+
+        try:
+            port = self._require_port()
+        except Exception as exc:
+            self.status_var.set(str(exc))
+            return
+
+        self.connect_btn.config(state="disabled")
+        self.status_var.set(f"Connecting to {port}...")
+
+        def work():
+            link = MapperLink(port)
+            try:
+                link.__enter__()
+                self.log_event("connected", link)
+            except Exception as exc:
+                try:
+                    link.__exit__(None, None, None)
+                except Exception:
+                    pass
+                self.log_event("connect_error", str(exc))
+
+        threading.Thread(target=work, daemon=True).start()
+
     def flash(self) -> None:
         try:
             port = self._require_port()
@@ -635,6 +678,7 @@ class MapperGUI:
             self.status_var.set(str(exc))
             return
 
+        self._disconnect_link()
         self.status_var.set("Compiling/uploading mapper...")
 
         def work():
@@ -659,8 +703,15 @@ class MapperGUI:
             return
 
         if self.link is not None:
-            self.link.__exit__(None, None, None)
-            self.link = None
+            self.learned.clear()
+            self.step_index = 0
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+            self._update_step_label()
+            self.status_var.set(
+                "Mapper connected - click Capture, then press the requested key"
+            )
+            return
 
         self.status_var.set("Checking mapper firmware...")
 
@@ -776,12 +827,26 @@ class MapperGUI:
                 kind, payload = self.worker_events.get_nowait()
                 if kind == "flash_ok":
                     self.status_var.set("Mapper firmware uploaded")
+                elif kind == "connected":
+                    self.link = payload
+                    self.connect_btn.config(text="Disconnect", state="normal")
+                    self.status_var.set(
+                        f"Connected to {self.port_var.get()} - mapper READY"
+                    )
+                elif kind == "connect_error":
+                    self.connect_btn.config(text="Connect", state="normal")
+                    self.status_var.set(
+                        "Connection failed: "
+                        + str(payload)
+                        + " | Use Start learning (auto prepare) if another firmware is loaded."
+                    )
                 elif kind == "log":
                     self.status_var.set(str(payload))
                 elif kind == "error":
                     self.status_var.set(str(payload))
                 elif kind == "learning_ready":
                     self.link = payload
+                    self.connect_btn.config(text="Disconnect", state="normal")
                     self.learned.clear()
                     self.step_index = 0
                     for item in self.tree.get_children():
@@ -813,9 +878,7 @@ class MapperGUI:
         self.window.after(100, self.poll_events)
 
     def close(self) -> None:
-        if self.link is not None:
-            self.link.__exit__(None, None, None)
-            self.link = None
+        self._disconnect_link()
         self.window.destroy()
 
     def run(self) -> int:
