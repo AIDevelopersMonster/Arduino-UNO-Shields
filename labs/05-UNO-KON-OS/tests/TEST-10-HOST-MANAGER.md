@@ -156,3 +156,32 @@ SHA256=D44507C76C80C80584DFB58593F9A6765467B4A8575860DFE5D2114EF52AFE5A
 This closes the GUI-side GET + CRC verification gate. Final byte-for-byte
 round-trip certification requires comparing this SHA-256 with the local source
 `HOSTMGR.KAP`.
+
+
+## Physical evidence — exact GUI round-trip
+
+The file downloaded by the TEST-10 Host Manager was compared against the local
+source file with SHA-256.
+
+Observed:
+
+```text
+SRC SHA256 = D44507C76C80C80584DFB58593F9A6765467B4A8575860DFE5D2114EF52AFE5A
+RX  SHA256 = D44507C76C80C80584DFB58593F9A6765467B4A8575860DFE5D2114EF52AFE5A
+MATCH      = True
+```
+
+This certifies an exact byte-for-byte GUI round-trip:
+
+```text
+PC source
+ -> KonSol Host Manager
+ -> HOST1
+ -> microSD
+ -> HOST1
+ -> KonSol Host Manager
+ -> PC download
+```
+
+The GUI install/download path is therefore physically verified independently of
+the TEST-09 PowerShell transfer script.
