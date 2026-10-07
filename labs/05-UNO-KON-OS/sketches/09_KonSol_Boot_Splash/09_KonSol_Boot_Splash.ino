@@ -740,10 +740,8 @@ static bool bootSplashFromSd() {
     if (ch < 32 || ch > 126) ch = '.';
 
     uint16_t color = LCD_WHITE;
-    if (line == 0 || line == 3 || line >= 10) color = LCD_BLUE;
-    else if (line == 1) color = LCD_CYAN;
-    else if (line == 2) color = LCD_YELLOW;
-    else if (line == 5) color = LCD_GREEN;
+    if (line <= 4) color = LCD_CYAN;
+    else if (line >= 6) color = LCD_YELLOW;
 
     lcdChar(x, y, ch, 2, color);
     x += 8;
