@@ -205,3 +205,38 @@ DESCRIPTION=Touch-driven counter
 
 That is intentionally deferred so the first physical launcher test remains
 small, reproducible and resource-measurable.
+
+
+## Physical evidence — boot
+
+KonSol 0.8 was uploaded to the physical Arduino UNO and booted successfully.
+
+Observed:
+
+```text
+KonSol 0.8
+Arduino UNO / ATmega328P / 16 MHz
+Kernel + SD + direct ILI9341 + direct Touch
+KAP1/KAP2 VM + HOST1 + app launcher + touch browser
+
+BOOT: TFT init
+BOOT: kernel init
+BOOT: SD mount
+SD: READY
+FREE RAM: 723 B
+Type HELP
+A:/>
+```
+
+Gate A: **PASS**.
+
+Reference comparison:
+
+```text
+KonSol 0.7 boot free RAM: 724 B
+KonSol 0.8 boot free RAM: 723 B
+Delta: -1 B
+```
+
+The measured runtime RAM cost of the first on-device launcher therefore matches
+the compile-time global-SRAM delta: one byte.
