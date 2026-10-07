@@ -429,3 +429,48 @@ FILES -> directories + TXT/data files + KAP files
 
 This also demonstrates that text content stored on microSD can be rendered by
 resident KonSol without adding the content itself to MCU Flash.
+
+
+## Stage 2 — SD boot splash
+
+Stage 2 keeps KonSol 0.8 and adds an optional boot resource loaded from
+microSD:
+
+```text
+/BOOT.TXT
+```
+
+The splash content is data, not firmware. It can therefore be changed without
+recompiling or reflashing the ATmega328P.
+
+Observed Stage-2 build:
+
+```text
+Flash:        31088 / 32256 B (96%)
+Global SRAM:   1327 / 2048 B (64%)
+Linker SRAM remainder: 721 B
+```
+
+Compared with Stage 1:
+
+```text
+Flash: 30738 -> 31088 B (+350 B)
+SRAM:   1317 -> 1327 B  (+10 B)
+```
+
+Flash headroom after Stage 2:
+
+```text
+32256 - 31088 = 1168 B
+```
+
+Because the firmware budget is now tight, the splash artwork itself remains on
+microSD.
+
+The first generic HOST1 `put-file.ps1` attempt timed out after one successful
+PUTD record. The generic installer was therefore made more conservative than
+the certified TEST-09 transfer script: 8 data bytes per PUTD plus a 20 ms gap
+between acknowledged records. Re-running starts with PUTB, which recreates the
+destination file.
+
+Stage-2 physical splash display: **PENDING**.
