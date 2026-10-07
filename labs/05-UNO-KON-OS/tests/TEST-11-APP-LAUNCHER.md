@@ -1,6 +1,6 @@
 # LAB-05 / TEST-11 — KonSol 0.8 Application Launcher
 
-Status: **STAGE 1 FULL PHYSICAL PASS**.
+Status: **FULL PHYSICAL PASS**.
 
 ## Purpose
 
@@ -23,7 +23,16 @@ Execution:   resident KonSol + external KAP1/KAP2
 
 ## Firmware
 
+Stage 1 launcher baseline:
+
 `sketches/08_KonSol_App_Launcher/08_KonSol_App_Launcher.ino`
+
+Final TEST-11 / Stage 2 firmware:
+
+`sketches/09_KonSol_Boot_Splash/09_KonSol_Boot_Splash.ino`
+
+The Stage-2 firmware retains the physically verified Stage-1 APPS/FILES
+launcher and adds the optional SD-backed `/BOOT.TXT` splash.
 
 ## First implementation
 
@@ -184,27 +193,22 @@ TEST-11 first stage is FULL PHYSICAL PASS when:
 8. HOST1 status/tasks/filesystem remain operational;
 9. no reset, SD corruption or progressive RAM loss is observed.
 
-## Next stage after first PASS
+## Deferred beyond TEST-11
 
-Only after the minimal launcher is physically certified should TEST-11 add
-application metadata/catalog data, for example:
+Application metadata/catalog sidecars such as:
 
 ```text
 APP.KAP
 APP.INF
 ```
 
-Possible metadata:
+remain a possible future platform feature, but they are **not part of the
+TEST-11 acceptance criteria**.
 
-```ini
-NAME=Touch Counter
-VERSION=1.0
-TYPE=KAP2
-DESCRIPTION=Touch-driven counter
-```
-
-That is intentionally deferred so the first physical launcher test remains
-small, reproducible and resource-measurable.
+The final Stage-2 build leaves only 1168 B of ATmega328P Flash headroom, so
+metadata parsing is intentionally deferred to a future KonSol revision or to
+host-side tooling rather than being added to the closed 0.8 firmware merely for
+presentation purposes.
 
 
 ## Physical evidence — boot
