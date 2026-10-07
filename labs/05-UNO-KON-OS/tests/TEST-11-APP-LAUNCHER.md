@@ -1,6 +1,6 @@
 # LAB-05 / TEST-11 — KonSol 0.8 Application Launcher
 
-Status: **BUILD PASS / PHYSICAL TEST PENDING**.
+Status: **STAGE 1 FULL PHYSICAL PASS**.
 
 ## Purpose
 
@@ -396,3 +396,36 @@ added in KonSol 0.8.
 
 All five cooperative tasks remain active and the root filesystem remains
 readable after repeated KAP1/KAP2 launcher execution.
+
+
+## Physical evidence — FILES regression
+
+The physical TFT confirms that the original general filesystem browser remains
+available separately from the KAP-only APPS launcher.
+
+Observed in FILES mode:
+
+```text
+KONSOL 0.8 FILE BROWSER
+/
+T07LOG.TXT
+XOLOG.TXT
+TEST03/
+HELLO.KAP
+ABOUT.KAP
+...
+```
+
+A TXT file was also opened successfully in the resident viewer.
+
+Gate E: **PASS**.
+
+The UI separation is therefore physically verified:
+
+```text
+APPS  -> KAP applications only
+FILES -> directories + TXT/data files + KAP files
+```
+
+This also demonstrates that text content stored on microSD can be rendered by
+resident KonSol without adding the content itself to MCU Flash.
