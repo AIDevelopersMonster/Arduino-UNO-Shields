@@ -12,6 +12,53 @@ The design takes inspiration from early small computers: one shared stack,
 static buffers, cooperative scheduling, a command shell, and external programs
 or data on removable storage.
 
+## Project status — KonSol 0.8 frozen
+
+KonSol 0.8 / TEST-11 is the current completed research milestone and is now
+**frozen**.
+
+The project has reached the result it was created to test on the physical
+Arduino UNO / ATmega328P platform:
+
+- resident cooperative operating environment in MCU Flash;
+- external KAP1/KAP2 applications stored on microSD;
+- KASM host-side application language/toolchain;
+- direct TFT and resistive-Touch resident services;
+- APPS launcher and general FILES browser on the device;
+- HOST1 machine protocol over USB-TTL Serial;
+- Host Manager GUI and PowerShell CLI file transfer;
+- SD-backed boot resource via `/BOOT.TXT`;
+- TEST-11 **FULL PHYSICAL PASS**.
+
+The research question is therefore considered solved for the purposes of this
+project. Further feature development is not planned merely because additional
+features are technically possible.
+
+At the present stage there is no demonstrated external user or professional
+demand sufficient to justify continued expansion of the resident firmware.
+This is an observation about the current project state, not a claim that the
+approach can never become useful to others.
+
+Development may be reopened if a concrete reason appears, for example:
+
+- a real user or application requires KonSol;
+- an external issue, pull request, integration request or reproducible use case
+  identifies a useful next step;
+- a new research question cannot be answered by the published 0.8 result;
+- a separate architecture line such as native AVR refactoring or KON-Boot is
+  intentionally started as a new milestone.
+
+Until such a trigger exists, KonSol 0.8 should be treated as a completed,
+published and reproducible research result rather than an actively expanding
+firmware branch.
+
+Publication:
+
+- KonSol 0.8 / TEST-11 DOI:
+  https://doi.org/10.5281/zenodo.23223036
+- TEST-11 video:
+  https://youtu.be/FmeGiIh2ii0
+
 ## Hardware
 
 - Arduino UNO R3 / ATmega328P
@@ -1214,6 +1261,16 @@ Procedure:
 Status: **FULL PHYSICAL PASS**.
 
 ## Publication
+
+KonSol 0.8 / TEST-11 is published as a **standalone technical article**:
+
+- KonSol 0.8 DOI: https://doi.org/10.5281/zenodo.23223036
+- TEST-11 video: https://youtu.be/FmeGiIh2ii0
+
+The 0.8 publication records the autonomous on-device APPS/FILES launcher,
+KAP1/KAP2 Touch launch path, SD-backed boot resource, preserved HOST1
+management path, and the physically verified GUI/CLI file-management workflow.
+KonSol 0.8 is the current frozen milestone of LAB-05.
 
 KonSol 0.7 TEST-09/TEST-10 is published as a **standalone technical article**:
 
