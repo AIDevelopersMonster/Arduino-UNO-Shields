@@ -1,11 +1,11 @@
-======================================
-            KONSOL 0.8
-              KON-OS
-======================================
+K  K OOO N  N SSS OOO L
+K K  O O NN N S   O O L
+KK   O O N NN SSS O O L
+K K  O O N NN   S O O L
+K  K OOO N  N SSS OOO LLL
 
-       RESIDENT KAP SYSTEM
-       KAP1 KAP2 HOST1
-       TFT TOUCH MICROSD
-       ARDUINO UNO / ATMEGA328P
-       SD APPLICATIONS READY
-======================================
+ OOO   SSS
+O   O S
+O   O  SSS
+O   O    S
+ OOO  SSS
