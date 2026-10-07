@@ -332,3 +332,67 @@ This verifies that the launcher is not limited to the legacy KAP1 format. The
 same on-device Touch selection path launches the current KAP2 VM application
 format and returns cleanly to the resident KonSol environment through
 `APP EXIT 0`.
+
+
+## Physical evidence — HOST1 regression after repeated launcher runs
+
+After repeated on-device application launches, KonSol 0.8 remained stable.
+
+Observed sequence:
+
+```text
+APP RUN /HELLO.KAP
+HELLO KAP1
+APP EXIT 0
+
+APP RUN /HELLO.KAP
+HELLO KAP1
+APP EXIT 0
+
+APP RUN /MULTI.KAP
+MULTILABEL KAP2
+APP EXIT 0
+```
+
+Post-run HOST1 status:
+
+```text
+@INFO
+@OK INFO V=0.8 HOST=1 SD=1 APP=0 RAM=651 TASKS=5
+
+@MEM
+@OK MEM 651
+
+@PS
+@TASK 0 SERIAL 1 2472845
+@TASK 1 CLOCK 100 24728
+@TASK 2 DISPLAY 1000 2472
+@TASK 3 TOUCH 30 82428
+@TASK 4 APP 10 247284
+@END PS 5
+```
+
+Filesystem remained readable:
+
+```text
+@LS /
+@F 175 T07LOG.TXT
+@F 23 XOLOG.TXT
+@D TEST03
+@F 123 HELLO.KAP
+@F 197 ABOUT.KAP
+@F 171 DEMO.KAP
+@F 363 COUNTER.KAP
+@F 488 MULTI.KAP
+@F 454 HOSTGUI.KAP
+@END LS 9
+```
+
+HOST1 regression gate: **PASS**.
+
+Measured post-run resident RAM is 651 B, one byte below the KonSol 0.7 shell
+reference of 652 B and consistent with the one-byte persistent launcher state
+added in KonSol 0.8.
+
+All five cooperative tasks remain active and the root filesystem remains
+readable after repeated KAP1/KAP2 launcher execution.
