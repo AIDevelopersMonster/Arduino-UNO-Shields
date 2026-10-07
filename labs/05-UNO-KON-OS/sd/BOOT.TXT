@@ -1,11 +1,11 @@
-K  K OOO N  N SSS OOO L
-K K  O O NN N S   O O L
-KK   O O N NN SSS O O L
-K K  O O N NN   S O O L
-K  K OOO N  N SSS OOO LLL
+K   K  OOO  N   N  SSS   OOO  L    
+K  K  O   O NN  N S     O   O L    
+KKK   O   O N N N  SSS  O   O L    
+K  K  O   O N  NN     S O   O L    
+K   K  OOO  N   N SSSS   OOO  LLLLL
 
- OOO   SSS
-O   O S
-O   O  SSS
-O   O    S
- OOO  SSS
+              OOO   SSS 
+             O   O S    
+             O   O  SSS 
+             O   O     S
+              OOO  SSSS 
