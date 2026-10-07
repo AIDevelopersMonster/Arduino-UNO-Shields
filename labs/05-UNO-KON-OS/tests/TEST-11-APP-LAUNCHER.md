@@ -273,3 +273,41 @@ Gate B: **PASS** — APPS/FILES split is present on the resident UI.
 
 Gate C: **PASS** — the APPS view is a KAP-only application list and is distinct
 from the general filesystem browser.
+
+
+## Physical evidence — KAP1 launch from APPS
+
+The physical KonSol 0.8 launcher successfully started the legacy KAP1
+application directly from the on-device APPS view.
+
+Observed TFT:
+
+```text
+HELLO FROM SD
+TOUCH TO EXIT
+```
+
+Observed Serial:
+
+```text
+APP RUN /HELLO.KAP
+HELLO KAP1
+APP EXIT 0
+```
+
+Gate D / KAP1 path: **PASS**.
+
+This verifies the complete autonomous on-device lifecycle:
+
+```text
+APPS
+ -> HELLO.KAP
+ -> resident KAP1 VM
+ -> TFT output
+ -> Touch input
+ -> APP EXIT 0
+ -> resident KonSol
+```
+
+No Host Manager, Serial RUN command, microSD removal or MCU reflashing was
+required to select and start the application.
