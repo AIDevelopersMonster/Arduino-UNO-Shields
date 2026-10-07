@@ -473,4 +473,21 @@ the certified TEST-09 transfer script: 8 data bytes per PUTD plus a 20 ms gap
 between acknowledged records. Re-running starts with PUTB, which recreates the
 destination file.
 
-Stage-2 physical splash display: **PENDING**.
+## Stage 2 physical result
+
+Stage 2 is **FULL PHYSICAL PASS**.
+
+`/BOOT.TXT` was installed through the KonSol Host Manager and physically
+verified as the SD-backed boot splash on the Arduino UNO.
+
+The working `/BOOT.TXT` was then left unchanged.
+
+A separate file, `/CLITEST.TXT`, was used to certify the generic PowerShell
+HOST1 uploader:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File `
+  .\tools\konsol-host1\put-file.ps1 `
+  -Source .\labs\05-UNO-KON-OS\sd\CLITEST.TXT `
+  -Remote /CLITEST.TXT `
+  -Port COM4

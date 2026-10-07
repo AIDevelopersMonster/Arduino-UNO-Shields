@@ -32,7 +32,16 @@ function Read-ProtocolLine {
     while ($true) {
         $line = $sp.ReadLine().Trim()
         if ($line.Length -eq 0) { continue }
+
         Write-Host $line
+
+        # KonSol human prompt has no trailing newline.
+        # After DTR reset the first HOST1 reply can arrive as:
+        # A:/> @OK PONG HOST1
+        if ($line -match '^A:/> (@.*)$') {
+            $line = $Matches[1]
+        }
+
         return $line
     }
 }
@@ -97,12 +106,12 @@ try {
             $hex += $data[$off + $i].ToString("X2")
         }
 
-        [void](Send-Expect "@PUTD $Remote $hex" '^@OK PUTD d+$')
+        [void](Send-Expect "@PUTD $Remote $hex" '^@OK PUTD \d+$')
     }
 
     [void](Send-Expect (
         "@PUTE {0} {1} {2:X4}" -f $Remote, $data.Length, $crc
-    ) '^@OK PUTE d+ [0-9A-F]{4}$')
+    ) '^@OK PUTE \d+ [0-9A-F]{4}$')
 
     Write-Host ""
     Write-Host "> @LS /"
@@ -113,7 +122,7 @@ try {
         if ($line -match '^@ERR') {
             throw "HOST1 error: $line"
         }
-        if ($line -match '^@END LS d+$') { break }
+        if ($line -match '^@END LS \d+$') { break }
     }
 }
 finally {
