@@ -311,3 +311,24 @@ APPS
 
 No Host Manager, Serial RUN command, microSD removal or MCU reflashing was
 required to select and start the application.
+
+
+## Physical evidence — KAP2 launch from APPS
+
+The physical KonSol 0.8 launcher also started the multi-label KAP2 application
+directly from the on-device APPS view.
+
+Observed Serial:
+
+```text
+APP RUN /MULTI.KAP
+MULTILABEL KAP2
+APP EXIT 0
+```
+
+Gate D / KAP2 path: **PASS**.
+
+This verifies that the launcher is not limited to the legacy KAP1 format. The
+same on-device Touch selection path launches the current KAP2 VM application
+format and returns cleanly to the resident KonSol environment through
+`APP EXIT 0`.
