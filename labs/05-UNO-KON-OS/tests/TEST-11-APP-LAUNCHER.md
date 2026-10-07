@@ -467,11 +467,9 @@ Flash headroom after Stage 2:
 Because the firmware budget is now tight, the splash artwork itself remains on
 microSD.
 
-The first generic HOST1 `put-file.ps1` attempt timed out after one successful
-PUTD record. The generic installer was therefore made more conservative than
-the certified TEST-09 transfer script: 8 data bytes per PUTD plus a 20 ms gap
-between acknowledged records. Re-running starts with PUTB, which recreates the
-destination file.
+The first generic HOST1 `put-file.ps1` attempt exposed two host-side parsing
+defects in the generic PowerShell uploader. The device and HOST1 transport were
+not the cause.
 
 ## Stage 2 physical result
 
@@ -491,3 +489,58 @@ powershell -ExecutionPolicy Bypass -File `
   -Source .\labs\05-UNO-KON-OS\sd\CLITEST.TXT `
   -Remote /CLITEST.TXT `
   -Port COM4
+```
+
+Two host-side defects were identified and corrected.
+
+First, after the DTR reset the first HOST1 reply can be attached to the resident
+shell prompt:
+
+```text
+A:/> @OK PONG HOST1
+```
+
+The uploader now removes this known prompt prefix before matching the HOST1
+response.
+
+Second, the generic uploader contained malformed numeric response expressions:
+
+```text
+d+
+```
+
+instead of:
+
+```text
+\d+
+```
+
+for `PUTD`, `PUTE` and `LS` completion records.
+
+After these corrections the complete file was transferred successfully:
+
+```text
+PC file
+ -> PowerShell CLI
+ -> HOST1
+ -> USB Serial
+ -> KonSol 0.8
+ -> microSD
+```
+
+`/CLITEST.TXT` was then opened successfully through the resident `FILES`
+browser.
+
+The apparent visual difference between the boot splash and the ordinary TXT
+view was physically checked and confirmed to be presentation-only:
+
+```text
+BOOT.TXT at boot -> bootSplashFromSd() -> scale 2 + splash colors
+TXT in FILES     -> viewerDraw()       -> scale 1 + normal TXT rendering
+```
+
+The file contents are equivalent; the renderers are intentionally different.
+
+The existing `/BOOT.TXT` was not modified during the CLI certification test.
+
+Status: **TEST-11 STAGE 2 FULL PHYSICAL PASS**.
