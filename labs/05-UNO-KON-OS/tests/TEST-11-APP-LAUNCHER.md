@@ -240,3 +240,36 @@ Delta: -1 B
 
 The measured runtime RAM cost of the first on-device launcher therefore matches
 the compile-time global-SRAM delta: one byte.
+
+
+## Physical evidence — launcher view
+
+The physical TFT confirms the new KonSol 0.8 on-device application launcher.
+
+Observed on the device:
+
+```text
+KONSOL 0.8 APP LAUNCHER
+KAP APPLICATIONS
+
+HELLO.KAP
+ABOUT.KAP
+DEMO.KAP
+COUNTER.KAP
+MULTI.KAP
+```
+
+The launcher view shows only `.KAP` files. Root entries that are not
+applications, including text log files and the TEST03 directory, are absent
+from the launcher.
+
+The dedicated launcher footer is also visible:
+
+```text
+DASH | PREV | NEXT | FILES
+```
+
+Gate B: **PASS** — APPS/FILES split is present on the resident UI.
+
+Gate C: **PASS** — the APPS view is a KAP-only application list and is distinct
+from the general filesystem browser.
