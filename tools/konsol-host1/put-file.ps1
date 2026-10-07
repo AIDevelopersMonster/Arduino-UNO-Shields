@@ -83,8 +83,11 @@ try {
     [void](Send-Expect "@PING" '^@OK PONG HOST1$')
     [void](Send-Expect "@PUTB $Remote" '^@OK PUTB$')
 
-    # Keep complete PUTD lines below the ATmega328P 64-byte RX buffer.
-    $chunkSize = 20
+    # Generic installer uses a deliberately conservative payload.
+    # 8 data bytes -> 16 hex chars, keeping a /BOOT.TXT PUTD record near
+    # 33 bytes total. This gives substantially more margin for periods when
+    # TFT/SD work delays the 1 ms Serial task on the ATmega328P.
+    $chunkSize = 8
 
     for ($off = 0; $off -lt $data.Length; $off += $chunkSize) {
         $count = [Math]::Min($chunkSize, $data.Length - $off)
