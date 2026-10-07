@@ -1,0 +1,11 @@
+======================================
+            KONSOL 0.8
+              KON-OS
+======================================
+
+       RESIDENT KAP SYSTEM
+       KAP1 KAP2 HOST1
+       TFT TOUCH MICROSD
+       ARDUINO UNO / ATMEGA328P
+       SD APPLICATIONS READY
+======================================
