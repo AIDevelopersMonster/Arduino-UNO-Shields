@@ -52,6 +52,177 @@ Until such a trigger exists, KonSol 0.8 should be treated as a completed,
 published and reproducible research result rather than an actively expanding
 firmware branch.
 
+## What to do after unfreezing
+
+If KonSol is ever unfrozen, development should not resume as uncontrolled
+feature growth inside the published 0.8 firmware. The 0.8 result should remain
+an immutable reference point and the continuation should begin as a new
+milestone or experimental branch.
+
+A rational continuation path is:
+
+### 1. Re-establish the certified baseline
+
+Before adding anything new:
+
+- preserve the published KonSol 0.8 / TEST-11 firmware and documentation;
+- rebuild it with the current toolchain;
+- repeat the essential boot, APPS, FILES, KAP1/KAP2, HOST1 and GUI/CLI checks;
+- record Flash, global SRAM and runtime free-RAM values again.
+
+The first purpose of reopening the project is to prove that the known baseline
+still reproduces before changing it.
+
+### 2. TEST-12 — reliability and recovery
+
+The first new test should strengthen the system rather than add a feature.
+
+Candidate fault/recovery cases:
+
+- repeated cold boots and watchdog resets;
+- missing or unreadable microSD;
+- missing, empty or malformed `/BOOT.TXT`;
+- invalid KAP header, invalid opcode and invalid label table;
+- interrupted HOST1 upload followed by a clean retry;
+- repeated GUI and PowerShell CLI transfers;
+- repeated RUN / EXIT cycles for KAP1 and KAP2;
+- repeated remote STOP;
+- post-failure filesystem readability;
+- task-count and free-RAM stability after long repeated operation.
+
+This work can be largely test-side and host-side, so it does not require
+spending the remaining ATmega328P Flash merely to create new visible features.
+
+### 3. Recover engineering headroom before major feature growth
+
+KonSol 0.8 already occupies 31,088 of 32,256 program bytes. If future demand
+requires substantial resident functionality, the next architectural task should
+be to recover Flash and SRAM rather than immediately consume the last bytes.
+
+One possible line is a native AVR implementation built with Microchip Studio or
+an equivalent avr-gcc toolchain while preserving the same external behaviour:
+
+- replace Arduino abstractions only where measurement shows a real benefit;
+- use a compact UART driver instead of the full resident Serial abstraction;
+- evaluate a smaller FAT/SD layer;
+- move remaining GPIO/ADC/timing paths to direct AVR services where useful;
+- keep the current direct ILI9341/TFT work;
+- retain the cooperative kernel, KAP VM, HOST1 and physical test contract.
+
+The goal would be architectural headroom and measurable reproducibility, not a
+rewrite for its own sake. Any claimed memory reduction must be demonstrated by
+build and physical measurements against the frozen 0.8 baseline.
+
+### 4. Add persistent application data only when an application needs it
+
+The most useful next KAP capability is likely persistent state.
+
+A deliberately small API should be preferred over a general desktop-style
+filesystem interface. Possible first services are:
+
+```text
+LOAD16 key/file
+SAVE16 key/file
+READ small record
+WRITE small record
+```
+
+or an equivalently compact `.DAT` model.
+
+That would enable settings, counters, scores, calibration values and retained
+application state across reset without giving KAP applications unrestricted
+ownership of the filesystem.
+
+### 5. Application metadata and catalog information
+
+Metadata such as:
+
+```text
+APP.KAP
+APP.INF
+```
+
+may be introduced when there is a real catalog-management need.
+
+The preferred order is:
+
+1. Host Manager understands metadata first;
+2. KASM/tooling can generate it;
+3. only then consider device-side parsing if the user benefit justifies the
+   resident Flash cost.
+
+Possible fields include application name, version, type, author and short
+description. Metadata should remain data, not a reason to enlarge the kernel
+without a use case.
+
+### 6. Extend the KAP platform according to real applications
+
+Further KAP evolution should be driven by concrete programs rather than by
+instruction-count growth.
+
+Possible directions include:
+
+- application-level persistent data;
+- controlled Serial input;
+- additional resident drawing primitives;
+- subroutine/call support if programs become large enough to need it;
+- carefully scoped hardware services on a different hardware configuration;
+- improved KASM diagnostics and host-side debugging tools.
+
+Each new service should preserve the central KonSol rule: the resident system
+owns the hardware and applications use explicit services.
+
+### 7. Keep KON-Boot as a separate execution line
+
+A native AVR image loader remains an interesting continuation, but it is not a
+KAP2 feature and should not be inserted into the frozen 0.8 kernel.
+
+A separate KON-Boot milestone would investigate:
+
+```text
+microSD native image
+        |
+        v
+AVR Boot Loader Section
+        |
+        v
+verify target / size / CRC
+        |
+        v
+program Application Flash
+        |
+        v
+verify -> reset -> native application
+```
+
+It requires its own treatment of BOOTSZ fuses, bootloader protection, recovery
+after interrupted programming, image format, Flash endurance and a reliable
+return/recovery path.
+
+### 8. Port only when a target justifies it
+
+A larger AVR or another MCU may eventually make richer services practical, but
+a port should answer a concrete need rather than replace the original result.
+
+The frozen ATmega328P version remains valuable precisely because it establishes
+what was achieved under the 32 KB Flash / 2 KB SRAM constraint.
+
+In short, after unfreezing the order should be:
+
+```text
+reproduce 0.8
+    ->
+reliability / recovery
+    ->
+recover architectural headroom
+    ->
+add the smallest feature required by a real application
+    ->
+expand tooling before resident firmware where possible
+    ->
+treat native boot or new hardware as separate milestones
+```
+
 Publication:
 
 - KonSol 0.8 / TEST-11 DOI:
