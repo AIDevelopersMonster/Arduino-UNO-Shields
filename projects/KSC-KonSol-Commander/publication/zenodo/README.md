@@ -1,6 +1,6 @@
 # KSC_Core Zenodo Package
 
-Status: PRE-DEPOSIT PACKAGE - DOI AND CREATOR METADATA FILLED
+Status: PRE-DEPOSIT PACKAGE - METADATA AND PUBLIC TOOLCHAIN RECORD READY
 
 This directory prepares the KSC_Core v0.2 publication candidate for Zenodo.
 
@@ -53,7 +53,7 @@ Minimum preservation package:
 Recommended final package additionally contains:
 
     KSC_CORE_TWO_TARGET_VALIDATION_v0.2.pdf
-    toolchain-final.txt
+    toolchain-public.txt
 
 The PDF should be generated only after a DOI is reserved if the DOI is to appear
 inside the document.
@@ -67,13 +67,13 @@ Do not publish the Zenodo record until all items below are resolved.
 - [x] ORCID(s) confirmed;
 - [x] publication/document license selected: CC BY 4.0;
 - [x] source code kept as external repository reference; publication license does not relicense code;
-- [ ] final toolchain capture recorded;
+- [x] final privacy-scrubbed toolchain capture recorded;
 - [ ] final manuscript reviewed after DOI insertion;
 - [x] DOI supplied and inserted into the manuscript;
 - [ ] PDF/Markdown source pair visually and textually checked;
-- [ ] source snapshot and core blob identifiers unchanged;
-- [ ] final Zenodo description matches the bounded claim;
-- [ ] no KSC-03 result is represented as completed.
+- [x] source snapshot and core blob identifiers verified unchanged;
+- [x] final Zenodo description matches the bounded claim;
+- [x] no KSC-03 result is represented as completed.
 
 ## DOI workflow
 
