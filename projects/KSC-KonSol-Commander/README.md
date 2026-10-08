@@ -1160,3 +1160,22 @@ The first physical launcher target is `/host/DEMO.KSC`, which toggles the
 HY-M302 red and blue discrete LEDs and prints start/pass markers.
 
 No whole-script buffer is allocated.
+
+
+### KSC-04B FULL PHYSICAL PASS
+
+KSC-04B File Actions & Launcher is physically certified on Arduino UNO +
+HY-M302.
+
+A remote `.KSC` file can now be selected in Commander, previewed, and
+streamed for execution against the local VFS.
+
+Final certified runtime status:
+
+```text
+RUN OK
+RAM 399 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+The certified KSC Script v0.1 instruction set is deliberately small:
+`PRINT`, `WRITE`, `WAIT`, and `STOP`.
