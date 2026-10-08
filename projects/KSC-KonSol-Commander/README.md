@@ -1184,6 +1184,11 @@ The certified KSC Script v0.1 instruction set is deliberately small:
 
 ### KSC-04C FULL PHYSICAL PASS - HY-M302 TARGET PHASE CLOSED
 
+Video:
+
+https://youtu.be/pqV5DG1o-WA
+
+
 KSC-04C adds one deliberately small RAM-resident runtime profile for the HY-M302
 SW1 button:
 
