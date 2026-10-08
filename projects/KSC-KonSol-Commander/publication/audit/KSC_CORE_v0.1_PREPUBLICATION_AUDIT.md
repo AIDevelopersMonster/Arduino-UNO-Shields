@@ -480,7 +480,34 @@ Resolved audit blockers:
 Remaining pre-deposit/final-release blockers:
 
 - publication/document license must be explicitly selected;
-- final toolchain capture must be recorded;
+- final privacy-scrubbed toolchain capture: RESOLVED;
 - final PDF must be generated and visually audited;
 - if source code is uploaded as a licensed software artifact, its software
   license must be decided separately.
+
+
+---
+
+## 11. Final toolchain resolution
+
+A final environment capture was supplied and then privacy-scrubbed for public
+preservation.
+
+Public reproducibility record:
+
+```text
+OS: Windows 10 Home, version 2009, build 19045
+Git: 2.45.2.windows.1
+Arduino CLI: 1.5.2-rc.1
+Arduino CLI commit: fef6e48df
+Arduino AVR core: 1.8.8
+Board FQBN: arduino:avr:uno
+Python: 3.14.4
+pyserial: 3.5
+Core-separation check: PASS
+```
+
+The public record intentionally omits user-profile paths, local filesystem
+identifiers, and unrelated working-tree filenames.
+
+Reproducibility blocker M4 is therefore resolved for publication metadata.
