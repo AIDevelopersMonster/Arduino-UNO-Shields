@@ -17,6 +17,10 @@ KscHyM302Target::KscHyM302Target()
     _rgbR(0),
     _rgbG(0),
     _rgbB(0),
+    _sw1Mode(0),
+    _sw1Raw(false),
+    _sw1Stable(false),
+    _sw1RawChangedMs(0),
     _dhtLastMs(0),
     _dhtHaveValue(false) {
   _dht.temperatureC = 0.0f;
@@ -58,12 +62,52 @@ void KscHyM302Target::begin() {
   _shield.rgbOff();
   _shield.buzzerOff();
 
+  _sw1Raw =
+    _shield.button1Pressed();
+  _sw1Stable = _sw1Raw;
+  _sw1RawChangedMs = millis();
+
   _irOk =
     _shield.beginIrNecAsync();
 }
 
 void KscHyM302Target::service() {
   _shield.service();
+  serviceSw1Profile();
+}
+
+void KscHyM302Target::serviceSw1Profile() {
+  const bool raw =
+    _shield.button1Pressed();
+
+  if (raw != _sw1Raw) {
+    _sw1Raw = raw;
+    _sw1RawChangedMs = millis();
+    return;
+  }
+
+  if (raw == _sw1Stable ||
+      millis() - _sw1RawChangedMs <
+        25UL) {
+    return;
+  }
+
+  _sw1Stable = raw;
+
+  if (!_sw1Stable) {
+    return;
+  }
+
+  if (_sw1Mode == 0) {
+    _ledBlue = false;
+    _ledRed = true;
+  } else {
+    _ledRed = false;
+    _ledBlue = true;
+  }
+
+  _shield.ledRed(_ledRed);
+  _shield.ledBlue(_ledBlue);
 }
 
 void KscHyM302Target::pollInput(
@@ -215,7 +259,8 @@ KscNodeType KscHyM302Target::pathType(
     return KSC_NODE_RO;
   }
 
-  if (strcmp(path, "/dev/led/red") == 0 ||
+  if (strcmp(path, "/sys/sw1") == 0 ||
+      strcmp(path, "/dev/led/red") == 0 ||
       strcmp(path, "/dev/led/blue") == 0 ||
       strcmp(path, "/dev/rgb/red") == 0 ||
       strcmp(path, "/dev/rgb/green") == 0 ||
@@ -255,7 +300,7 @@ uint8_t KscHyM302Target::dirCount(
   }
 
   if (strcmp(path, "/sys") == 0) {
-    return 3;
+    return 4;
   }
 
   return 0;
@@ -427,6 +472,11 @@ bool KscHyM302Target::dirEntry(
       case 2:
         name = "storage";
         type = KSC_NODE_RO;
+        break;
+
+      case 3:
+        name = "sw1";
+        type = KSC_NODE_RW;
         break;
 
       default:
@@ -711,6 +761,16 @@ KscResult KscHyM302Target::read(
     return KSC_OK;
   }
 
+  if (strcmp(path, "/sys/sw1") == 0) {
+    utoa(
+      _sw1Mode,
+      out,
+      10
+    );
+
+    return KSC_OK;
+  }
+
   return KSC_ERR_NOT_FOUND;
 }
 
@@ -719,7 +779,8 @@ bool KscHyM302Target::writableRange(
   uint16_t &minValue,
   uint16_t &maxValue
 ) {
-  if (strcmp(path, "/dev/led/red") == 0 ||
+  if (strcmp(path, "/sys/sw1") == 0 ||
+      strcmp(path, "/dev/led/red") == 0 ||
       strcmp(path, "/dev/led/blue") == 0 ||
       strcmp(path, "/dev/buzzer") == 0) {
     minValue = 0;
@@ -742,6 +803,11 @@ bool KscHyM302Target::readWritableLong(
   const char *path,
   long &value
 ) {
+  if (strcmp(path, "/sys/sw1") == 0) {
+    value = _sw1Mode;
+    return true;
+  }
+
   if (strcmp(path, "/dev/led/red") == 0) {
     value = _ledRed ? 1 : 0;
     return true;
@@ -808,6 +874,17 @@ KscResult KscHyM302Target::write(
   if (value < minValue ||
       value > maxValue) {
     return KSC_ERR_RANGE;
+  }
+
+  if (strcmp(path, "/sys/sw1") == 0) {
+    _sw1Mode = (uint8_t)value;
+
+    _ledRed = false;
+    _ledBlue = false;
+    _shield.ledRed(false);
+    _shield.ledBlue(false);
+
+    return KSC_OK;
   }
 
   if (strcmp(path, "/dev/led/red") == 0) {
