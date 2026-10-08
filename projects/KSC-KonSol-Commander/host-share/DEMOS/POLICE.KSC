@@ -1,0 +1,31 @@
+# Red/blue visual alarm with active buzzer pulses
+PRINT POLICE START
+WRITE /dev/led/red 1
+WRITE /dev/led/blue 0
+WRITE /dev/rgb/red 255
+WRITE /dev/rgb/green 0
+WRITE /dev/rgb/blue 0
+WRITE /dev/buzzer 1
+WAIT 180
+WRITE /dev/buzzer 0
+WRITE /dev/led/red 0
+WRITE /dev/led/blue 1
+WRITE /dev/rgb/red 0
+WRITE /dev/rgb/blue 255
+WAIT 180
+WRITE /dev/led/red 1
+WRITE /dev/led/blue 0
+WRITE /dev/rgb/red 255
+WRITE /dev/rgb/blue 0
+WRITE /dev/buzzer 1
+WAIT 180
+WRITE /dev/buzzer 0
+WRITE /dev/led/red 0
+WRITE /dev/led/blue 1
+WRITE /dev/rgb/red 0
+WRITE /dev/rgb/blue 255
+WAIT 180
+WRITE /dev/led/blue 0
+WRITE /dev/rgb/blue 0
+PRINT POLICE PASS
+STOP
