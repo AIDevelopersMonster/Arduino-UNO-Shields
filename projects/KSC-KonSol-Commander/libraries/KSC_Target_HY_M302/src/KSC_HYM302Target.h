@@ -67,11 +67,17 @@ private:
   uint8_t _rgbG;
   uint8_t _rgbB;
 
+  uint8_t _sw1Mode;
+  bool _sw1Raw;
+  bool _sw1Stable;
+  unsigned long _sw1RawChangedMs;
+
   HY_M302::DhtReading _dht;
   unsigned long _dhtLastMs;
   bool _dhtHaveValue;
 
   void refreshDht();
+  void serviceSw1Profile();
 
   static void copyText(
     char *out,
