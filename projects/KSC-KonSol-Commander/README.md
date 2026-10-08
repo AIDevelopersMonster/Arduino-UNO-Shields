@@ -1125,3 +1125,38 @@ RAM 437 B   IN drop 0   IR drop 0/0   HOST M/0 R0
 
 The next stage is KSC-04B: line-aware text viewing on top of the certified
 byte-window viewer.
+
+
+### KSC-04B implementation status
+
+**FILE ACTIONS & LAUNCHER READY FOR FIRST BUILD/PHYSICAL TEST**
+
+KSC-04B changes the role of remote files from passive viewer objects to
+actionable Commander resources.
+
+Remote `.KSC` files now open an action menu:
+
+```text
+VIEW
+RUN
+```
+
+`VIEW` reuses the KSC-04A file viewer.
+
+`RUN` streams the script from `/host` in bounded 32-byte chunks, assembles
+one command line at a time, and immediately executes the supported KSC Script
+v0.1 instruction against the local VFS target.
+
+Initial script instructions:
+
+```text
+PRINT
+WRITE
+WAIT
+STOP
+```
+
+The first physical launcher target is `/host/DEMO.KSC`, which toggles the
+HY-M302 red and blue discrete LEDs and prints start/pass markers.
+
+No whole-script buffer is allocated.
