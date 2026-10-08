@@ -183,3 +183,138 @@ If all stages pass, the intended bounded result is:
 > KSC can extend its existing local virtual namespace across a serial transport
 > to a streamed host-backed `/host` tree without requiring host files to fit in
 > ATmega328P SRAM and without replacing the existing shell/Commander interface.
+
+
+## KSC-03A implementation
+
+Firmware sketch:
+
+```text
+projects/KSC-KonSol-Commander/sketches/07_KSC_03A_HostTransport/
+```
+
+Reusable transport:
+
+```text
+projects/KSC-KonSol-Commander/libraries/KSC_HostTransport/
+```
+
+Reusable HY-M302 adapter package:
+
+```text
+projects/KSC-KonSol-Commander/libraries/KSC_Target_HY_M302/
+```
+
+Host:
+
+```text
+projects/KSC-KonSol-Commander/tools/ksc_host.py
+```
+
+The packaged HY-M302 adapter source is copied from the physically certified
+KSC-02D target adapter. KSC_Core itself is not modified for KSC-03A.
+
+### Build
+
+From the repository root:
+
+```powershell
+New-Item -ItemType Directory -Force .\build\KSC\07_KSC_03A_HostTransport | Out-Null
+
+arduino-cli compile `
+  --fqbn arduino:avr:uno `
+  --libraries .\projects\KSC-KonSol-Commander\libraries `
+  --libraries .\libraries `
+  --output-dir .\build\KSC\07_KSC_03A_HostTransport `
+  .\projects\KSC-KonSol-Commander\sketches\07_KSC_03A_HostTransport
+```
+
+Record both flash and global SRAM.
+
+### Upload
+
+```powershell
+arduino-cli upload `
+  -p COM4 `
+  --fqbn arduino:avr:uno `
+  --input-dir .\build\KSC\07_KSC_03A_HostTransport
+```
+
+### Start KSC Host
+
+Do not open Arduino Serial Monitor or another COM4 client at the same time.
+
+```powershell
+python .\projects\KSC-KonSol-Commander\tools\ksc_host.py -p COM4 --ping-on-start
+```
+
+Expected boot includes:
+
+```text
+KSC-03A Host Transport
+TTY + framed HOSTFS on one serial link
+KSC Core 0.1
+Target: Arduino UNO + HY-M302
+IR INIT: OK
+TRANSPORT RX payload: 48 B
+TRANSPORT TTY queue: 32 B
+FREE RAM AFTER TRANSPORT INIT: <measured>
+```
+
+Expected host result:
+
+```text
+[HOSTFS] PING_RESP seq=<n> PASS
+[HOSTFS] PING seq=<n> round-trip PASS
+```
+
+### KSC-03A physical route
+
+1. At the KSC shell, type:
+   ```text
+   MEM
+   PWD
+   LS /
+   CAT /dev/light
+   ```
+2. Press Ctrl-P several times. Each request must return PING PASS and must not
+   insert visible garbage into the shell command line.
+3. Open Commander with `KSC`.
+4. Navigate with PC arrows.
+5. Navigate with HY-M302 IR arrows/OK/RETURN.
+6. Press Ctrl-P while Commander is active. The response must be parsed by KSC
+   Host rather than becoming a Commander key.
+7. Return to shell and run `MEM` again.
+8. Press Ctrl-B. Expected:
+   ```text
+   ERROR_RESP ... BAD_CRC
+   ```
+9. Press Ctrl-T. Expected after firmware parser timeout:
+   ```text
+   ERROR_RESP ... TIMEOUT
+   ```
+10. Press Ctrl-U. Expected:
+    ```text
+    ERROR_RESP ... UNSUPPORTED
+    ```
+11. Type ordinary shell text immediately after each malformed-frame test to
+    verify parser resynchronization.
+
+### KSC-03A certification data to return
+
+Return the complete compile output and the terminal evidence containing:
+
+```text
+Flash:
+Global SRAM:
+Boot/free RAM after transport init:
+MEM at shell:
+MEM after Commander route:
+PING round trips:
+BAD_CRC response:
+TIMEOUT response:
+UNSUPPORTED response:
+Input drops:
+IR drops:
+Any visible frame leakage into TTY:
+```
