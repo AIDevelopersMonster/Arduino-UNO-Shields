@@ -1,6 +1,7 @@
 import argparse
 import ctypes
 import msvcrt
+from pathlib import Path
 import sys
 import threading
 import time
@@ -11,17 +12,43 @@ import serial
 SOF1 = 0x1B
 SOF2 = 0x5D
 MAX_PAYLOAD = 48
+REMOTE_NAME_MAX = 15
 
 TYPE_PING_REQ = 0x01
+TYPE_MOUNT_REQ = 0x02
+TYPE_LS_REQ = 0x03
+TYPE_STAT_REQ = 0x04
+
 TYPE_PING_RESP = 0x81
+TYPE_MOUNT_RESP = 0x82
+TYPE_LS_RESP = 0x83
+TYPE_STAT_RESP = 0x84
+
 TYPE_ERROR_RESP = 0x7F
 
+ERR_BAD_LENGTH = 0x01
+ERR_BAD_CRC = 0x02
+ERR_TIMEOUT = 0x03
+ERR_UNSUPPORTED = 0x04
+ERR_NOT_FOUND = 0x10
+ERR_NOT_DIR = 0x11
+ERR_PATH = 0x12
+ERR_HOST_IO = 0x13
+
 ERR_NAMES = {
-    0x01: "BAD_LENGTH",
-    0x02: "BAD_CRC",
-    0x03: "TIMEOUT",
-    0x04: "UNSUPPORTED",
+    ERR_BAD_LENGTH: "BAD_LENGTH",
+    ERR_BAD_CRC: "BAD_CRC",
+    ERR_TIMEOUT: "TIMEOUT",
+    ERR_UNSUPPORTED: "UNSUPPORTED",
+    ERR_NOT_FOUND: "NOT_FOUND",
+    ERR_NOT_DIR: "NOT_DIR",
+    ERR_PATH: "PATH",
+    ERR_HOST_IO: "HOST_IO",
 }
+
+HOST_TYPE_NONE = 0
+HOST_TYPE_DIR = 1
+HOST_TYPE_FILE = 2
 
 ANSI = {
     "UP": b"\x1b[A",
@@ -188,8 +215,14 @@ class WireDemux:
 
 
 class KscHost:
-    def __init__(self, ser, show_frames=True):
+    def __init__(
+        self,
+        ser,
+        export_root,
+        show_frames=True,
+    ):
         self.ser = ser
+        self.export_root = Path(export_root).resolve()
         self.show_frames = show_frames
         self.stop_event = threading.Event()
         self.write_lock = threading.Lock()
@@ -217,7 +250,287 @@ class KscHost:
         )
         sys.stdout.flush()
 
+    def _send_frame(self, frame_type, seq, payload=b""):
+        self.send_bytes(
+            build_frame(
+                frame_type,
+                seq,
+                payload,
+            )
+        )
+
+    def _send_error(self, seq, error_code):
+        self._send_frame(
+            TYPE_ERROR_RESP,
+            seq,
+            bytes([error_code]),
+        )
+
+    def _decode_ksc_path(self, payload):
+        try:
+            text = payload.decode("ascii")
+        except UnicodeDecodeError:
+            raise ValueError("non-ASCII path")
+
+        if text == "/host":
+            parts = []
+        elif text.startswith("/host/"):
+            tail = text[6:]
+
+            if not tail:
+                parts = []
+            else:
+                parts = tail.split("/")
+        else:
+            raise ValueError("path outside /host")
+
+        for part in parts:
+            if (
+                not part
+                or part in (".", "..")
+                or ":" in part
+                or "\\" in part
+            ):
+                raise ValueError("unsafe path")
+
+        candidate = self.export_root.joinpath(
+            *parts
+        ).resolve()
+
+        try:
+            candidate.relative_to(
+                self.export_root
+            )
+        except ValueError as exc:
+            raise ValueError(
+                "path escapes export root"
+            ) from exc
+
+        return candidate
+
+    def _entry_type(self, path):
+        if path.is_dir():
+            return HOST_TYPE_DIR
+
+        if path.is_file():
+            return HOST_TYPE_FILE
+
+        return HOST_TYPE_NONE
+
+    def _visible_entries(self, directory):
+        entries = []
+
+        for path in directory.iterdir():
+            host_type = self._entry_type(path)
+
+            if host_type == HOST_TYPE_NONE:
+                continue
+
+            try:
+                encoded = path.name.encode("ascii")
+            except UnicodeEncodeError:
+                continue
+
+            if (
+                not encoded
+                or len(encoded) > REMOTE_NAME_MAX
+            ):
+                continue
+
+            entries.append(
+                (path.name, host_type)
+            )
+
+        entries.sort(
+            key=lambda item: (
+                0 if item[1] == HOST_TYPE_DIR else 1,
+                item[0].casefold(),
+            )
+        )
+
+        return entries[:255]
+
+    def _handle_mount_req(self, seq, payload):
+        if payload:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        if not self.export_root.is_dir():
+            self._send_error(
+                seq,
+                ERR_HOST_IO,
+            )
+            return
+
+        self._frame_line(
+            f"MOUNT /host -> {self.export_root}"
+        )
+
+        self._send_frame(
+            TYPE_MOUNT_RESP,
+            seq,
+            b"\x01",
+        )
+
+    def _handle_stat_req(self, seq, payload):
+        if not payload:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        try:
+            path = self._decode_ksc_path(
+                payload
+            )
+        except ValueError:
+            self._send_error(
+                seq,
+                ERR_PATH,
+            )
+            return
+
+        if not path.exists():
+            self._send_error(
+                seq,
+                ERR_NOT_FOUND,
+            )
+            return
+
+        host_type = self._entry_type(path)
+
+        if host_type == HOST_TYPE_NONE:
+            self._send_error(
+                seq,
+                ERR_NOT_FOUND,
+            )
+            return
+
+        self._send_frame(
+            TYPE_STAT_RESP,
+            seq,
+            bytes([host_type]),
+        )
+
+    def _handle_ls_req(self, seq, payload):
+        if len(payload) < 2:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        index = payload[0]
+
+        try:
+            directory = self._decode_ksc_path(
+                payload[1:]
+            )
+        except ValueError:
+            self._send_error(
+                seq,
+                ERR_PATH,
+            )
+            return
+
+        if not directory.exists():
+            self._send_error(
+                seq,
+                ERR_NOT_FOUND,
+            )
+            return
+
+        if not directory.is_dir():
+            self._send_error(
+                seq,
+                ERR_NOT_DIR,
+            )
+            return
+
+        try:
+            entries = self._visible_entries(
+                directory
+            )
+        except OSError:
+            self._send_error(
+                seq,
+                ERR_HOST_IO,
+            )
+            return
+
+        count = len(entries)
+
+        if index == 0xFF:
+            self._send_frame(
+                TYPE_LS_RESP,
+                seq,
+                bytes([count]),
+            )
+            return
+
+        if index >= count:
+            self._send_error(
+                seq,
+                ERR_NOT_FOUND,
+            )
+            return
+
+        name, host_type = entries[index]
+        encoded = name.encode("ascii")
+
+        response = bytes(
+            [
+                count,
+                host_type,
+                len(encoded),
+            ]
+        ) + encoded
+
+        self._send_frame(
+            TYPE_LS_RESP,
+            seq,
+            response,
+        )
+
     def _on_frame(self, frame_type, seq, payload):
+        if frame_type == TYPE_PING_REQ:
+            if payload:
+                self._send_error(
+                    seq,
+                    ERR_BAD_LENGTH,
+                )
+            else:
+                self._send_frame(
+                    TYPE_PING_RESP,
+                    seq,
+                )
+            return
+
+        if frame_type == TYPE_MOUNT_REQ:
+            self._handle_mount_req(
+                seq,
+                payload,
+            )
+            return
+
+        if frame_type == TYPE_STAT_REQ:
+            self._handle_stat_req(
+                seq,
+                payload,
+            )
+            return
+
+        if frame_type == TYPE_LS_REQ:
+            self._handle_ls_req(
+                seq,
+                payload,
+            )
+            return
+
         if frame_type == TYPE_PING_RESP:
             self._frame_line(
                 f"PING_RESP seq={seq} PASS"
@@ -235,7 +548,9 @@ class KscHost:
             code = payload[0] if payload else None
             name = ERR_NAMES.get(
                 code,
-                f"0x{code:02X}" if code is not None else "EMPTY",
+                f"0x{code:02X}"
+                if code is not None
+                else "EMPTY",
             )
 
             self._frame_line(
@@ -379,9 +694,16 @@ def send_special(host, prefix, code):
     return False
 
 
+def default_export_root():
+    return (
+        Path(__file__).resolve().parent.parent
+        / "host-share"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="KSC Host 0.1 - TTY + HOSTFS transport"
+        description="KSC Host 0.2 - TTY + remote /host service"
     )
 
     parser.add_argument(
@@ -398,6 +720,12 @@ def main():
     )
 
     parser.add_argument(
+        "--export",
+        default=str(default_export_root()),
+        help="PC directory exported as /host",
+    )
+
+    parser.add_argument(
         "--ping-on-start",
         action="store_true",
     )
@@ -408,6 +736,15 @@ def main():
     )
 
     args = parser.parse_args()
+
+    export_root = Path(
+        args.export
+    ).resolve()
+
+    if not export_root.is_dir():
+        raise SystemExit(
+            f"Export directory does not exist: {export_root}"
+        )
 
     enable_windows_vt()
 
@@ -422,6 +759,7 @@ def main():
 
     host = KscHost(
         ser,
+        export_root=export_root,
         show_frames=not args.quiet_frames,
     )
 
@@ -433,18 +771,25 @@ def main():
     reader.start()
 
     print()
-    print("KSC HOST 0.1 - KSC-03A")
+    print("KSC HOST 0.2 - KSC-03B")
     print(f"PORT={args.port} BAUD={args.baud}")
+    print(f"EXPORT={export_root}")
+    print("MOUNT=/host")
     print()
     print("TTY:")
     print("  printable keys -> KSC terminal")
     print("  arrows/home/end/delete/F9/F10 -> KSC ANSI keys")
     print()
-    print("HOSTFS test hotkeys:")
-    print("  Ctrl-P -> PING_REQ / expect PING_RESP")
-    print("  Ctrl-B -> bad CRC frame / expect BAD_CRC")
-    print("  Ctrl-T -> partial frame / expect TIMEOUT")
-    print("  Ctrl-U -> unsupported frame / expect UNSUPPORTED")
+    print("HOSTFS:")
+    print("  /host -> exported PC directory")
+    print("  MOUNT / STAT / LS enabled")
+    print("  file content streaming remains KSC-03C")
+    print()
+    print("Transport test hotkeys:")
+    print("  Ctrl-P -> PING")
+    print("  Ctrl-B -> bad CRC")
+    print("  Ctrl-T -> partial frame / TIMEOUT")
+    print("  Ctrl-U -> unsupported frame")
     print("  Ctrl-C -> close host")
     print()
 
