@@ -18,11 +18,17 @@ TYPE_PING_REQ = 0x01
 TYPE_MOUNT_REQ = 0x02
 TYPE_LS_REQ = 0x03
 TYPE_STAT_REQ = 0x04
+TYPE_OPEN_REQ = 0x05
+TYPE_READ_REQ = 0x06
+TYPE_CLOSE_REQ = 0x07
 
 TYPE_PING_RESP = 0x81
 TYPE_MOUNT_RESP = 0x82
 TYPE_LS_RESP = 0x83
 TYPE_STAT_RESP = 0x84
+TYPE_OPEN_RESP = 0x85
+TYPE_READ_RESP = 0x86
+TYPE_CLOSE_RESP = 0x87
 
 TYPE_ERROR_RESP = 0x7F
 
@@ -34,6 +40,8 @@ ERR_NOT_FOUND = 0x10
 ERR_NOT_DIR = 0x11
 ERR_PATH = 0x12
 ERR_HOST_IO = 0x13
+ERR_NOT_FILE = 0x14
+ERR_BAD_HANDLE = 0x15
 
 ERR_NAMES = {
     ERR_BAD_LENGTH: "BAD_LENGTH",
@@ -44,6 +52,8 @@ ERR_NAMES = {
     ERR_NOT_DIR: "NOT_DIR",
     ERR_PATH: "PATH",
     ERR_HOST_IO: "HOST_IO",
+    ERR_NOT_FILE: "NOT_FILE",
+    ERR_BAD_HANDLE: "BAD_HANDLE",
 }
 
 HOST_TYPE_NONE = 0
@@ -229,6 +239,9 @@ class KscHost:
         self.seq = 0
         self.ping_waiters = {}
         self.waiter_lock = threading.Lock()
+
+        self.open_files = {}
+        self.next_handle = 0
 
         self.demux = WireDemux(
             self._on_tty,
@@ -496,6 +509,189 @@ class KscHost:
             response,
         )
 
+    def _allocate_handle(self):
+        for _ in range(255):
+            self.next_handle = (
+                self.next_handle + 1
+            ) & 0xFF
+
+            if self.next_handle == 0:
+                self.next_handle = 1
+
+            if self.next_handle not in self.open_files:
+                return self.next_handle
+
+        return 0
+
+    def _handle_open_req(self, seq, payload):
+        if not payload:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        try:
+            path = self._decode_ksc_path(
+                payload
+            )
+        except ValueError:
+            self._send_error(
+                seq,
+                ERR_PATH,
+            )
+            return
+
+        if not path.exists():
+            self._send_error(
+                seq,
+                ERR_NOT_FOUND,
+            )
+            return
+
+        if not path.is_file():
+            self._send_error(
+                seq,
+                ERR_NOT_FILE,
+            )
+            return
+
+        handle = self._allocate_handle()
+
+        if handle == 0:
+            self._send_error(
+                seq,
+                ERR_HOST_IO,
+            )
+            return
+
+        try:
+            file_obj = path.open("rb")
+            size = path.stat().st_size
+        except OSError:
+            self._send_error(
+                seq,
+                ERR_HOST_IO,
+            )
+            return
+
+        self.open_files[handle] = {
+            "file": file_obj,
+            "size": size,
+            "path": path,
+        }
+
+        response = bytes([handle]) + int(size).to_bytes(
+            4,
+            byteorder="little",
+            signed=False,
+        )
+
+        self._send_frame(
+            TYPE_OPEN_RESP,
+            seq,
+            response,
+        )
+
+    def _handle_read_req(self, seq, payload):
+        if len(payload) != 2:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        handle = payload[0]
+        requested = payload[1]
+
+        if requested == 0 or requested > 32:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        state = self.open_files.get(handle)
+
+        if state is None:
+            self._send_error(
+                seq,
+                ERR_BAD_HANDLE,
+            )
+            return
+
+        try:
+            data = state["file"].read(requested)
+            position = state["file"].tell()
+        except OSError:
+            self._send_error(
+                seq,
+                ERR_HOST_IO,
+            )
+            return
+
+        eof = position >= state["size"]
+
+        response = bytes(
+            [
+                handle,
+                1 if eof else 0,
+            ]
+        ) + data
+
+        self._send_frame(
+            TYPE_READ_RESP,
+            seq,
+            response,
+        )
+
+    def _handle_close_req(self, seq, payload):
+        if len(payload) != 1:
+            self._send_error(
+                seq,
+                ERR_BAD_LENGTH,
+            )
+            return
+
+        handle = payload[0]
+        state = self.open_files.pop(
+            handle,
+            None,
+        )
+
+        if state is None:
+            self._send_error(
+                seq,
+                ERR_BAD_HANDLE,
+            )
+            return
+
+        try:
+            state["file"].close()
+        except OSError:
+            self._send_error(
+                seq,
+                ERR_HOST_IO,
+            )
+            return
+
+        self._send_frame(
+            TYPE_CLOSE_RESP,
+            seq,
+            bytes([handle]),
+        )
+
+    def close_open_files(self):
+        for state in list(
+            self.open_files.values()
+        ):
+            try:
+                state["file"].close()
+            except OSError:
+                pass
+
+        self.open_files.clear()
+
     def _on_frame(self, frame_type, seq, payload):
         if frame_type == TYPE_PING_REQ:
             if payload:
@@ -526,6 +722,27 @@ class KscHost:
 
         if frame_type == TYPE_LS_REQ:
             self._handle_ls_req(
+                seq,
+                payload,
+            )
+            return
+
+        if frame_type == TYPE_OPEN_REQ:
+            self._handle_open_req(
+                seq,
+                payload,
+            )
+            return
+
+        if frame_type == TYPE_READ_REQ:
+            self._handle_read_req(
+                seq,
+                payload,
+            )
+            return
+
+        if frame_type == TYPE_CLOSE_REQ:
+            self._handle_close_req(
                 seq,
                 payload,
             )
@@ -703,7 +920,7 @@ def default_export_root():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="KSC Host 0.2 - TTY + remote /host service"
+        description="KSC Host 0.3 - TTY + streamed remote /host service"
     )
 
     parser.add_argument(
@@ -771,7 +988,7 @@ def main():
     reader.start()
 
     print()
-    print("KSC HOST 0.2 - KSC-03B")
+    print("KSC HOST 0.3 - KSC-03C")
     print(f"PORT={args.port} BAUD={args.baud}")
     print(f"EXPORT={export_root}")
     print("MOUNT=/host")
@@ -783,7 +1000,8 @@ def main():
     print("HOSTFS:")
     print("  /host -> exported PC directory")
     print("  MOUNT / STAT / LS enabled")
-    print("  file content streaming remains KSC-03C")
+    print("  OPEN / READ / CLOSE streaming enabled")
+    print("  CAT /host/<file> streams via Arduino in 32-byte chunks")
     print()
     print("Transport test hotkeys:")
     print("  Ctrl-P -> PING")
@@ -855,6 +1073,8 @@ def main():
     finally:
         host.stop_event.set()
         time.sleep(0.1)
+
+        host.close_open_files()
 
         try:
             ser.close()
