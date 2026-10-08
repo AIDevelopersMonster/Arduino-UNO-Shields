@@ -131,7 +131,25 @@ Maximum is 2048 bytes.
 
 Build status: PASS.
 
-Runtime free RAM is still to be measured on the physical target.
+Boot runtime free RAM is measured at 818 B; Commander-view runtime is still to be observed during physical navigation.
+
+## Boot runtime measurement
+
+Physical startup on Arduino UNO + HY-M302:
+
+```text
+KSC 0.2
+KonSol Commander - ANSI VFS Navigator
+Arduino UNO / ATmega328P + HY-M302
+IR INIT: OK
+FREE RAM: 818 B
+Storage: virtual namespace only
+Type KSC to open Commander, HELP for shell commands.
+```
+
+Boot status: PASS.
+
+Measured runtime free RAM after initialization: 818 B.
 
 ## Physical PASS gate
 
