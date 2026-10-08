@@ -110,7 +110,7 @@ Maximum is 2048 bytes.
 
 Build status: PASS.
 
-Runtime free RAM is still to be measured on the physical reference target.
+Runtime free RAM is measured at 1320 B on the physical bare-UNO reference target.
 
 ## Upload
 
@@ -146,6 +146,34 @@ Type KSC to open Commander, HELP for shell commands.
 
 KSC:/>
 ```
+
+## Physical boot measurement
+
+The bare Arduino UNO reference target booted successfully through KSC Raw TTY
+0.3 with no HY-M302 shield installed.
+
+Observed startup:
+
+```text
+KSC Core 0.1
+Hardware-independent ANSI VFS core
+Target: UNO Reference Target
+FREE RAM: 1320 B
+Target backend: synthetic VFS only
+External hardware: none required
+Type KSC to open Commander, HELP for shell commands.
+
+KSC:/>
+```
+
+Physical boot status: PASS.
+
+Measured runtime free RAM after initialization: 1320 B.
+
+This confirms that the extracted KSC_Core executes on Arduino UNO without the
+HY-M302 target adapter or shield. Full KSC-02C certification still requires
+shell, Commander, RW/RO, and state-sharing checks, followed by a second target
+adapter using the same KSC_Core source.
 
 ## Shell checks
 
