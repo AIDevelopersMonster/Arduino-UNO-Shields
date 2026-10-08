@@ -942,3 +942,176 @@ scope of KSC-03C using OPEN / READ / CLOSE streaming.
 One captured Commander status line showed `HOST M/1`; this is retained as an
 observed accumulated session error and is not silently rewritten to zero. It
 did not prevent successful directory navigation or the in-view PING round trip.
+
+
+## KSC-03C implementation
+
+Status: **IMPLEMENTED - FIRST PHYSICAL BUILD/TEST PENDING**
+
+KSC-03C adds real streamed host-file reads for shell `CAT`.
+
+New firmware:
+
+```text
+projects/KSC-KonSol-Commander/sketches/09_KSC_03C_HostStream/
+```
+
+KSC Host becomes:
+
+```text
+KSC HOST 0.3 - KSC-03C
+```
+
+and now serves:
+
+```text
+MOUNT / STAT / LS
+OPEN / READ / CLOSE
+```
+
+### Core evolution
+
+KSC-03C introduces one backward-compatible optional target hook:
+
+```text
+KscTarget::streamRead(path, Print&, handled)
+```
+
+Existing targets remain valid because the base implementation reports
+`handled=false`, after which the legacy buffered `read()` path is used.
+
+This means the two-target KSC_Core v0.1 publication result remains a historical
+validated result for its recorded source hashes, while KSC-03C deliberately
+evolves the core API for streaming.
+
+### Test files
+
+```text
+/host/STREAM.TXT   265 B, multi-chunk functional sample
+/host/BIG.TXT      about 12 KB, larger than the full AVR SRAM
+```
+
+The large file exists specifically to prove bounded streaming.
+
+### Build
+
+```powershell
+New-Item -ItemType Directory -Force .\build\KSC\09_KSC_03C_HostStream | Out-Null
+
+arduino-cli compile `
+  --fqbn arduino:avr:uno `
+  --libraries .\projects\KSC-KonSol-Commander\libraries `
+  --libraries .\libraries `
+  --output-dir .\build\KSC\09_KSC_03C_HostStream `
+  .\projects\KSC-KonSol-Commander\sketches\09_KSC_03C_HostStream
+```
+
+Record Flash and global SRAM before upload.
+
+### Upload
+
+```powershell
+arduino-cli upload `
+  -p COM4 `
+  --fqbn arduino:avr:uno `
+  --input-dir .\build\KSC\09_KSC_03C_HostStream
+```
+
+### Start host
+
+```powershell
+python .\projects\KSC-KonSol-Commander\tools\ksc_host.py `
+  -p COM4
+```
+
+Expected banner:
+
+```text
+KSC HOST 0.3 - KSC-03C
+...
+OPEN / READ / CLOSE streaming enabled
+```
+
+Expected firmware banner:
+
+```text
+KSC-03C Host File Streaming
+CAT /host/<file> via OPEN/READ/CLOSE
+Remote read chunk: 32 B
+```
+
+### First shell route
+
+```text
+MEM
+LS /host
+CAT /host/DATA.TXT
+CAT /host/STREAM.TXT
+MEM
+```
+
+Expected DATA.TXT content:
+
+```text
+KSC-03B SAMPLE DATA
+VALUE=273
+STATUS=HOST_FILE
+```
+
+Expected STREAM.TXT terminator:
+
+```text
+END KSC-03C STREAM TEST
+```
+
+### Large-file proof
+
+Run:
+
+```text
+CAT /host/BIG.TXT
+```
+
+Verify all of:
+
+- first line is `KSC-03C BIG FILE - STREAMING PROOF`;
+- numbered lines progress continuously;
+- final line is `END OF KSC-03C BIG FILE`;
+- shell remains responsive afterward;
+- `MEM` returns to the pre-CAT baseline or an explainable instantaneous value;
+- no reset occurs;
+- no input-drop, IR-drop, or transport corruption is observed.
+
+Because BIG.TXT is about 12 KB while ATmega328P SRAM is 2 KB, a complete output
+is direct physical evidence that the whole file was not resident in SRAM.
+
+### Commander scope
+
+In KSC-03C, Commander still uses the bounded node preview path. Opening a remote
+file displays:
+
+```text
+CAT STREAM AVAILABLE
+```
+
+Full multi-page file viewing inside Commander is not claimed by KSC-03C and can
+be a later UI stage.
+
+### Data to return
+
+```text
+Flash:
+Global SRAM:
+FREE RAM after host stream init:
+MEM before CAT:
+CAT /host/DATA.TXT:
+CAT /host/STREAM.TXT:
+BIG.TXT first line:
+BIG.TXT final line:
+MEM after BIG.TXT:
+Any reset:
+Input drops:
+IR drops:
+HOST errors:
+TTY/frame corruption:
+```
