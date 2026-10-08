@@ -1,0 +1,11 @@
+resource,arduino_uno,purpose,status,conflict_note
+RELAY_CANDIDATES,D4-D7,4 relay control,CANDIDATE_ONLY,order/polarity unverified
+USB_SERIAL,D0-D1,Arduino programming or host console,UNO_REFERENCE,hardware UART shared with RS485 production mode
+MODBUS_RS485_UART,D0-D1,UART 8E1 target profile,DESIGN,USB-UART contention must be isolated/tested
+RS485_DIR,D2,DE and inverted RE tied to direction GPIO,DESIGN,add defined receive default via resistor
+RELAY_TEST_BUTTON,D3,optional manual button,DESIGN,physical input debounce required
+I2C,A4-A5,optional I2C auxiliary bus,UNO_REFERENCE,not yet used by relay shield
+SPI,D10-D13,W5100 Ethernet external shield,UNO_REFERENCE,check stack power and mechanics
+W5100_SD_CS,D4,SD select on tested W5100 shield,REPO_REFERENCE,possible relay conflict if D4 confirmed
+TFT_MAR2406,D2-D9,8-bit TFT data/control overlap,REPO_REFERENCE,not to stack directly
+HY_M302,D4-D6,DHT11 buzzer IR sample verified,REPO_REFERENCE,conflicts if relay uses candidate pins
