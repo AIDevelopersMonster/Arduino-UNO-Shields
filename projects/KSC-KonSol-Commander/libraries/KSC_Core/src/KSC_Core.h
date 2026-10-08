@@ -79,6 +79,19 @@ public:
     uint8_t outSize
   ) = 0;
 
+  // Optional streaming read hook. Targets that do not implement streaming
+  // leave handled=false and the core falls back to the legacy buffered read().
+  virtual KscResult streamRead(
+    const char *path,
+    Print &out,
+    bool &handled
+  ) {
+    (void)path;
+    (void)out;
+    handled = false;
+    return KSC_ERR_TARGET;
+  }
+
   virtual KscResult write(
     const char *path,
     long value
