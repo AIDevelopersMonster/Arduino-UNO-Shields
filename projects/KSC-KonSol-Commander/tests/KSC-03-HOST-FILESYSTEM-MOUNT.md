@@ -859,3 +859,44 @@ Not yet attributable from the captured transcript alone:
   active.
 
 Those two checks remain the final gate before declaring **KSC-03B FULL PHYSICAL PASS**.
+
+
+### KSC-03B framed PING inside remote Commander view
+
+Status: **PHYSICAL PASS**
+
+While Commander was actively displaying the remote directory:
+
+```text
+Path: /host
+> [DOCS/]
+  DATA.TXT  [RO]
+  README.TXT  [RO]
+
+RAM 469 B   IN drop 0   IR drop 0/0   HOST M/1
+```
+
+the host transport hotkey produced:
+
+```text
+PING_RESP seq=2 PASS
+PING seq=2 round-trip PASS
+```
+
+This verifies that a framed HOSTFS transport exchange can complete while the
+Commander UI is active on the remote `/host` namespace without visibly
+corrupting the directory view.
+
+The captured status showed `HOST M/1`, i.e. one host-side error had been
+accumulated somewhere in the session. The PING itself passed. The source of that
+single accumulated host error is not inferred from this transcript and should
+not be silently treated as zero.
+
+Remaining gate for **KSC-03B FULL PHYSICAL PASS**:
+
+- explicit attribution that PC keyboard navigation was tested successfully;
+- explicit attribution that HY-M302 IR navigation was tested successfully.
+
+If both are confirmed, KSC-03B may be closed as FULL PHYSICAL PASS, with the
+single observed accumulated `HOST M/1` retained in the record unless a clean
+rerun establishes `M/0`.
