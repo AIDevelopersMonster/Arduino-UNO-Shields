@@ -84,6 +84,19 @@ This license applies to the publication text. Software licensing remains a
 separate decision if source code itself is uploaded as a licensed software
 artifact.
 
+## Reproducibility environment
+
+    OS: Windows 10 Home, version 2009, build 19045
+    Git: 2.45.2.windows.1
+    Arduino CLI: 1.5.2-rc.1 (commit fef6e48df)
+    Arduino AVR core: 1.8.8
+    FQBN: arduino:avr:uno
+    Python: 3.14.4
+    pyserial: 3.5
+
+Local user-profile paths and unrelated working-tree filenames are intentionally
+excluded from the public metadata.
+
 ## Publisher
 
     Zenodo
@@ -147,4 +160,4 @@ Recommended:
     KSC_CORE_v0.1_PREPUBLICATION_AUDIT.md
     REPRODUCIBILITY.md
     SOURCE_MANIFEST.txt
-    toolchain-final.txt
+    toolchain-public.txt
