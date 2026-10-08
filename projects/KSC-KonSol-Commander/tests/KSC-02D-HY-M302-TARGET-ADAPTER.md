@@ -1,6 +1,6 @@
 # KSC-02D - HY-M302 Target Adapter on KSC_Core
 
-Status: IMPLEMENTATION READY FOR PHYSICAL TEST
+Status: FULL PHYSICAL PASS
 
 ## Goal
 
@@ -17,7 +17,7 @@ without moving HY-M302-specific code back into the core.
 Reference Target                 HY-M302 Target
 bare UNO                         physical shield
 synthetic VFS                    sensors/actuators
-FULL PASS                        TEST PENDING
+FULL PASS                        FULL PASS
 ```
 
 The KSC_Core source must remain unchanged from the Reference Target test.
@@ -189,6 +189,79 @@ Repeat the KSC-02 certified behavior through the new adapter:
 13. Exit to shell and verify shell still observes the current VFS state.
 14. Record boot and Commander free RAM.
 15. Confirm input/IR drops remain zero in normal operation.
+
+## Certification result
+
+**KSC-02D FULL PHYSICAL PASS**
+
+The complete physical HY-M302 route was exercised on the real Arduino UNO +
+HY-M302 target using the same KSC_Core source as the previously certified bare
+UNO Reference Target.
+
+Observed shell evidence:
+
+```text
+/dev/light     328 -> 70 -> 616
+/dev/pot       0 -> 582 -> 1023
+/dev/dht/temp  26.3
+/dev/dht/humidity 30.0
+/dev/dht/status OK
+
+WRITE /dev/led/red 1   -> OK
+WRITE /dev/led/red 0   -> OK
+WRITE /dev/rgb/red 128 -> OK
+WRITE /dev/buzzer 1    -> OK
+WRITE /dev/buzzer 0    -> OK
+
+/sys/version -> KSC Core 0.1
+/sys/target  -> UNO + HY-M302
+```
+
+Observed Commander evidence:
+
+- root navigation across dev, proc, and sys;
+- physical /dev tree navigation;
+- RW LED nodes with exact CHAR entry and APPLIED status;
+- repeated physical LED state changes;
+- PC keyboard and HY-M302 IR remote were both reported working through the same
+  KSC input model;
+- input drop counter remained 0;
+- IR drop counters remained 0/0;
+- Commander RAM was 693 B in normal navigation and RW use;
+- minimum observed Commander RAM in the proof log was 676 B.
+
+Recorded resource envelope:
+
+```text
+Flash:                    20806 / 32256 B = 64%
+Global SRAM:              1255 / 2048 B  = 61%
+Boot free RAM:             734 B
+Commander free RAM:        693 B typical
+Minimum observed:          676 B
+Input drops:                 0
+IR drops:                   0 / 0
+```
+
+Core identity check:
+
+```text
+KSC_Core.h   blob: 9190ef5d231acc82498b46a897e32b6e4327ed92
+KSC_Core.cpp blob: 211803fcc045b8a2dbba029fa0f7f62b2f6ac8e0
+```
+
+These are the same KSC_Core source blobs used during the Reference Target phase;
+the second target adapter was added without modifying the core.
+
+Empirical two-target result:
+
+```text
+Reference Target  <->  SAME KSC_Core  <->  HY-M302 Target
+FULL PASS                                  FULL PASS
+```
+
+This supports the bounded claim that KSC_Core is hardware-independent with
+respect to the two tested target adapters. It does not establish universal
+portability to arbitrary MCUs, transports, or peripherals.
 
 ## Strong PASS gate
 
