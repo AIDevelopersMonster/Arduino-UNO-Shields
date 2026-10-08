@@ -2,7 +2,7 @@
 
 ## Status
 
-**KSC-02 FULL PHYSICAL PASS.**
+**KSC-02D MULTI-TARGET FULL PHYSICAL PASS.**
 
 Certified milestones:
 
@@ -10,11 +10,12 @@ Certified milestones:
 - KSC-01B - unified physical keyboard sources: FULL PHYSICAL PASS;
 - KSC-01C - CHAR vs KEY semantic input model: FULL PHYSICAL PASS;
 - KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS;
-- KSC-02C Reference Target - bare UNO synthetic VFS: FULL PHYSICAL PASS.
+- KSC-02C Reference Target - bare UNO synthetic VFS: FULL PHYSICAL PASS;
+- KSC-02D - HY-M302 adapter on unchanged KSC_Core: FULL PHYSICAL PASS;
 
-Current active milestone: **KSC-02D - HY-M302 Target Adapter on KSC_Core**.
+Core-independence experiment status: **COMPLETE FOR TWO TESTED TARGETS**.
 
-The bare-UNO Reference Target is **FULL PHYSICAL PASS**. The HY-M302 target adapter implementation is now ready for compile and physical certification against the same unchanged KSC_Core.
+Both the bare-UNO Reference Target and the physical HY-M302 Target are **FULL PHYSICAL PASS** on the same unchanged KSC_Core. KSC-03 - Host Filesystem Mount is now the next implementation milestone. The two-target result is sufficient to support a bounded hardware-independence article claim, while explicitly excluding universal portability.
 
 KSC-03 - Host Filesystem Mount remains the next transport/backend milestone after the core-independence experiment.
 
@@ -820,7 +821,7 @@ Goal:
 Use the same extracted KSC_Core that passed the bare-UNO Reference Target with a
 second, physically different target adapter for the HY-M302 shield.
 
-Status: **IMPLEMENTATION READY FOR PHYSICAL TEST**
+Status: **FULL PHYSICAL PASS**
 
 Architecture:
 
@@ -831,20 +832,32 @@ Architecture:
 Reference Target                 HY-M302 Target
 bare UNO                         physical shield
 synthetic VFS                    sensors/actuators
-FULL PASS                        TEST PENDING
+FULL PASS                        FULL PASS
 ```
 
 The HY-M302-specific code lives only in the target adapter and the existing
 HY_M302 libraries. KSC_Core remains free of HY_M302 includes, DHT code, IR
 decoder code, and physical pin mappings.
 
-Physical certification repeats the already certified KSC-02 routes through the
-new adapter: live sensors, LED/RGB/buzzer RW nodes, PC keyboard, HY-M302 IR
+Physical certification repeated the already certified KSC-02 routes through
+the new adapter: live sensors, LED/RGB/buzzer RW nodes, PC keyboard, HY-M302 IR
 remote, shared shell/Commander state, memory measurements, and drop counters.
 
-A KSC-02D FULL PHYSICAL PASS establishes the stronger empirical two-target
-hardware-independence claim. It does not claim universal portability to
-arbitrary MCUs or interfaces.
+Certified HY-M302 envelope:
+
+```text
+Flash:                    20806 / 32256 B = 64%
+Global SRAM:              1255 / 2048 B  = 61%
+Boot free RAM:             734 B
+Commander free RAM:        693 B typical
+Minimum observed:          676 B
+Input drops:                 0
+IR drops:                   0 / 0
+```
+
+The same KSC_Core source blobs were used for both targets. This establishes the
+bounded empirical two-target hardware-independence result. It does not claim
+universal portability to arbitrary MCUs or interfaces.
 
 ---
 
