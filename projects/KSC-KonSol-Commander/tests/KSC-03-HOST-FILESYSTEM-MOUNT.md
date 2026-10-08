@@ -1155,3 +1155,81 @@ Interpretation:
   stack/temporary-buffer margin is tight;
 - the next gate is physical CAT of a real host file, then the large-file
   streaming proof.
+
+
+### KSC-03C first physical streaming result
+
+Status: **STREAMING CORE PHYSICAL PASS - FINAL STATUS-COUNTER CHECK PENDING**
+
+Observed host/firmware startup:
+
+```text
+KSC HOST 0.3 - KSC-03C
+MOUNT / STAT / LS enabled
+OPEN / READ / CLOSE streaming enabled
+CAT /host/<file> streams via Arduino in 32-byte chunks
+
+KSC-03C Host File Streaming
+CAT /host/<file> via OPEN/READ/CLOSE
+Remote read chunk: 32 B
+```
+
+Runtime memory at boot:
+
+```text
+FREE RAM: 506 B
+FREE RAM AFTER HOST STREAM INIT: 506 B
+MEM: 506 B
+```
+
+Remote directory enumeration remained functional:
+
+```text
+LS /host
+D DOCS
+F BIG.TXT  RO
+F DATA.TXT  RO
+F README.TXT  RO
+F STREAM.TXT  RO
+```
+
+Real host-file CAT passed for DATA.TXT:
+
+```text
+CAT /host/DATA.TXT
+KSC-03B SAMPLE DATA
+VALUE=273
+STATUS=HOST_FILE
+```
+
+Multi-frame streaming passed for STREAM.TXT, including its final marker:
+
+```text
+END KSC-03C STREAM TEST
+```
+
+Large-file bounded streaming proof passed for BIG.TXT:
+
+- first marker observed: `KSC-03C BIG FILE - STREAMING PROOF`;
+- numbered records progressed continuously from `LINE 000` through `LINE 095`;
+- final marker observed: `END OF KSC-03C BIG FILE`;
+- shell remained responsive afterward;
+- final `MEM` returned to 506 B, matching the pre-stream baseline.
+
+The test file is about 12 KB while ATmega328P SRAM is 2 KB. Since the complete
+file was emitted from first marker through final marker and the post-CAT SRAM
+observation returned to baseline, this is direct physical evidence that the
+implementation is not buffering the entire host file in AVR SRAM. The validated
+route is sequential bounded-chunk streaming through repeated OPEN/READ/CLOSE
+transactions.
+
+No reset or visible TTY/frame corruption is present in the captured route.
+
+Still not directly shown in this transcript:
+
+- final input-drop counter;
+- final IR-drop counter;
+- final HOST error counter.
+
+Those counters should be captured once before declaring **KSC-03C FULL PHYSICAL
+PASS**.
