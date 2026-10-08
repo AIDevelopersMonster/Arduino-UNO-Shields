@@ -38,7 +38,10 @@ KscCore::KscCore(
     _editActive(false),
     _editValue(0),
     _nodeMessage(NODE_MSG_NONE),
-    _lastRenderMs(0) {
+    _lastRenderMs(0),
+    _fileOffset(0),
+    _fileSize(0),
+    _fileBytesRead(0) {
   strcpy(_shellCwd, "/");
   _shellLine[0] = 0;
   strcpy(_commanderPath, "/");
@@ -1105,11 +1108,38 @@ void KscCore::openSelected() {
       sizeof(_nodePath) - 1
     ] = 0;
 
-    _view = VIEW_NODE;
     _editActive = false;
     _nodeMessage =
       NODE_MSG_NONE;
 
+    if (type == KSC_NODE_RO) {
+      bool handled = false;
+      uint16_t bytesRead = 0;
+      uint32_t totalSize = 0;
+
+      const KscResult probe =
+        _target.streamWindow(
+          _nodePath,
+          0,
+          0,
+          _io,
+          bytesRead,
+          totalSize,
+          handled
+        );
+
+      if (handled &&
+          probe == KSC_OK) {
+        _view = VIEW_FILE;
+        _fileOffset = 0;
+        _fileSize = totalSize;
+        _fileBytesRead = 0;
+        renderCommander();
+        return;
+      }
+    }
+
+    _view = VIEW_NODE;
     renderCommander();
   }
 }
@@ -1390,6 +1420,73 @@ void KscCore::renderNode() {
   renderStatusLine();
 }
 
+void KscCore::renderFile() {
+  static const uint16_t PAGE_BYTES = 192;
+
+  ansiClear();
+  renderHeader();
+
+  _io.println(_nodePath);
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  _io.print(F("FILE "));
+  _io.print(_fileOffset);
+  _io.print('/');
+  _io.println(_fileSize);
+
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  bool handled = false;
+  uint16_t bytesRead = 0;
+  uint32_t totalSize = 0;
+
+  const KscResult result =
+    _target.streamWindow(
+      _nodePath,
+      _fileOffset,
+      PAGE_BYTES,
+      _io,
+      bytesRead,
+      totalSize,
+      handled
+    );
+
+  _fileBytesRead = bytesRead;
+
+  if (handled &&
+      result == KSC_OK) {
+    _fileSize = totalSize;
+  } else {
+    _io.println();
+    _io.println(
+      resultName(result)
+    );
+  }
+
+  _io.println();
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  _io.println(
+    F("UP/LEFT Prev     DOWN/RIGHT Next")
+  );
+
+  _io.println(
+    F("HOME Start       END Last")
+  );
+
+  _io.println(
+    F("BACK Return      F10/POWER/Q Shell")
+  );
+
+  renderStatusLine();
+}
+
 void KscCore::renderHelp() {
   ansiClear();
 
@@ -1469,6 +1566,10 @@ void KscCore::renderCommander() {
 
     case VIEW_NODE:
       renderNode();
+      break;
+
+    case VIEW_FILE:
+      renderFile();
       break;
 
     case VIEW_HELP:
@@ -1655,7 +1756,8 @@ void KscCore::handleCommanderChar(
     return;
   }
 
-  if (_view == VIEW_HELP) {
+  if (_view == VIEW_HELP ||
+      _view == VIEW_FILE) {
     return;
   }
 
@@ -1734,6 +1836,60 @@ void KscCore::handleCommanderKey(
 
         break;
       }
+
+      default:
+        break;
+    }
+
+    return;
+  }
+
+  if (_view == VIEW_FILE) {
+    static const uint16_t PAGE_BYTES = 192;
+
+    switch (key) {
+      case KSC_KEY_UP:
+      case KSC_KEY_LEFT:
+        if (_fileOffset >= PAGE_BYTES) {
+          _fileOffset -= PAGE_BYTES;
+        } else {
+          _fileOffset = 0;
+        }
+        renderCommander();
+        break;
+
+      case KSC_KEY_DOWN:
+      case KSC_KEY_RIGHT:
+      case KSC_KEY_ENTER:
+        if (_fileOffset +
+              _fileBytesRead <
+            _fileSize) {
+          _fileOffset += PAGE_BYTES;
+          renderCommander();
+        }
+        break;
+
+      case KSC_KEY_HOME:
+        _fileOffset = 0;
+        renderCommander();
+        break;
+
+      case KSC_KEY_END:
+        if (_fileSize > PAGE_BYTES) {
+          _fileOffset =
+            ((_fileSize - 1) /
+             PAGE_BYTES) *
+            PAGE_BYTES;
+        } else {
+          _fileOffset = 0;
+        }
+        renderCommander();
+        break;
+
+      case KSC_KEY_BACK:
+        _view = VIEW_DIR;
+        renderCommander();
+        break;
 
       default:
         break;
