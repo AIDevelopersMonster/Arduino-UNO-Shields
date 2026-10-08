@@ -225,3 +225,34 @@ A cooperative transport wait hook has been added so the local target service
 runs while an OPEN/READ/CLOSE exchange is waiting for its host response. A clean
 rebuild/reflash and fresh IR navigation test is required. A reset/reflash is
 important because the dropped-edge counter is cumulative within a boot.
+
+
+## Clean IR coexistence retest
+
+Status: **PASS**
+
+After the cooperative host-wait service fix and a clean restart, Commander at
+`/host` reported:
+
+```text
+RAM 437 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+This clears the previously observed IR edge-buffer overflow regression at the
+directory-view level.
+
+The remaining KSC-04A certification gate is to exercise the actual remote file
+viewer navigation after the fix, preferably with the HY-M302 IR remote:
+
+```text
+BIG.TXT -> ENTER
+DOWN
+DOWN
+UP
+HOME
+END
+BACK
+```
+
+and confirm that the file offsets move as expected while the final counters
+remain `IN drop 0`, `IR drop 0/0`, and `HOST M/0`.
