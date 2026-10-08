@@ -1022,3 +1022,13 @@ KSC is not required to reuse:
 - application launcher design.
 
 The two lines should remain independently reproducible.
+
+
+### KSC-03C implementation status
+
+**STREAMED HOST FILE CAT READY FOR FIRST PHYSICAL BUILD/TEST**
+
+KSC-03C extends the certified KSC-03B remote directory mount with sequential
+`OPEN / READ / CLOSE` and a bounded 32-byte AVR read chunk. The primary proof
+target is `CAT /host/BIG.TXT`, where the host file is about 12 KB and therefore
+cannot fit in ATmega328P SRAM.
