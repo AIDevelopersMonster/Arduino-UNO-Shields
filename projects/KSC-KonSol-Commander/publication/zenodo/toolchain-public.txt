@@ -1,0 +1,58 @@
+KSC_Core v0.2 public toolchain record
+=====================================
+
+Capture time:
+2026-10-08T10:20:28.1005234+03:00
+
+Privacy:
+Local filesystem paths, user-profile identifiers, and unrelated working-tree
+filenames are intentionally omitted from this public record.
+
+OS:
+Windows 10 Home
+Windows version: 2009
+OS build: 19045
+
+Git:
+git version 2.45.2.windows.1
+Capture HEAD:
+7f18e774566ffa9ad0a284e01f45e27f60431e5a
+
+Working tree:
+Not clean at capture time.
+Unrelated local modifications/untracked files were present.
+Their paths are intentionally omitted because they are not part of the
+KSC_Core publication evidence.
+
+Arduino CLI:
+Version: 1.5.2-rc.1
+Commit: fef6e48df
+Build date: 2026-07-23T11:13:25Z
+
+Relevant Arduino core:
+arduino:avr 1.8.8
+Board FQBN used:
+arduino:avr:uno
+
+Python:
+3.14.4
+
+pyserial:
+3.5
+
+Core separation check:
+PASS - no target-specific references found by the publication capture check.
+
+Validated KSC_Core blobs:
+KSC_Core.h
+9190ef5d231acc82498b46a897e32b6e4327ed92
+
+KSC_Core.cpp
+211803fcc045b8a2dbba029fa0f7f62b2f6ac8e0
+
+Experimental evidence snapshot:
+96487e66b159df75a1b3162098590cb23ab4af49
+
+Publication DOI:
+10.5281/zenodo.23232216
+https://doi.org/10.5281/zenodo.23232216
