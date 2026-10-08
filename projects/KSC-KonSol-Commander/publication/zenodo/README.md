@@ -1,6 +1,6 @@
 # KSC_Core Zenodo Package
 
-Status: PRE-DEPOSIT PACKAGE - METADATA AND PUBLIC TOOLCHAIN RECORD READY
+Status: READY FOR ZENODO FILE UPLOAD AND RECORD PREVIEW
 
 This directory prepares the KSC_Core v0.2 publication candidate for Zenodo.
 
@@ -49,6 +49,7 @@ Minimum preservation package:
     REPRODUCIBILITY.md
     ZENODO_METADATA_TEMPLATE.md
     SOURCE_MANIFEST.txt
+    ../audit/KSC_CORE_v0.2_FINAL_PUBLICATION_AUDIT.md
 
 Recommended final package additionally contains:
 
@@ -68,9 +69,9 @@ Do not publish the Zenodo record until all items below are resolved.
 - [x] publication/document license selected: CC BY 4.0;
 - [x] source code kept as external repository reference; publication license does not relicense code;
 - [x] final privacy-scrubbed toolchain capture recorded;
-- [ ] final manuscript reviewed after DOI insertion;
+- [x] final manuscript reviewed after DOI insertion;
 - [x] DOI supplied and inserted into the manuscript;
-- [ ] PDF/Markdown source pair visually and textually checked;
+- [x] PDF/Markdown source pair visually and textually checked;
 - [x] source snapshot and core blob identifiers verified unchanged;
 - [x] final Zenodo description matches the bounded claim;
 - [x] no KSC-03 result is represented as completed.
