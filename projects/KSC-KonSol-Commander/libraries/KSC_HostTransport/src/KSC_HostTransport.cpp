@@ -6,6 +6,8 @@ KscHostMuxStream::KscHostMuxStream(
   Stream &wire
 )
   : _wire(wire),
+    _waitHook(nullptr),
+    _waitHookContext(nullptr),
     _ttyHead(0),
     _ttyTail(0),
     _ttyCount(0),
@@ -30,6 +32,14 @@ KscHostMuxStream::KscHostMuxStream(
     _badLengths(0),
     _unsupportedFrames(0),
     _ttyDrops(0) {
+}
+
+void KscHostMuxStream::setWaitHook(
+  WaitHook hook,
+  void *context
+) {
+  _waitHook = hook;
+  _waitHookContext = context;
 }
 
 uint8_t KscHostMuxStream::crc8Update(
@@ -418,6 +428,12 @@ bool KscHostMuxStream::exchange(
 
   while (millis() - started <
          timeoutMs) {
+    if (_waitHook) {
+      _waitHook(
+        _waitHookContext
+      );
+    }
+
     service();
 
     if (!_responseReady) {
