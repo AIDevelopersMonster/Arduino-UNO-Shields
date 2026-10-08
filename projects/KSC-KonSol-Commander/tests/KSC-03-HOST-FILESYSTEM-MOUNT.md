@@ -352,3 +352,97 @@ Interpretation:
 
 Next gate: upload and measure boot/free RAM through KSC Host while testing
 TTY/HOSTFS coexistence.
+
+
+### KSC-03A first physical transport result
+
+Status: **TRANSPORT CORE PHYSICAL PASS - COMMANDER/IR ROUTE STILL PENDING**
+
+Observed host startup and protocol result:
+
+```text
+KSC HOST 0.1 - KSC-03A
+PORT=COM4 BAUD=115200
+
+PING_RESP seq=1 PASS
+PING seq=1 round-trip PASS
+
+KSC-03A Host Transport
+TTY + framed HOSTFS on one serial link
+
+KSC Core 0.1
+Target: Arduino UNO + HY-M302
+FREE RAM: 593 B
+IR INIT: OK
+
+TRANSPORT RX payload: 48 B
+TRANSPORT TTY queue: 32 B
+FREE RAM AFTER TRANSPORT INIT: 593 B
+```
+
+Shell coexistence was physically verified:
+
+```text
+MEM
+593
+
+PWD
+/
+
+LS /
+D dev
+D proc
+D sys
+
+CAT /dev/light
+273
+```
+
+Five framed PING round trips succeeded while ordinary shell traffic remained
+functional:
+
+```text
+PING seq=1 PASS
+PING seq=2 PASS
+PING seq=3 PASS
+PING seq=4 PASS
+PING seq=5 PASS
+```
+
+Negative protocol routes also passed:
+
+```text
+bad CRC     -> ERROR_RESP ... BAD_CRC
+partial     -> ERROR_RESP ... TIMEOUT
+unsupported -> ERROR_RESP ... UNSUPPORTED
+```
+
+No HOSTFS frame bytes were visibly injected into the shell command stream in
+the recorded route.
+
+Runtime RAM result:
+
+```text
+KSC-02D boot free RAM:        734 B
+KSC-03A boot/free RAM:        593 B
+Runtime delta:               -141 B
+
+KSC-02D global SRAM:         1255 B
+KSC-03A global SRAM:         1396 B
+Global SRAM delta:           +141 B
+```
+
+The observed runtime free-RAM loss exactly matches the compiler-reported global
+SRAM increase for this route.
+
+This is strong evidence that the first bounded transport implementation has not
+introduced an additional hidden persistent RAM loss beyond the added globals.
+
+Remaining KSC-03A certification items:
+
+- Commander navigation through the multiplexed host;
+- framed PING while Commander is active;
+- HY-M302 IR navigation while host owns COM;
+- shell/TTY resynchronization after malformed frame tests;
+- post-Commander MEM observation;
+- input-drop and IR-drop observation on the final route.
