@@ -9,9 +9,12 @@ Certified milestones:
 - KSC-01A - virtual VFS / TTY core: FULL PHYSICAL PASS;
 - KSC-01B - unified physical keyboard sources: FULL PHYSICAL PASS;
 - KSC-01C - CHAR vs KEY semantic input model: FULL PHYSICAL PASS;
-- KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS.
+- KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS;
+- KSC-02C Reference Target - bare UNO synthetic VFS: FULL PHYSICAL PASS.
 
-Current active milestone: **KSC-02C - Core Extraction & Reference Target**.
+Current active milestone: **KSC-02C - Core Extraction & Multi-Target Proof**.
+
+The bare-UNO Reference Target is **FULL PHYSICAL PASS**. The remaining KSC-02C step is to move the HY-M302 physical target onto the same unchanged KSC_Core.
 
 KSC-03 - Host Filesystem Mount remains the next transport/backend milestone after the core-independence experiment.
 
@@ -736,6 +739,26 @@ PASS gate:
 ---
 
 ## 16A. KSC-02C - Core Extraction & Reference Target
+
+Reference Target status: **FULL PHYSICAL PASS**
+
+Measured Reference Target envelope:
+
+```text
+Flash:                    13658 / 32256 B = 42%
+Global SRAM:               669 / 2048 B  = 32%
+Boot free RAM:             1320 B
+Commander free RAM:        1279 B typical
+Minimum observed:          1262 B
+Input drops:                  0
+External shield required:    no
+```
+
+The KSC_Core source contains no HY_M302 dependency, DHT implementation, or
+target pin mapping. Stronger multi-target hardware-independence certification
+remains pending until the HY-M302 line is reimplemented as a second KscTarget
+adapter using the same unchanged KSC_Core.
+
 
 Goal:
 
