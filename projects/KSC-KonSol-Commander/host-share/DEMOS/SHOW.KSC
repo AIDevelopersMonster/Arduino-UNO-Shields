@@ -1,0 +1,23 @@
+# Combined launcher demo
+PRINT KSC SHOW START
+WRITE /dev/led/red 1
+WAIT 250
+WRITE /dev/led/red 0
+WRITE /dev/led/blue 1
+WAIT 250
+WRITE /dev/led/blue 0
+WRITE /dev/rgb/red 180
+WRITE /dev/rgb/green 0
+WRITE /dev/rgb/blue 180
+WAIT 400
+WRITE /dev/buzzer 1
+WAIT 150
+WRITE /dev/buzzer 0
+WRITE /dev/rgb/red 0
+WRITE /dev/rgb/green 180
+WRITE /dev/rgb/blue 180
+WAIT 400
+WRITE /dev/rgb/green 0
+WRITE /dev/rgb/blue 0
+PRINT KSC SHOW PASS
+STOP
