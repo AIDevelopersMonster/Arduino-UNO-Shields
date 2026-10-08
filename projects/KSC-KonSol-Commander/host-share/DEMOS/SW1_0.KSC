@@ -1,10 +1,5 @@
-# Static profile demo, no SW1 event binding in Script v0.1
-PRINT SW1_0 PROFILE RED
-WRITE /dev/buzzer 0
-WRITE /dev/rgb/red 0
-WRITE /dev/rgb/green 0
-WRITE /dev/rgb/blue 0
-WRITE /dev/led/blue 0
-WRITE /dev/led/red 1
-PRINT SW1_0 RED ON
+# Load runtime profile: SW1 press -> RED
+PRINT SW1_0 LOAD RED PROFILE
+WRITE /sys/sw1 0
+PRINT PRESS SW1 FOR RED
 STOP
