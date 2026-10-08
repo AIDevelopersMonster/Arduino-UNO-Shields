@@ -2,12 +2,23 @@
 
 **Subtitle:** Two-target physical validation on Arduino UNO using a synthetic Reference Target and the HY-M302 multifunction shield
 
+**Author:** A. A. Malachevsky  
+**ORCID:** 0009-0008-6009-3196  
+**DOI:** https://doi.org/10.5281/zenodo.23232216  
 **Manuscript status:** v0.2 - publication candidate  
 **Experimental evidence snapshot:** `96487e66b159df75a1b3162098590cb23ab4af49`  
 **Project:** KSC - KonSol Commander  
 **Repository:** AIDevelopersMonster/Arduino-UNO-Shields  
 **Validated platform:** Arduino UNO / ATmega328P  
 **Date:** 2026-10-08
+
+---
+
+## Citation
+
+Malachevsky, A. A. (2026). **KSC_Core: A Target-Decoupled Virtual Namespace and ANSI Commander Core for Resource-Constrained 8-bit Systems**. Zenodo. https://doi.org/10.5281/zenodo.23232216
+
+ORCID: https://orcid.org/0009-0008-6009-3196
 
 ---
 
