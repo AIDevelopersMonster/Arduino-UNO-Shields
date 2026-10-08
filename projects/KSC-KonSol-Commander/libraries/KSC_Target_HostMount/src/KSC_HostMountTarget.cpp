@@ -11,6 +11,23 @@ KscHostMountTarget::KscHostMountTarget(
     _mounted(false),
     _hostErrors(0),
     _streamRecoveries(0) {
+  _transport.setWaitHook(
+    transportWaitHook,
+    this
+  );
+}
+
+void KscHostMountTarget::transportWaitHook(
+  void *context
+) {
+  KscHostMountTarget *self =
+    (KscHostMountTarget *)context;
+
+  if (!self) {
+    return;
+  }
+
+  self->_local.service();
 }
 
 void KscHostMountTarget::begin() {
