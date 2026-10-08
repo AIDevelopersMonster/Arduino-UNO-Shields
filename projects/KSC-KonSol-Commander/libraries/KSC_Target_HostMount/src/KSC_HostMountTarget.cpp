@@ -741,50 +741,51 @@ KscResult KscHostMountTarget::streamWindow(
     return KSC_ERR_NOT_FOUND;
   }
 
-  uint8_t handle = 0;
-
-  if (!remoteOpen(
-        path,
-        handle
-      )) {
+  if (!ensureMounted()) {
     return KSC_ERR_TARGET;
   }
-
-  uint8_t response[5];
-  uint8_t responseLen = 0;
-  uint8_t errorCode = 0;
 
   const uint8_t pathLen =
     (uint8_t)strlen(path);
 
-  const bool openAgain =
+  if (pathLen == 0 ||
+      pathLen >= KscCore::PATH_SIZE ||
+      pathLen > KscHostMuxStream::MAX_PAYLOAD) {
+    ++_hostErrors;
+    return KSC_ERR_TARGET;
+  }
+
+  uint8_t openResponse[5];
+  uint8_t openResponseLen = 0;
+  uint8_t openError = 0;
+
+  const bool opened =
     _transport.exchange(
       KscHostMuxStream::TYPE_OPEN_REQ,
       (const uint8_t *)path,
       pathLen,
       KscHostMuxStream::TYPE_OPEN_RESP,
-      response,
-      sizeof(response),
-      responseLen,
-      errorCode
+      openResponse,
+      sizeof(openResponse),
+      openResponseLen,
+      openError
     );
 
-  if (!openAgain ||
-      responseLen != 5 ||
-      response[0] == 0) {
-    remoteClose(handle);
+  if (!opened ||
+      openResponseLen != 5 ||
+      openResponse[0] == 0) {
     ++_hostErrors;
     return KSC_ERR_TARGET;
   }
 
-  remoteClose(handle);
-  handle = response[0];
+  uint8_t handle =
+    openResponse[0];
 
   totalSize =
-    (uint32_t)response[1] |
-    ((uint32_t)response[2] << 8) |
-    ((uint32_t)response[3] << 16) |
-    ((uint32_t)response[4] << 24);
+    (uint32_t)openResponse[1] |
+    ((uint32_t)openResponse[2] << 8) |
+    ((uint32_t)openResponse[3] << 16) |
+    ((uint32_t)openResponse[4] << 24);
 
   if (maxBytes == 0 ||
       offset >= totalSize) {
@@ -803,7 +804,7 @@ KscResult KscHostMountTarget::streamWindow(
     bool eof = false;
     uint8_t readError = 0;
 
-    uint8_t want =
+    const uint8_t want =
       remaining > sizeof(chunk)
         ? sizeof(chunk)
         : (uint8_t)remaining;
