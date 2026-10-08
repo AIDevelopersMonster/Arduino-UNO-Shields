@@ -249,3 +249,40 @@ Interpretation:
   KSC-04B physical-certification baseline;
 - persistent SRAM increased by 12 bytes due to the stream sink object layout;
 - a second flash-focused refactor is required before upload.
+
+
+## Build result after second flash refactor
+
+After parser/UI slimming:
+
+```text
+Sketch uses 30630 bytes (94%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1537 bytes (75%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 511 bytes.
+Arduino CLI warning: low memory may cause instability.
+```
+
+Comparison:
+
+```text
+                         KSC-04A    Initial 04B   Refactor 1   Refactor 2
+Flash                    28816 B     31656 B       31118 B      30630 B
+Global SRAM               1499 B      1525 B        1537 B       1537 B
+Flash headroom             3440 B       600 B        1138 B       1626 B
+SRAM remainder              549 B       523 B         511 B        511 B
+```
+
+Refactor-2 recovered another 488 bytes of Flash, for a total recovery of
+1026 bytes relative to the first KSC-04B build.
+
+Interpretation:
+
+- KSC-04B now fits with 1626 bytes of Flash headroom;
+- SRAM remains tight but is still above the runtime level already exercised by
+  KSC-04A;
+- further pre-test optimization is no longer mandatory;
+- proceed to physical upload and launcher certification before adding any new
+  feature.
