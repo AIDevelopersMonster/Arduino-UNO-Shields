@@ -446,3 +446,173 @@ Remaining KSC-03A certification items:
 - shell/TTY resynchronization after malformed frame tests;
 - post-Commander MEM observation;
 - input-drop and IR-drop observation on the final route.
+
+
+## KSC-03B implementation
+
+Status: **IMPLEMENTED - FIRST PHYSICAL BUILD/TEST PENDING**
+
+Firmware:
+
+```text
+projects/KSC-KonSol-Commander/sketches/08_KSC_03B_HostMount/
+```
+
+New target wrapper:
+
+```text
+projects/KSC-KonSol-Commander/libraries/KSC_Target_HostMount/
+```
+
+Host tool:
+
+```text
+projects/KSC-KonSol-Commander/tools/ksc_host.py
+```
+
+Default exported PC directory:
+
+```text
+projects/KSC-KonSol-Commander/host-share/
+```
+
+Expected remote namespace:
+
+```text
+/
++-- dev/
++-- proc/
++-- sys/
++-- host/
+    +-- DOCS/
+    |   +-- HELLO.TXT
+    +-- DATA.TXT
+    +-- README.TXT
+```
+
+KSC_Core remains unchanged. The new KscHostMountTarget wraps the existing
+physical HY-M302 target and delegates all non-`/host` paths to it.
+
+### Build
+
+```powershell
+New-Item -ItemType Directory -Force .\build\KSC\08_KSC_03B_HostMount | Out-Null
+
+arduino-cli compile `
+  --fqbn arduino:avr:uno `
+  --libraries .\projects\KSC-KonSol-Commander\libraries `
+  --libraries .\libraries `
+  --output-dir .\build\KSC\08_KSC_03B_HostMount `
+  .\projects\KSC-KonSol-Commander\sketches\08_KSC_03B_HostMount
+```
+
+Record Flash and global SRAM before upload.
+
+### Upload
+
+```powershell
+arduino-cli upload `
+  -p COM4 `
+  --fqbn arduino:avr:uno `
+  --input-dir .\build\KSC\08_KSC_03B_HostMount
+```
+
+### Start host service
+
+Default sample export:
+
+```powershell
+python .\projects\KSC-KonSol-Commander\tools\ksc_host.py `
+  -p COM4 `
+  --ping-on-start
+```
+
+Explicit arbitrary export directory:
+
+```powershell
+python .\projects\KSC-KonSol-Commander\tools\ksc_host.py `
+  -p COM4 `
+  --export C:\Some\Folder
+```
+
+Do not run another COM4 client at the same time.
+
+### KSC-03B shell route
+
+Expected:
+
+```text
+LS /
+D dev
+D proc
+D sys
+D host
+
+LS /host
+D DOCS
+F DATA.TXT  RO
+F README.TXT  RO
+
+LS /host/DOCS
+F HELLO.TXT  RO
+```
+
+Also verify:
+
+```text
+CAT /dev/light
+MEM
+```
+
+to prove the local target remains functional.
+
+Opening a remote file in KSC-03B returns the explicit placeholder:
+
+```text
+REMOTE FILE: KSC-03C
+```
+
+Actual byte streaming is reserved for KSC-03C.
+
+### Commander route
+
+1. Enter `KSC`.
+2. Confirm the root now shows `host/` beside `dev/`, `proc/`, and `sys/`.
+3. Open `host/`.
+4. Confirm `DOCS/`, `DATA.TXT`, and `README.TXT`.
+5. Open `DOCS/` and confirm `HELLO.TXT`.
+6. Return to root and open a local `/dev` node to confirm local navigation still
+   works.
+7. Use the HY-M302 IR remote for at least UP, DOWN, OK, RETURN, and HOME.
+8. Run a Ctrl-P transport PING while the remote directory view is active.
+9. Return to shell and run `MEM`.
+
+### KSC-03B containment checks
+
+Run the host against the default export and verify that no parent directory is
+visible.
+
+The KSC path layer itself truncates paths to 23 characters in this core version;
+the host additionally rejects traversal and paths outside the configured export
+root.
+
+### KSC-03B data to return
+
+```text
+Flash:
+Global SRAM:
+Boot/free RAM after host-mount init:
+MEM after /host shell route:
+MEM after Commander /host route:
+LS /:
+LS /host:
+LS /host/DOCS:
+Commander /host visible:
+PC navigation:
+IR navigation:
+PING while /host active:
+Input drops:
+IR drops:
+Host errors shown in status:
+Any TTY/frame corruption:
+```
