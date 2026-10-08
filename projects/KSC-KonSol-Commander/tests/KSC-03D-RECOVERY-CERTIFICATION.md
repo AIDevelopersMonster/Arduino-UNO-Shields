@@ -358,3 +358,59 @@ At this point both independent KSC-03D recovery mechanisms have physical PASS:
 lost READ response and invalidated host handle. A clean no-fault KSC-03D
 baseline run remains the final mandatory certification gate if it has not
 already been captured separately.
+
+
+## KSC-03D FULL PHYSICAL PASS
+
+Status: **FULL PHYSICAL PASS**
+
+Final no-fault certification status after the requested clean KSC-03D route:
+
+```text
+RAM 463 B   IN drop 0   IR drop 0/0   HOST M/0 R2
+```
+
+The recovery counter `R2` is cumulative from the two deliberately injected and
+successfully recovered faults recorded earlier:
+
+1. lost READ response;
+2. invalidated host handle.
+
+The final host-error counter remains `M/0`, and both input-drop counters remain
+zero.
+
+Together with the recorded KSC-03D physical routes, the final certification
+covers:
+
+- explicit-offset READ on the remote `/host` stream;
+- normal bounded streaming of the large host file;
+- recovery from a deliberately lost READ response by retrying the same offset;
+- recovery from BAD_HANDLE by reopening the same path and resuming at the same
+  explicit offset;
+- successful completion of the large-file stream after each injected fault;
+- no reset in the certified routes;
+- runtime SRAM returning to the established shell baseline after streaming;
+- Commander remaining operational after recovery tests;
+- `IN drop 0`;
+- `IR drop 0/0`;
+- `HOST M/0`;
+- cumulative successful recoveries `R2`.
+
+Bounded claim:
+
+**KSC-03D demonstrates recoverable sequential host-backed text-file streaming
+through the remote `/host` namespace on Arduino UNO / ATmega328P, using
+explicit-offset idempotent READ requests, bounded retry after a lost READ
+response, and reopen/resume after a lost host file handle, without requiring the
+complete host file to fit in AVR SRAM.**
+
+Non-claims remain:
+
+- arbitrary binary-safe streaming is not certified;
+- transparent recovery from full KSC Host process restart during an active CAT
+  is not certified;
+- concurrent multiple AVR-side open files are not certified;
+- Commander does not yet provide a full multi-page streaming file viewer.
+
+With KSC-03D complete, the KSC-03 remote `/host` transport/mount/stream/recovery
+line is technically complete within these stated bounds.
