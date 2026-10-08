@@ -902,8 +902,7 @@ KscResult KscHostMountTarget::executeScriptLine(
     return KSC_ERR_VALUE;
   }
 
-  while (*line == ' ' ||
-         *line == '\t') {
+  while (*line == ' ') {
     ++line;
   }
 
@@ -915,14 +914,7 @@ KscResult KscHostMountTarget::executeScriptLine(
   char *cmd = line;
 
   while (*line &&
-         *line != ' ' &&
-         *line != '\t') {
-    if (*line >= 'a' &&
-        *line <= 'z') {
-      *line =
-        (char)(*line - 'a' + 'A');
-    }
-
+         *line != ' ') {
     ++line;
   }
 
@@ -930,8 +922,7 @@ KscResult KscHostMountTarget::executeScriptLine(
     *line++ = 0;
   }
 
-  while (*line == ' ' ||
-         *line == '\t') {
+  while (*line == ' ') {
     ++line;
   }
 
@@ -980,8 +971,7 @@ KscResult KscHostMountTarget::executeScriptLine(
     char *path = line;
 
     while (*line &&
-           *line != ' ' &&
-           *line != '\t') {
+           *line != ' ') {
       ++line;
     }
 
@@ -991,8 +981,7 @@ KscResult KscHostMountTarget::executeScriptLine(
 
     *line++ = 0;
 
-    while (*line == ' ' ||
-           *line == '\t') {
+    while (*line == ' ') {
       ++line;
     }
 
@@ -1103,26 +1092,8 @@ KscResult KscHostMountTarget::launch(
     return KSC_ERR_TARGET;
   }
 
-  const size_t pathLenText =
-    strlen(path);
-
-  if (pathLenText < 4) {
-    return KSC_ERR_TARGET;
-  }
-
-  const char *ext =
-    path + pathLenText - 4;
-
-  if (!(ext[0] == '.' &&
-        (ext[1] == 'K' || ext[1] == 'k') &&
-        (ext[2] == 'S' || ext[2] == 's') &&
-        (ext[3] == 'C' || ext[3] == 'c'))) {
-    return KSC_ERR_TARGET;
-  }
-
   handled = true;
 
-  out.println(F("[RUN]"));
 
   ScriptSink sink(
     *this,
@@ -1169,13 +1140,6 @@ KscResult KscHostMountTarget::launch(
       sink.result() != KSC_OK) {
     result = sink.result();
   }
-
-  out.print(F("[RUN] "));
-  out.println(
-    result == KSC_OK
-      ? F("DONE")
-      : F("ERROR")
-  );
 
   return result;
 }
