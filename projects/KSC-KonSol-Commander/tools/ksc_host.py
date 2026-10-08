@@ -242,6 +242,9 @@ class KscHost:
 
         self.open_files = {}
         self.next_handle = 0
+        self.read_request_count = 0
+        self.drop_read_at = 0
+        self.invalidate_read_at = 0
 
         self.demux = WireDemux(
             self._on_tty,
@@ -594,7 +597,7 @@ class KscHost:
         )
 
     def _handle_read_req(self, seq, payload):
-        if len(payload) != 2:
+        if len(payload) != 6:
             self._send_error(
                 seq,
                 ERR_BAD_LENGTH,
@@ -602,7 +605,12 @@ class KscHost:
             return
 
         handle = payload[0]
-        requested = payload[1]
+        offset = int.from_bytes(
+            payload[1:5],
+            byteorder="little",
+            signed=False,
+        )
+        requested = payload[5]
 
         if requested == 0 or requested > 32:
             self._send_error(
@@ -610,6 +618,26 @@ class KscHost:
                 ERR_BAD_LENGTH,
             )
             return
+
+        self.read_request_count += 1
+
+        if (
+            self.drop_read_at
+            and self.read_request_count == self.drop_read_at
+        ):
+            self._frame_line(
+                f"FAULT drop READ response at request #{self.read_request_count} offset={offset}"
+            )
+            return
+
+        if (
+            self.invalidate_read_at
+            and self.read_request_count == self.invalidate_read_at
+        ):
+            self._frame_line(
+                f"FAULT invalidate handles at READ #{self.read_request_count} offset={offset}"
+            )
+            self.close_open_files()
 
         state = self.open_files.get(handle)
 
@@ -621,8 +649,8 @@ class KscHost:
             return
 
         try:
+            state["file"].seek(offset)
             data = state["file"].read(requested)
-            position = state["file"].tell()
         except OSError:
             self._send_error(
                 seq,
@@ -630,14 +658,18 @@ class KscHost:
             )
             return
 
-        eof = position >= state["size"]
+        eof = offset + len(data) >= state["size"]
 
-        response = bytes(
-            [
-                handle,
-                1 if eof else 0,
-            ]
-        ) + data
+        response = bytes([handle])
+        response += int(offset).to_bytes(
+            4,
+            byteorder="little",
+            signed=False,
+        )
+        response += bytes(
+            [1 if eof else 0]
+        )
+        response += data
 
         self._send_frame(
             TYPE_READ_RESP,
@@ -920,7 +952,7 @@ def default_export_root():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="KSC Host 0.3 - TTY + streamed remote /host service"
+        description="KSC Host 0.4 - recoverable streamed remote /host service"
     )
 
     parser.add_argument(
@@ -952,6 +984,20 @@ def main():
         action="store_true",
     )
 
+    parser.add_argument(
+        "--drop-read-at",
+        type=int,
+        default=0,
+        help="KSC-03D fault injection: drop the Nth READ response",
+    )
+
+    parser.add_argument(
+        "--invalidate-read-at",
+        type=int,
+        default=0,
+        help="KSC-03D fault injection: invalidate handles on the Nth READ",
+    )
+
     args = parser.parse_args()
 
     export_root = Path(
@@ -980,6 +1026,16 @@ def main():
         show_frames=not args.quiet_frames,
     )
 
+    host.drop_read_at = max(
+        0,
+        args.drop_read_at,
+    )
+
+    host.invalidate_read_at = max(
+        0,
+        args.invalidate_read_at,
+    )
+
     reader = threading.Thread(
         target=host.reader_loop,
         daemon=True,
@@ -988,7 +1044,7 @@ def main():
     reader.start()
 
     print()
-    print("KSC HOST 0.3 - KSC-03C")
+    print("KSC HOST 0.4 - KSC-03D")
     print(f"PORT={args.port} BAUD={args.baud}")
     print(f"EXPORT={export_root}")
     print("MOUNT=/host")
@@ -1000,8 +1056,13 @@ def main():
     print("HOSTFS:")
     print("  /host -> exported PC directory")
     print("  MOUNT / STAT / LS enabled")
-    print("  OPEN / READ / CLOSE streaming enabled")
+    print("  OPEN / offset-READ / CLOSE streaming enabled")
     print("  CAT /host/<file> streams via Arduino in 32-byte chunks")
+    print("  READ is idempotent by explicit 32-bit offset")
+    if host.drop_read_at:
+        print(f"  FAULT: drop READ response #{host.drop_read_at}")
+    if host.invalidate_read_at:
+        print(f"  FAULT: invalidate handles at READ #{host.invalidate_read_at}")
     print()
     print("Transport test hotkeys:")
     print("  Ctrl-P -> PING")
