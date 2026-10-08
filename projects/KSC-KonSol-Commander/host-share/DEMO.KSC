@@ -1,0 +1,10 @@
+# KSC Script v0.1
+PRINT KSC-04B RUN START
+WRITE /dev/led/red 1
+WAIT 400
+WRITE /dev/led/red 0
+WRITE /dev/led/blue 1
+WAIT 400
+WRITE /dev/led/blue 0
+PRINT KSC-04B RUN PASS
+STOP
