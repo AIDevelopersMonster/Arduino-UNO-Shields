@@ -1,0 +1,10 @@
+# Static profile demo, no SW1 event binding in Script v0.1
+PRINT SW1_1 PROFILE BLUE
+WRITE /dev/buzzer 0
+WRITE /dev/rgb/red 0
+WRITE /dev/rgb/green 0
+WRITE /dev/rgb/blue 0
+WRITE /dev/led/red 0
+WRITE /dev/led/blue 1
+PRINT SW1_1 BLUE ON
+STOP
