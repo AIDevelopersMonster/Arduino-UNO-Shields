@@ -65,8 +65,8 @@ Do not publish the Zenodo record until all items below are resolved.
 - [x] creator name(s) confirmed;
 - [x] creator order confirmed;
 - [x] ORCID(s) confirmed;
-- [ ] publication/document license explicitly selected;
-- [ ] code-license status explicitly decided or code kept as external repository reference;
+- [x] publication/document license selected: CC BY 4.0;
+- [x] source code kept as external repository reference; publication license does not relicense code;
 - [ ] final toolchain capture recorded;
 - [ ] final manuscript reviewed after DOI insertion;
 - [x] DOI supplied and inserted into the manuscript;
