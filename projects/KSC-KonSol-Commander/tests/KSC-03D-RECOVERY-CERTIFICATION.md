@@ -218,3 +218,34 @@ Non-claims:
 - host-process restart during an active CAT is not yet transparently recovered;
 - multiple concurrent AVR-side open files are not certified;
 - Commander still has only bounded node preview, not a full file viewer.
+
+
+## Build result
+
+Physical build on Arduino UNO / ATmega328P:
+
+```text
+Sketch uses 26712 bytes (82%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1485 bytes (72%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 563 bytes.
+```
+
+Comparison with KSC-03C:
+
+```text
+                         KSC-03C      KSC-03D      Delta
+Flash                    26330 B      26712 B      +382 B
+Global SRAM               1483 B       1485 B        +2 B
+Compiler SRAM remainder    565 B        563 B        -2 B
+```
+
+Interpretation:
+
+- build PASS;
+- recovery hardening adds only 2 bytes of persistent SRAM;
+- flash remains below the Arduino UNO sketch limit;
+- runtime free-RAM and recovery-path measurements remain mandatory before
+  certification.
