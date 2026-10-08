@@ -251,6 +251,156 @@ bool KscHostMountTarget::remoteList(
   return true;
 }
 
+bool KscHostMountTarget::remoteOpen(
+  const char *path,
+  uint8_t &handle
+) {
+  handle = 0;
+
+  if (!ensureMounted()) {
+    return false;
+  }
+
+  const uint8_t pathLen =
+    (uint8_t)strlen(path);
+
+  if (pathLen == 0 ||
+      pathLen >= KscCore::PATH_SIZE ||
+      pathLen > KscHostMuxStream::MAX_PAYLOAD) {
+    ++_hostErrors;
+    return false;
+  }
+
+  uint8_t response[5];
+  uint8_t responseLen = 0;
+  uint8_t errorCode = 0;
+
+  const bool ok =
+    _transport.exchange(
+      KscHostMuxStream::TYPE_OPEN_REQ,
+      (const uint8_t *)path,
+      pathLen,
+      KscHostMuxStream::TYPE_OPEN_RESP,
+      response,
+      sizeof(response),
+      responseLen,
+      errorCode
+    );
+
+  if (!ok ||
+      responseLen != 5 ||
+      response[0] == 0) {
+    ++_hostErrors;
+    return false;
+  }
+
+  handle = response[0];
+  return true;
+}
+
+bool KscHostMountTarget::remoteRead(
+  uint8_t handle,
+  uint8_t *dataOut,
+  uint8_t dataCapacity,
+  uint8_t &dataLen,
+  bool &eof
+) {
+  dataLen = 0;
+  eof = false;
+
+  if (!dataOut ||
+      dataCapacity == 0) {
+    ++_hostErrors;
+    return false;
+  }
+
+  const uint8_t requested =
+    dataCapacity > 32
+      ? 32
+      : dataCapacity;
+
+  const uint8_t request[2] = {
+    handle,
+    requested
+  };
+
+  uint8_t response[34];
+  uint8_t responseLen = 0;
+  uint8_t errorCode = 0;
+
+  const bool ok =
+    _transport.exchange(
+      KscHostMuxStream::TYPE_READ_REQ,
+      request,
+      sizeof(request),
+      KscHostMuxStream::TYPE_READ_RESP,
+      response,
+      sizeof(response),
+      responseLen,
+      errorCode
+    );
+
+  if (!ok ||
+      responseLen < 2 ||
+      response[0] != handle) {
+    ++_hostErrors;
+    return false;
+  }
+
+  eof = response[1] != 0;
+  dataLen =
+    (uint8_t)(responseLen - 2);
+
+  if (dataLen > requested) {
+    ++_hostErrors;
+    return false;
+  }
+
+  if (dataLen) {
+    memcpy(
+      dataOut,
+      response + 2,
+      dataLen
+    );
+  }
+
+  return true;
+}
+
+void KscHostMountTarget::remoteClose(
+  uint8_t handle
+) {
+  if (handle == 0) {
+    return;
+  }
+
+  const uint8_t request[1] = {
+    handle
+  };
+
+  uint8_t response[1];
+  uint8_t responseLen = 0;
+  uint8_t errorCode = 0;
+
+  const bool ok =
+    _transport.exchange(
+      KscHostMuxStream::TYPE_CLOSE_REQ,
+      request,
+      sizeof(request),
+      KscHostMuxStream::TYPE_CLOSE_RESP,
+      response,
+      sizeof(response),
+      responseLen,
+      errorCode
+    );
+
+  if (!ok ||
+      responseLen != 1 ||
+      response[0] != handle) {
+    ++_hostErrors;
+  }
+}
+
 KscNodeType KscHostMountTarget::pathType(
   const char *path
 ) {
@@ -402,7 +552,7 @@ KscResult KscHostMountTarget::read(
 
       strncpy(
         out,
-        "REMOTE FILE: KSC-03C",
+        "CAT STREAM AVAILABLE",
         outSize
       );
 
@@ -418,6 +568,73 @@ KscResult KscHostMountTarget::read(
     out,
     outSize
   );
+}
+
+KscResult KscHostMountTarget::streamRead(
+  const char *path,
+  Print &out,
+  bool &handled
+) {
+  handled = false;
+
+  if (!isHostPath(path)) {
+    return KSC_ERR_TARGET;
+  }
+
+  handled = true;
+
+  const KscNodeType type =
+    pathType(path);
+
+  if (type == KSC_NODE_DIR) {
+    return KSC_ERR_IS_DIR;
+  }
+
+  if (type != KSC_NODE_RO) {
+    return KSC_ERR_NOT_FOUND;
+  }
+
+  uint8_t handle = 0;
+
+  if (!remoteOpen(
+        path,
+        handle
+      )) {
+    return KSC_ERR_TARGET;
+  }
+
+  KscResult result =
+    KSC_OK;
+
+  for (;;) {
+    uint8_t chunk[32];
+    uint8_t chunkLen = 0;
+    bool eof = false;
+
+    if (!remoteRead(
+          handle,
+          chunk,
+          sizeof(chunk),
+          chunkLen,
+          eof
+        )) {
+      result = KSC_ERR_TARGET;
+      break;
+    }
+
+    for (uint8_t i = 0;
+         i < chunkLen;
+         ++i) {
+      out.write(chunk[i]);
+    }
+
+    if (eof) {
+      break;
+    }
+  }
+
+  remoteClose(handle);
+  return result;
 }
 
 KscResult KscHostMountTarget::write(
