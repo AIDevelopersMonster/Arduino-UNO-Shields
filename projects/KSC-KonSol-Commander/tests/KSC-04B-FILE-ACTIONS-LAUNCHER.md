@@ -309,3 +309,51 @@ Confirmed by this observation:
 This is a strong runtime stability result, but the KSC-04B FULL PHYSICAL PASS
 still additionally requires explicit confirmation of the script side effects
 (red/blue LED sequence) and the visible RUN success markers/status.
+
+
+## Physical launcher execution result
+
+Observed on Arduino UNO + HY-M302:
+
+```text
+KSC Core 0.1 - KonSol Commander
+Target: Arduino UNO + HY-M302
+Path: /host/DEMO.KSC
+----------------------------------------
+ACTIONS
+  VIEW
+> RUN
+----------------------------------------
+UP/DOWN Select  ENTER Action
+BACK Return
+RAM 399 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+
+KSC-04B RUN START
+KSC-04B RUN PASS
+
+KSC Core 0.1 - KonSol Commander
+Target: Arduino UNO + HY-M302
+Path: /host/DEMO.KSC
+----------------------------------------
+RUN OK
+ENTER/BACK Return
+RAM 399 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+This confirms that:
+
+- Commander recognized `DEMO.KSC` as an actionable script;
+- the ACTIONS view exposed VIEW/RUN;
+- RUN streamed and parsed the remote script;
+- both script PRINT markers were reached;
+- every preceding WRITE/WAIT instruction returned success, because any error
+  would terminate execution before the final PASS marker;
+- the launcher returned `RUN OK`;
+- runtime free RAM remained 399 B;
+- input drops remained zero;
+- HY-M302 IR drops remained 0/0;
+- host status remained clean at M/0 R0;
+- no reset occurred.
+
+The only remaining physical-side-effect acceptance item is direct human
+confirmation that the expected red-then-blue LED sequence was visibly observed.
