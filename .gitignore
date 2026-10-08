@@ -15,3 +15,6 @@ __pycache__/
 .arduinoIDE/
 .DS_Store
 Thumbs.db
+
+# Local publication captures that may contain user/profile paths
+projects/KSC-KonSol-Commander/publication/zenodo/toolchain-final.txt
