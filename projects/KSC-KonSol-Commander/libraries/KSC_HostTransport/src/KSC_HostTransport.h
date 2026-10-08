@@ -4,6 +4,7 @@
 
 class KscHostMuxStream : public Stream {
 public:
+  typedef void (*WaitHook)(void *context);
   static const uint8_t SOF1 = 0x1B;
   static const uint8_t SOF2 = 0x5D;
 
@@ -40,6 +41,11 @@ public:
   static const uint8_t TTY_QUEUE_SIZE = 32;
 
   explicit KscHostMuxStream(Stream &wire);
+
+  void setWaitHook(
+    WaitHook hook,
+    void *context
+  );
 
   void service();
 
@@ -114,6 +120,8 @@ private:
   };
 
   Stream &_wire;
+  WaitHook _waitHook;
+  void *_waitHookContext;
 
   uint8_t _ttyQueue[TTY_QUEUE_SIZE];
   uint8_t _ttyHead;
