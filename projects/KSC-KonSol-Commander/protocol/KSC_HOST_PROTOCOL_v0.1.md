@@ -1,0 +1,125 @@
+# KSC Host Protocol v0.1 - Framing Draft
+
+Status: KSC-03A DESIGN BASELINE
+
+## Objective
+
+Provide an AVR-friendly framed machine channel that can coexist with normal KSC
+terminal traffic on one serial connection.
+
+The framing is deliberately small and binary.
+
+## Frame format
+
+Candidate v0.1 frame:
+
+```text
++------+-----+------+-----+------+---------+-------+
+| SOF1 | SOF2| TYPE | SEQ | LEN  | PAYLOAD | CRC8  |
++------+-----+------+-----+------+---------+-------+
+  0x1B  0x5D   1 B    1 B   1 B    0..48 B   1 B
+```
+
+Where:
+
+- `SOF1=0x1B`
+- `SOF2=0x5D`
+- `TYPE` identifies request/response/control operation;
+- `SEQ` correlates one request and response;
+- `LEN` is payload length, maximum 48 bytes in v0.1;
+- `CRC8` covers TYPE, SEQ, LEN, and PAYLOAD.
+
+Maximum complete v0.1 frame size:
+
+```text
+2 + 1 + 1 + 1 + 48 + 1 = 54 bytes
+```
+
+The exact SOF choice is provisional until KSC-03A proves that it coexists
+cleanly with the existing terminal parser.
+
+## Initial message types
+
+```text
+0x01 PING_REQ
+0x81 PING_RESP
+
+0x02 MOUNT_REQ
+0x82 MOUNT_RESP
+
+0x03 LS_REQ
+0x83 LS_RESP
+
+0x04 STAT_REQ
+0x84 STAT_RESP
+
+0x05 OPEN_REQ
+0x85 OPEN_RESP
+
+0x06 READ_REQ
+0x86 READ_RESP
+
+0x07 CLOSE_REQ
+0x87 CLOSE_RESP
+
+0x7F ERROR_RESP
+```
+
+KSC-03A needs only PING_REQ/PING_RESP plus explicit malformed-frame handling.
+
+## Parser policy
+
+Firmware parser states:
+
+```text
+IDLE
+SEEN_SOF1
+HEADER
+PAYLOAD
+CRC
+```
+
+Rules:
+
+- no heap allocation;
+- one bounded payload buffer;
+- timeout resets an incomplete frame;
+- invalid LEN resets parser;
+- invalid CRC produces no filesystem operation;
+- parser must resynchronize at the next valid SOF;
+- frame bytes consumed by HOSTFS must not be passed to the TTY CHAR/KEY parser.
+
+## Terminal coexistence
+
+Normal terminal bytes remain ordinary TTY input unless a valid HOSTFS frame
+start is recognized.
+
+The KSC Host process owns the serial port and provides the human terminal
+frontend while host mounting is active.
+
+## Buffer target
+
+Initial AVR budget:
+
+```text
+RX payload buffer: 48 B
+small parser/header state: < 16 B target
+TX response constructed/streamed without a second full 48 B copy where possible
+```
+
+KSC-03A must measure the actual global SRAM and runtime free-RAM delta.
+
+## CRC
+
+CRC-8 polynomial is not frozen in this draft.
+
+KSC-03A must select one polynomial, document the exact initialization and update
+rule, and provide host/firmware test vectors before physical certification.
+
+## Why not textual commands
+
+Human-readable commands are convenient but make unambiguous multiplexing with a
+normal shell harder and increase parsing/state cost.
+
+The machine protocol is therefore binary internally while users continue to see
+ordinary paths and shell/Commander operations.
