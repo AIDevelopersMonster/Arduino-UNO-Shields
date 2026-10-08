@@ -55,11 +55,12 @@ void handle(const char *p) {
     Serial.println(F("ARMED 10s"));
     return;
   }
-  if (armed && strlen(p)==3 && p[2]>='1' && p[2]<='4' &&
-      ((p[0]=='O' && p[1]=='N') || (p[0]=='O' && p[1]=='F'))) {
-    uint8_t index=(uint8_t)(p[2]-'1');
+  const bool turnOn = strlen(p)==3 && p[0]=='O' && p[1]=='N' && p[2]>='1' && p[2]<='4';
+  const bool turnOff = strlen(p)==4 && p[0]=='O' && p[1]=='F' && p[2]=='F' && p[3]>='1' && p[3]<='4';
+  if (armed && (turnOn || turnOff)) {
+    uint8_t index=(uint8_t)((turnOn ? p[2] : p[3])-'1');
     digitalWrite(candidatePins[index],
-       (p[1]=='N') ? (outputOffLevel == HIGH ? LOW : HIGH) : outputOffLevel);
+       turnOn ? (outputOffLevel == HIGH ? LOW : HIGH) : outputOffLevel);
     Serial.println(F("GPIO COMMAND SENT -- NOT RELAY CONTACT CONFIRMATION"));
     return;
   }
