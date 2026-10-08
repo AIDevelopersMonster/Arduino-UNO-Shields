@@ -1,6 +1,15 @@
 KSC_Core two-target validation source manifest
 ================================================
 
+Publication DOI:
+10.5281/zenodo.23232216
+https://doi.org/10.5281/zenodo.23232216
+
+Creator:
+A. A. Malachevsky
+ORCID 0009-0008-6009-3196
+
+
 Experimental evidence snapshot:
 96487e66b159df75a1b3162098590cb23ab4af49
 
