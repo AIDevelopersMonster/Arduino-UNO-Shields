@@ -8,6 +8,7 @@ KscHostMountTarget::KscHostMountTarget(
 )
   : _local(localTarget),
     _transport(transport),
+    _core(nullptr),
     _mounted(false),
     _hostErrors(0),
     _streamRecoveries(0) {
@@ -28,6 +29,12 @@ void KscHostMountTarget::transportWaitHook(
   }
 
   self->_local.service();
+
+  if (self->_core) {
+    self->_local.pollInput(
+      *self->_core
+    );
+  }
 }
 
 void KscHostMountTarget::begin() {
@@ -42,6 +49,7 @@ void KscHostMountTarget::service() {
 void KscHostMountTarget::pollInput(
   KscCore &core
 ) {
+  _core = &core;
   _local.pollInput(core);
 }
 
@@ -961,6 +969,13 @@ KscResult KscHostMountTarget::executeScriptLine(
     while (millis() - started <
            waitMs) {
       _local.service();
+
+      if (_core) {
+        _local.pollInput(
+          *_core
+        );
+      }
+
       _transport.service();
     }
 
@@ -1058,6 +1073,14 @@ size_t KscHostMountTarget::ScriptSink::write(
 
   if (ch == '\n') {
     executeLine();
+    return 1;
+  }
+
+  // Comments are not executable and do not need to fit in the
+  // bounded command-line buffer. Once '#' is seen as the first
+  // character, discard the rest of that line until newline.
+  if (_lineLen &&
+      _line[0] == '#') {
     return 1;
   }
 
