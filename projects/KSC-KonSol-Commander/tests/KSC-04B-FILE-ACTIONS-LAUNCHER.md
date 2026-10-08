@@ -216,3 +216,36 @@ Interpretation:
 - SRAM growth is acceptable, but Flash has become the primary blocker;
 - KSC-04B should undergo a Flash audit/optimization before upload and physical
   launcher testing.
+
+
+## Build result after first flash refactor
+
+After reusing the certified `streamWindow()` path for launcher input:
+
+```text
+Sketch uses 31118 bytes (96%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1537 bytes (75%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 511 bytes.
+Arduino CLI warning: low memory may cause instability.
+```
+
+Comparison:
+
+```text
+                         Initial 04B   Refactor 1    Delta
+Flash                    31656 B       31118 B       -538 B
+Global SRAM               1525 B        1537 B        +12 B
+Flash headroom              600 B        1138 B       +538 B
+SRAM remainder              523 B         511 B        -12 B
+```
+
+Interpretation:
+
+- first refactor recovered 538 bytes of Flash;
+- Flash headroom improved to 1138 bytes but remains too small for the desired
+  KSC-04B physical-certification baseline;
+- persistent SRAM increased by 12 bytes due to the stream sink object layout;
+- a second flash-focused refactor is required before upload.
