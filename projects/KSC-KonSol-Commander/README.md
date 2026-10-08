@@ -1123,8 +1123,9 @@ Final recorded status:
 RAM 437 B   IN drop 0   IR drop 0/0   HOST M/0 R0
 ```
 
-The next stage is KSC-04B: line-aware text viewing on top of the certified
-byte-window viewer.
+The next stage became KSC-04B File Actions & Launcher, reusing the certified
+byte-window viewer as a preview layer rather than expanding it into a larger
+text-viewer subsystem.
 
 
 ### KSC-04B implementation status
@@ -1179,3 +1180,45 @@ RAM 399 B   IN drop 0   IR drop 0/0   HOST M/0 R0
 
 The certified KSC Script v0.1 instruction set is deliberately small:
 `PRINT`, `WRITE`, `WAIT`, and `STOP`.
+
+
+### KSC-04C FULL PHYSICAL PASS - UNO KSC LINE CLOSED
+
+KSC-04C adds one deliberately small RAM-resident runtime profile for the HY-M302
+SW1 button:
+
+```text
+/sys/sw1 = 0  -> SW1 press selects RED
+/sys/sw1 = 1  -> SW1 press selects BLUE
+```
+
+The profile is loaded by the same already-certified KSC Script v0.1 mechanism:
+
+```text
+/host/DEMOS/SW1_0.KSC
+/host/DEMOS/SW1_1.KSC
+```
+
+Physical testing confirmed that the same SW1 button changes its later action
+after loading a different remote program, without recompiling, uploading, or
+resetting the Arduino UNO.
+
+The final demo pack also physically passed, including the corrected SOS and
+POLICE scripts. Representative final status:
+
+```text
+RUN OK
+RAM 380 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+Final UNO KSC build:
+
+```text
+Flash       31024 / 32256 B = 96%
+Global SRAM  1556 / 2048 B = 75%
+```
+
+The Arduino UNO KSC line is now considered **functionally complete and
+feature-saturated**. Further development should reuse the architecture on other
+shields, microcontrollers, or single-board computers instead of consuming the
+remaining UNO program-memory margin.
