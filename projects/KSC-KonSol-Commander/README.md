@@ -898,7 +898,9 @@ universal portability to arbitrary MCUs or interfaces.
 
 ### KSC-03 - Host Filesystem Mount
 
-KSC-03A implementation status: **FIRMWARE + HOST TOOL READY FOR FIRST PHYSICAL BUILD/TEST**.
+KSC-03A transport core: **PHYSICAL PASS** for TTY/PING/error coexistence.
+
+KSC-03B implementation status: **REMOTE /host DIRECTORY MOUNT READY FOR FIRST PHYSICAL BUILD/TEST**.
 
 Current implementation:
 
