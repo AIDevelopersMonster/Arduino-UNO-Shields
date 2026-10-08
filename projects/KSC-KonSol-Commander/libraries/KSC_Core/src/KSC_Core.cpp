@@ -833,6 +833,27 @@ void KscCore::executeShellLine(
       sizeof(path)
     );
 
+    bool streamed = false;
+
+    const KscResult streamResult =
+      _target.streamRead(
+        path,
+        _io,
+        streamed
+      );
+
+    if (streamed) {
+      if (streamResult != KSC_OK) {
+        _io.println(
+          resultName(streamResult)
+        );
+      } else {
+        _io.println();
+      }
+
+      return;
+    }
+
     const KscResult result =
       _target.read(
         path,
