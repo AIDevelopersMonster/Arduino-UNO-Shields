@@ -1,0 +1,5 @@
+KSC-03C STREAM TEST
+This file is intentionally longer than one transport frame.
+The Arduino UNO must fetch it through repeated 32-byte READ transactions.
+If this complete text appears after CAT /host/STREAM.TXT, multi-chunk streaming works.
+END KSC-03C STREAM TEST
