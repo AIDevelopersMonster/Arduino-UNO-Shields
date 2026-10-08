@@ -111,10 +111,42 @@ KSC-03A must measure the actual global SRAM and runtime free-RAM delta.
 
 ## CRC
 
-CRC-8 polynomial is not frozen in this draft.
+KSC-03A freezes CRC-8/ATM (CRC-8/ITU) for protocol v0.1:
 
-KSC-03A must select one polynomial, document the exact initialization and update
-rule, and provide host/firmware test vectors before physical certification.
+```text
+width:       8
+polynomial:  0x07
+init:        0x00
+refin:       false
+refout:      false
+xorout:      0x00
+coverage:    TYPE, SEQ, LEN, PAYLOAD
+```
+
+Update rule:
+
+```text
+crc ^= byte
+repeat 8 times:
+  if crc & 0x80:
+    crc = (crc << 1) ^ 0x07
+  else:
+    crc = crc << 1
+keep crc to 8 bits
+```
+
+Reference vectors:
+
+```text
+TYPE SEQ LEN [PAYLOAD] -> CRC
+
+01 01 00             -> 7E
+81 01 00             -> 75
+01 2A 00             -> 47
+7F 01 01 03          -> 97
+```
+
+The host and AVR implementations use the same rule.
 
 ## Why not textual commands
 
@@ -123,3 +155,46 @@ normal shell harder and increase parsing/state cost.
 
 The machine protocol is therefore binary internally while users continue to see
 ordinary paths and shell/Commander operations.
+
+
+## Implemented KSC-03A transport
+
+Firmware library:
+
+```text
+projects/KSC-KonSol-Commander/libraries/KSC_HostTransport/
+```
+
+Host tool:
+
+```text
+projects/KSC-KonSol-Commander/tools/ksc_host.py
+```
+
+The firmware transport is implemented as a `Stream` wrapper. KSC_Core reads and
+writes through that wrapper, so the existing core source does not need a HOSTFS
+parser.
+
+Inbound bytes are classified as:
+
+```text
+ordinary byte
+  -> bounded TTY queue
+  -> existing KSC_Core terminal parser
+
+ESC ]
+  -> HOSTFS frame parser
+  -> frame handler
+  -> never forwarded as CHAR/KEY bytes
+```
+
+Current fixed AVR storage added by the transport object includes:
+
+```text
+HOSTFS payload buffer: 48 B
+TTY queue:              32 B
+parser/counters/state:  measured by final build/runtime test
+```
+
+KSC-03A physical certification must measure the actual whole-build flash/global
+SRAM delta and runtime free SRAM.
