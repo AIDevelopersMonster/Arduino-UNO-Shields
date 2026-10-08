@@ -1043,3 +1043,13 @@ sequential `OPEN / READ / CLOSE` transactions with 32-byte reads. A roughly
 12 KB test file was emitted completely through an AVR with 2 KB SRAM, with
 post-stream shell free RAM returning to baseline and final counters showing
 `IN drop 0`, `IR drop 0/0`, and `HOST M/0`.
+
+
+### KSC-03D implementation status
+
+**RECOVERY CERTIFICATION READY FOR FIRST PHYSICAL BUILD/TEST**
+
+KSC-03D replaces implicit-position READ with explicit-offset READ and adds
+bounded recovery for a lost READ response and for BAD_HANDLE. KSC Host 0.4
+contains deterministic fault injection so the two recovery paths can be
+physically reproduced and certified before the remote `/host` line is closed.
