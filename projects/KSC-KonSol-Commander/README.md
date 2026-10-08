@@ -898,6 +898,28 @@ universal portability to arbitrary MCUs or interfaces.
 
 ### KSC-03 - Host Filesystem Mount
 
+KSC-03A implementation status: **FIRMWARE + HOST TOOL READY FOR FIRST PHYSICAL BUILD/TEST**.
+
+Current implementation:
+
+```text
+libraries/KSC_HostTransport/
+  bounded TTY/HOSTFS serial multiplexer
+
+libraries/KSC_Target_HY_M302/
+  reusable package of the certified KSC-02D HY-M302 adapter
+
+sketches/07_KSC_03A_HostTransport/
+  Arduino UNO + HY-M302 transport test firmware
+
+tools/ksc_host.py
+  Windows KSC Host 0.1 terminal + HOSTFS test client
+```
+
+KSC Host Protocol v0.1 now freezes CRC-8/ATM, a 48-byte maximum HOSTFS payload,
+and PING/error handling for the first transport coexistence test.
+
+
 Goal:
 
 Mount a PC directory as `/host` without adding SD hardware.
