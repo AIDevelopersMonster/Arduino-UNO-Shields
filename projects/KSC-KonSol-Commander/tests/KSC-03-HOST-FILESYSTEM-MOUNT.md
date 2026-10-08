@@ -616,3 +616,45 @@ IR drops:
 Host errors shown in status:
 Any TTY/frame corruption:
 ```
+
+
+### KSC-03B build result
+
+Physical build on Arduino UNO / ATmega328P:
+
+```text
+Sketch uses 25630 bytes (79%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1479 bytes (72%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 569 bytes.
+```
+
+Comparison:
+
+```text
+                         KSC-02D      KSC-03A      KSC-03B
+Flash                    20806 B      22986 B      25630 B
+Global SRAM               1255 B       1396 B       1479 B
+Compiler SRAM remainder    793 B        652 B        569 B
+```
+
+Increment from KSC-03A to KSC-03B:
+
+```text
+Flash:       +2644 B
+Global SRAM:   +83 B
+Remainder:     -83 B
+```
+
+Interpretation:
+
+- build PASS;
+- KSC-03B still fits Arduino UNO flash/SRAM limits;
+- SRAM headroom is now tight enough that runtime measurements are mandatory
+  before certification;
+- no safety claim is made from compiler global usage alone.
+
+Next gate: upload, start KSC Host 0.2, measure runtime free RAM, and test real
+`LS /host` plus Commander navigation.
