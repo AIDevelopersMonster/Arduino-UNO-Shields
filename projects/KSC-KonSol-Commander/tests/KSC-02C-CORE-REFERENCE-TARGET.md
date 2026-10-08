@@ -95,6 +95,23 @@ Record:
 - Flash bytes and percentage;
 - global SRAM bytes and percentage.
 
+## Build measurements
+
+Arduino CLI compile result:
+
+```text
+Sketch uses 13658 bytes (42%) of program storage space.
+Maximum is 32256 bytes.
+
+Global variables use 669 bytes (32%) of dynamic memory,
+leaving 1379 bytes for local variables.
+Maximum is 2048 bytes.
+```
+
+Build status: PASS.
+
+Runtime free RAM is still to be measured on the physical reference target.
+
 ## Upload
 
 ```powershell
