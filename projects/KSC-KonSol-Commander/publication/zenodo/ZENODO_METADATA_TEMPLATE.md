@@ -122,6 +122,14 @@ Experimental snapshot to state in description/notes:
 
     96487e66b159df75a1b3162098590cb23ab4af49
 
+Supplementary demonstration video:
+
+    https://youtu.be/QRReKMaaRMk
+
+Suggested relation in Zenodo, if added:
+
+    isSupplementedBy
+
 ## Notes
 
 Experimental validation is limited to two target backends on Arduino UNO /
