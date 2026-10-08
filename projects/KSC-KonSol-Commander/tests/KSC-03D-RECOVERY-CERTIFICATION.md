@@ -301,3 +301,60 @@ offset: the numbered file sequence continues through LINE 095 and the final
 marker is present.
 
 Result: **lost READ-response recovery route PASS**.
+
+
+## Physical recovery test B - invalidated handle
+
+Status: **PHYSICAL PASS**
+
+Fault injection:
+
+```text
+--invalidate-read-at 10
+```
+
+Observed host diagnostic:
+
+```text
+FAULT invalidate handles at READ #10 offset=288
+```
+
+The AVR recovered by reopening the same host path and continuing from the same
+explicit offset. The stream then completed the large test file through:
+
+```text
+LINE 095: ...
+END OF KSC-03C BIG FILE
+```
+
+Post-stream observations:
+
+```text
+MEM
+504
+
+Commander:
+RAM 463 B   IN drop 0   IR drop 0/0   HOST M/0 R2
+```
+
+Interpretation:
+
+- the deliberately invalidated host handle was detected as BAD_HANDLE;
+- the target reopened the remote file and resumed from the same explicit offset;
+- the stream reached the final marker without reset;
+- the cumulative recovery counter advanced from R1 to R2;
+- the final host-error counter remained M/0;
+- input and IR drop counters remained zero;
+- shell free RAM returned to the 504 B runtime baseline.
+
+The host diagnostic line is interleaved into the human-readable terminal text
+around LINE 001, which is console-output interleaving between host diagnostics
+and the TTY stream. The numbered file sequence continues through LINE 095 and
+the final marker is present.
+
+Result: **BAD_HANDLE reopen/resume recovery route PASS**.
+
+At this point both independent KSC-03D recovery mechanisms have physical PASS:
+lost READ response and invalidated host handle. A clean no-fault KSC-03D
+baseline run remains the final mandatory certification gate if it has not
+already been captured separately.
