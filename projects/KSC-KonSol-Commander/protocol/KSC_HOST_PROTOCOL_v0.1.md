@@ -314,3 +314,110 @@ It contains:
 +-- DATA.TXT
 +-- README.TXT
 ```
+
+
+## KSC-03C streamed file protocol
+
+KSC-03C activates the previously reserved OPEN, READ, and CLOSE message types.
+
+The design is intentionally sequential and bounded. The AVR never receives the
+whole host file at once.
+
+### OPEN
+
+Request:
+
+```text
+TYPE = 0x05 OPEN_REQ
+PAYLOAD = ASCII KSC path
+example: /host/BIG.TXT
+```
+
+Success response:
+
+```text
+TYPE = 0x85 OPEN_RESP
+PAYLOAD:
+  [0]    handle, 1..255
+  [1..4] file size, unsigned 32-bit little-endian
+```
+
+The current AVR target uses the handle and does not need to retain the complete
+file size in SRAM.
+
+### READ
+
+Request:
+
+```text
+TYPE = 0x06 READ_REQ
+PAYLOAD:
+  [0] handle
+  [1] requested byte count
+```
+
+KSC-03C AVR requests at most 32 bytes per transaction.
+
+Success response:
+
+```text
+TYPE = 0x86 READ_RESP
+PAYLOAD:
+  [0]    handle
+  [1]    EOF flag, 0 or 1
+  [2..]  0..32 file bytes
+```
+
+READ is sequential. The host owns the file position for the open handle.
+
+### CLOSE
+
+Request:
+
+```text
+TYPE = 0x07 CLOSE_REQ
+PAYLOAD:
+  [0] handle
+```
+
+Success response:
+
+```text
+TYPE = 0x87 CLOSE_RESP
+PAYLOAD:
+  [0] handle
+```
+
+### New host error codes
+
+```text
+0x14 NOT_FILE
+0x15 BAD_HANDLE
+```
+
+### Bounded-memory property
+
+For shell `CAT /host/<file>`, the AVR repeats:
+
+```text
+OPEN
+READ 32 B
+READ 32 B
+...
+CLOSE
+```
+
+and forwards each received chunk to the terminal before requesting the next
+chunk.
+
+The test file `/host/BIG.TXT` is intentionally about 12 KB, far larger than
+the ATmega328P 2 KB SRAM. A complete successful CAT therefore demonstrates that
+the implementation is chunk-streaming rather than buffering the whole file in
+AVR SRAM.
+
+### Text-stream scope
+
+KSC-03C certifies text-oriented CAT over the existing mixed TTY/HOSTFS serial
+link. Arbitrary binary files containing byte sequences that collide with the
+TTY/frame discriminator are not yet claimed as a certified binary-safe CAT
+channel.
