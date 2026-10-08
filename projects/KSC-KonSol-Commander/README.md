@@ -67,6 +67,18 @@ Commander, but reduced to what is useful and measurable on an ATmega328P.
 
 ---
 
+## Video demonstration
+
+**KSC_Core on Arduino UNO - one core for a software Target and HY-M302: VFS, Commander and IR remote**
+
+https://youtu.be/QRReKMaaRMk
+
+The video demonstrates the two-target KSC_Core result: the same core operating
+with the synthetic Reference Target and with the physical HY-M302 target
+adapter, including the VFS, ANSI Commander, PC keyboard, and IR remote path.
+
+---
+
 ## 1. Core idea
 
 KSC treats hardware, kernel information, configuration, and optional external
