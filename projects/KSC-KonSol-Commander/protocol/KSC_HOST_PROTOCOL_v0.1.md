@@ -421,3 +421,41 @@ KSC-03C certifies text-oriented CAT over the existing mixed TTY/HOSTFS serial
 link. Arbitrary binary files containing byte sequences that collide with the
 TTY/frame discriminator are not yet claimed as a certified binary-safe CAT
 channel.
+
+
+## KSC-03D recoverable READ v0.2
+
+KSC-03D changes READ from implicit host-position state to an explicit-offset
+request.
+
+Request payload:
+
+```text
+[0]    handle
+[1..4] offset, uint32 little-endian
+[5]    requested byte count, 1..32
+```
+
+Response payload:
+
+```text
+[0]    handle
+[1..4] echoed offset
+[5]    EOF flag
+[6..]  data bytes
+```
+
+This makes a READ idempotent with respect to response loss: retrying the same
+handle + offset requests the same file region instead of advancing an implicit
+cursor.
+
+KSC-03D recovery policy:
+
+- TIMEOUT: retry same handle + offset;
+- BAD_HANDLE: reopen the same path, then retry the same offset;
+- at most two retries for a recoverable chunk failure;
+- successful recoveries increment a dedicated recovery counter;
+- unrecovered failures increment the host-error counter.
+
+This protocol change is the recovery basis for final remote `/host`
+certification.
