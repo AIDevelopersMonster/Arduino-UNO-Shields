@@ -900,3 +900,45 @@ Remaining gate for **KSC-03B FULL PHYSICAL PASS**:
 If both are confirmed, KSC-03B may be closed as FULL PHYSICAL PASS, with the
 single observed accumulated `HOST M/1` retained in the record unless a clean
 rerun establishes `M/0`.
+
+
+### KSC-03B FULL PHYSICAL PASS
+
+Status: **FULL PHYSICAL PASS**
+
+Final operator confirmation:
+
+```text
+PC keyboard navigation: OK
+HY-M302 IR navigation: OK
+```
+
+Together with the previously recorded results, KSC-03B physically verified:
+
+- `/host` appears in the ordinary KSC root namespace;
+- lazy MOUNT succeeds;
+- shell `LS /host` succeeds;
+- nested `LS /host/DOCS` succeeds;
+- Commander navigates `/host` and nested directories;
+- remote files appear as read-only nodes;
+- PC keyboard navigation works;
+- HY-M302 IR navigation works;
+- framed PING completes while Commander is actively displaying `/host`;
+- local HY-M302 `/dev` paths remain functional;
+- input and IR drop counters remained zero in the captured route;
+- shell free RAM returned to the established 510 B baseline after Commander exit.
+
+KSC-03B does **not** yet stream host file contents. In this stage, reading a
+remote file returns the explicit placeholder:
+
+```text
+REMOTE FILE: KSC-03C
+```
+
+Therefore `CAT /host/<file>` is expected to identify/open the remote node but
+not yet print its actual host-side bytes. Real file content transfer is the
+scope of KSC-03C using OPEN / READ / CLOSE streaming.
+
+One captured Commander status line showed `HOST M/1`; this is retained as an
+observed accumulated session error and is not silently rewritten to zero. It
+did not prevent successful directory navigation or the in-view PING round trip.
