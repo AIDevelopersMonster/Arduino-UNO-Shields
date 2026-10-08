@@ -711,6 +711,168 @@ KscResult KscHostMountTarget::streamRead(
   return result;
 }
 
+KscResult KscHostMountTarget::streamWindow(
+  const char *path,
+  uint32_t offset,
+  uint16_t maxBytes,
+  Print &out,
+  uint16_t &bytesRead,
+  uint32_t &totalSize,
+  bool &handled
+) {
+  bytesRead = 0;
+  totalSize = 0;
+  handled = false;
+
+  if (!isHostPath(path)) {
+    return KSC_ERR_TARGET;
+  }
+
+  handled = true;
+
+  const KscNodeType type =
+    pathType(path);
+
+  if (type == KSC_NODE_DIR) {
+    return KSC_ERR_IS_DIR;
+  }
+
+  if (type != KSC_NODE_RO) {
+    return KSC_ERR_NOT_FOUND;
+  }
+
+  uint8_t handle = 0;
+
+  if (!remoteOpen(
+        path,
+        handle
+      )) {
+    return KSC_ERR_TARGET;
+  }
+
+  uint8_t response[5];
+  uint8_t responseLen = 0;
+  uint8_t errorCode = 0;
+
+  const uint8_t pathLen =
+    (uint8_t)strlen(path);
+
+  const bool openAgain =
+    _transport.exchange(
+      KscHostMuxStream::TYPE_OPEN_REQ,
+      (const uint8_t *)path,
+      pathLen,
+      KscHostMuxStream::TYPE_OPEN_RESP,
+      response,
+      sizeof(response),
+      responseLen,
+      errorCode
+    );
+
+  if (!openAgain ||
+      responseLen != 5 ||
+      response[0] == 0) {
+    remoteClose(handle);
+    ++_hostErrors;
+    return KSC_ERR_TARGET;
+  }
+
+  remoteClose(handle);
+  handle = response[0];
+
+  totalSize =
+    (uint32_t)response[1] |
+    ((uint32_t)response[2] << 8) |
+    ((uint32_t)response[3] << 16) |
+    ((uint32_t)response[4] << 24);
+
+  if (maxBytes == 0 ||
+      offset >= totalSize) {
+    remoteClose(handle);
+    return KSC_OK;
+  }
+
+  uint32_t cursor = offset;
+  uint16_t remaining = maxBytes;
+  uint8_t retryCount = 0;
+
+  while (remaining &&
+         cursor < totalSize) {
+    uint8_t chunk[32];
+    uint8_t chunkLen = 0;
+    bool eof = false;
+    uint8_t readError = 0;
+
+    uint8_t want =
+      remaining > sizeof(chunk)
+        ? sizeof(chunk)
+        : (uint8_t)remaining;
+
+    if (!remoteRead(
+          handle,
+          cursor,
+          chunk,
+          want,
+          chunkLen,
+          eof,
+          readError
+        )) {
+      if (retryCount < 2 &&
+          readError ==
+            KscHostMuxStream::ERR_TIMEOUT) {
+        ++retryCount;
+        ++_streamRecoveries;
+        continue;
+      }
+
+      if (retryCount < 2 &&
+          readError ==
+            KscHostMuxStream::ERR_BAD_HANDLE) {
+        ++retryCount;
+        ++_streamRecoveries;
+
+        uint8_t reopened = 0;
+
+        if (!remoteOpen(
+              path,
+              reopened
+            )) {
+          ++_hostErrors;
+          remoteClose(handle);
+          return KSC_ERR_TARGET;
+        }
+
+        handle = reopened;
+        continue;
+      }
+
+      ++_hostErrors;
+      remoteClose(handle);
+      return KSC_ERR_TARGET;
+    }
+
+    retryCount = 0;
+
+    for (uint8_t n = 0;
+         n < chunkLen;
+         ++n) {
+      out.write(chunk[n]);
+    }
+
+    cursor += chunkLen;
+    bytesRead += chunkLen;
+    remaining -= chunkLen;
+
+    if (eof ||
+        chunkLen == 0) {
+      break;
+    }
+  }
+
+  remoteClose(handle);
+  return KSC_OK;
+}
+
 KscResult KscHostMountTarget::write(
   const char *path,
   long value
