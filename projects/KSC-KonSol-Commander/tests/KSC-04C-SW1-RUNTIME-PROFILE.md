@@ -80,3 +80,35 @@ Non-claims:
 - only RED/BLUE discrete LED actions are certified in KSC-04C;
 - persistent storage, arbitrary event rules, conditions, and multiple bindings
   are outside this UNO-stage test.
+
+
+## Build after SOS/POLICE parser and IR fixes
+
+After fixing long comment handling and draining target input during launcher waits:
+
+```text
+Sketch uses 31024 bytes (96%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1556 bytes (75%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 492 bytes.
+Arduino CLI warning: low memory may cause instability.
+```
+
+Comparison with the previous KSC-04C build:
+
+```text
+                         Previous 04C   Current 04C   Delta
+Flash                    30940 B        31024 B       +84 B
+Global SRAM               1554 B         1556 B        +2 B
+Flash headroom             1316 B         1232 B       -84 B
+SRAM remainder              494 B          492 B        -2 B
+```
+
+Interpretation:
+
+- both fixes cost only 84 bytes of Flash and 2 bytes of global SRAM;
+- the firmware still fits with 1232 bytes of Flash headroom;
+- this build is suitable for the final controlled physical regression tests;
+- no further UNO feature growth is justified after this stage.
