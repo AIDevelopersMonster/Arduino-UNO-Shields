@@ -9,7 +9,8 @@ KscHostMountTarget::KscHostMountTarget(
   : _local(localTarget),
     _transport(transport),
     _mounted(false),
-    _hostErrors(0) {
+    _hostErrors(0),
+    _streamRecoveries(0) {
 }
 
 void KscHostMountTarget::begin() {
@@ -300,17 +301,21 @@ bool KscHostMountTarget::remoteOpen(
 
 bool KscHostMountTarget::remoteRead(
   uint8_t handle,
+  uint32_t offset,
   uint8_t *dataOut,
   uint8_t dataCapacity,
   uint8_t &dataLen,
-  bool &eof
+  bool &eof,
+  uint8_t &errorCode
 ) {
   dataLen = 0;
   eof = false;
+  errorCode = 0;
 
   if (!dataOut ||
       dataCapacity == 0) {
-    ++_hostErrors;
+    errorCode =
+      KscHostMuxStream::ERR_BAD_LENGTH;
     return false;
   }
 
@@ -319,14 +324,21 @@ bool KscHostMountTarget::remoteRead(
       ? 32
       : dataCapacity;
 
-  const uint8_t request[2] = {
-    handle,
-    requested
-  };
+  uint8_t request[6];
 
-  uint8_t response[34];
+  request[0] = handle;
+  request[1] =
+    (uint8_t)(offset & 0xFF);
+  request[2] =
+    (uint8_t)((offset >> 8) & 0xFF);
+  request[3] =
+    (uint8_t)((offset >> 16) & 0xFF);
+  request[4] =
+    (uint8_t)((offset >> 24) & 0xFF);
+  request[5] = requested;
+
+  uint8_t response[38];
   uint8_t responseLen = 0;
-  uint8_t errorCode = 0;
 
   const bool ok =
     _transport.exchange(
@@ -340,26 +352,43 @@ bool KscHostMountTarget::remoteRead(
       errorCode
     );
 
-  if (!ok ||
-      responseLen < 2 ||
-      response[0] != handle) {
-    ++_hostErrors;
+  if (!ok) {
     return false;
   }
 
-  eof = response[1] != 0;
+  if (responseLen < 6 ||
+      response[0] != handle) {
+    errorCode =
+      KscHostMuxStream::ERR_BAD_LENGTH;
+    return false;
+  }
+
+  const uint32_t responseOffset =
+    (uint32_t)response[1] |
+    ((uint32_t)response[2] << 8) |
+    ((uint32_t)response[3] << 16) |
+    ((uint32_t)response[4] << 24);
+
+  if (responseOffset != offset) {
+    errorCode =
+      KscHostMuxStream::ERR_BAD_LENGTH;
+    return false;
+  }
+
+  eof = response[5] != 0;
   dataLen =
-    (uint8_t)(responseLen - 2);
+    (uint8_t)(responseLen - 6);
 
   if (dataLen > requested) {
-    ++_hostErrors;
+    errorCode =
+      KscHostMuxStream::ERR_BAD_LENGTH;
     return false;
   }
 
   if (dataLen) {
     memcpy(
       dataOut,
-      response + 2,
+      response + 6,
       dataLen
     );
   }
@@ -606,21 +635,58 @@ KscResult KscHostMountTarget::streamRead(
   KscResult result =
     KSC_OK;
 
+  uint32_t offset = 0;
+  uint8_t retryCount = 0;
+
   for (;;) {
     uint8_t chunk[32];
     uint8_t chunkLen = 0;
     bool eof = false;
+    uint8_t errorCode = 0;
 
     if (!remoteRead(
           handle,
+          offset,
           chunk,
           sizeof(chunk),
           chunkLen,
-          eof
+          eof,
+          errorCode
         )) {
+      if (retryCount < 2 &&
+          errorCode ==
+            KscHostMuxStream::ERR_TIMEOUT) {
+        ++retryCount;
+        ++_streamRecoveries;
+        continue;
+      }
+
+      if (retryCount < 2 &&
+          errorCode ==
+            KscHostMuxStream::ERR_BAD_HANDLE) {
+        ++retryCount;
+        ++_streamRecoveries;
+
+        uint8_t reopened = 0;
+
+        if (!remoteOpen(
+              path,
+              reopened
+            )) {
+          result = KSC_ERR_TARGET;
+          break;
+        }
+
+        handle = reopened;
+        continue;
+      }
+
+      ++_hostErrors;
       result = KSC_ERR_TARGET;
       break;
     }
+
+    retryCount = 0;
 
     for (uint8_t i = 0;
          i < chunkLen;
@@ -628,7 +694,15 @@ KscResult KscHostMountTarget::streamRead(
       out.write(chunk[i]);
     }
 
+    offset += chunkLen;
+
     if (eof) {
+      break;
+    }
+
+    if (chunkLen == 0) {
+      ++_hostErrors;
+      result = KSC_ERR_TARGET;
       break;
     }
   }
@@ -703,4 +777,7 @@ void KscHostMountTarget::printStatus(
 
   out.print('/');
   out.print(_hostErrors);
+
+  out.print(F(" R"));
+  out.print(_streamRecoveries);
 }
