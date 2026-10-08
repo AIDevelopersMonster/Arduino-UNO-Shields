@@ -142,3 +142,35 @@ Non-claims:
 - editing is not provided;
 - arbitrary binary-safe rendering is not certified;
 - multi-pane Commander is not part of this stage.
+
+
+## Build result
+
+Physical build on Arduino UNO / ATmega328P:
+
+```text
+Sketch uses 28816 bytes (89%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1499 bytes (73%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 549 bytes.
+```
+
+Comparison with KSC-03D:
+
+```text
+                         KSC-03D      KSC-04A      Delta
+Flash                    26712 B      28816 B      +2104 B
+Global SRAM               1485 B       1499 B        +14 B
+Compiler SRAM remainder    563 B        549 B        -14 B
+```
+
+Interpretation:
+
+- build PASS;
+- the first Commander file-view layer costs 2104 bytes of flash;
+- persistent SRAM cost is 14 bytes;
+- SRAM remains tight but within the same operational envelope as KSC-03;
+- runtime free-RAM and navigation counters remain mandatory for physical
+  certification.
