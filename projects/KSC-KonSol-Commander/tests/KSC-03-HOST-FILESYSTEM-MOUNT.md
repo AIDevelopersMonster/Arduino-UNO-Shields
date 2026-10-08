@@ -1115,3 +1115,43 @@ IR drops:
 HOST errors:
 TTY/frame corruption:
 ```
+
+
+### KSC-03C build result
+
+Physical build on Arduino UNO / ATmega328P:
+
+```text
+Sketch uses 26330 bytes (81%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1483 bytes (72%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 565 bytes.
+```
+
+Comparison:
+
+```text
+                         KSC-03A      KSC-03B      KSC-03C
+Flash                    22986 B      25630 B      26330 B
+Global SRAM               1396 B       1479 B       1483 B
+Compiler SRAM remainder    652 B        569 B        565 B
+```
+
+Increment from KSC-03B to KSC-03C:
+
+```text
+Flash:       +700 B
+Global SRAM:   +4 B
+Remainder:     -4 B
+```
+
+Interpretation:
+
+- build PASS;
+- the streamed-read implementation adds very little persistent SRAM;
+- runtime free-RAM measurement remains mandatory because the operational
+  stack/temporary-buffer margin is tight;
+- the next gate is physical CAT of a real host file, then the large-file
+  streaming proof.
