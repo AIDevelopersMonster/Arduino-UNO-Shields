@@ -172,6 +172,7 @@ Final bounded non-claims:
 - this is a single fixed SW1 profile slot, not a general event-binding engine;
 - the profile is RAM-resident and is lost on reset;
 - only the two certified RED/BLUE SW1 actions are claimed here;
-- Arduino UNO is considered feature-saturated for this KSC line at 96% Flash;
-- further KSC feature growth should move to another MCU/platform rather than
-  consume the remaining UNO headroom.
+- the Arduino UNO + HY-M302 firmware image is feature-saturated at 96% Flash;
+- this closes only the HY-M302 target phase, not the wider KSC programme;
+- further KSC work should move to a fresh target image for another shield or
+  platform instead of consuming the remaining HY-M302 image headroom.
