@@ -1,0 +1,14 @@
+# RGB traffic light
+PRINT TRAFFIC START
+WRITE /dev/rgb/red 255
+WRITE /dev/rgb/green 0
+WRITE /dev/rgb/blue 0
+WAIT 800
+WRITE /dev/rgb/green 180
+WAIT 500
+WRITE /dev/rgb/red 0
+WRITE /dev/rgb/green 255
+WAIT 800
+WRITE /dev/rgb/green 0
+PRINT TRAFFIC PASS
+STOP
