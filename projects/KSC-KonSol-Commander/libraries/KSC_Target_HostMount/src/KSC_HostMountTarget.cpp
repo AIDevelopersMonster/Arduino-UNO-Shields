@@ -891,6 +891,310 @@ KscResult KscHostMountTarget::streamWindow(
   return KSC_OK;
 }
 
+KscResult KscHostMountTarget::executeScriptLine(
+  char *line,
+  Print &out,
+  bool &stopRequested
+) {
+  stopRequested = false;
+
+  if (!line) {
+    return KSC_ERR_VALUE;
+  }
+
+  while (*line == ' ' ||
+         *line == '\t') {
+    ++line;
+  }
+
+  if (!*line ||
+      *line == '#') {
+    return KSC_OK;
+  }
+
+  char *cmd = line;
+
+  while (*line &&
+         *line != ' ' &&
+         *line != '\t') {
+    if (*line >= 'a' &&
+        *line <= 'z') {
+      *line =
+        (char)(*line - 'a' + 'A');
+    }
+
+    ++line;
+  }
+
+  if (*line) {
+    *line++ = 0;
+  }
+
+  while (*line == ' ' ||
+         *line == '\t') {
+    ++line;
+  }
+
+  if (strcmp(cmd, "STOP") == 0) {
+    stopRequested = true;
+    return KSC_OK;
+  }
+
+  if (strcmp(cmd, "PRINT") == 0) {
+    out.println(line);
+    return KSC_OK;
+  }
+
+  if (strcmp(cmd, "WAIT") == 0) {
+    char *endp = nullptr;
+    const unsigned long waitMs =
+      strtoul(
+        line,
+        &endp,
+        10
+      );
+
+    if (!line[0] ||
+        !endp ||
+        *endp != 0) {
+      return KSC_ERR_VALUE;
+    }
+
+    const unsigned long started =
+      millis();
+
+    while (millis() - started <
+           waitMs) {
+      _local.service();
+      _transport.service();
+    }
+
+    return KSC_OK;
+  }
+
+  if (strcmp(cmd, "WRITE") == 0) {
+    char *path = line;
+
+    while (*line &&
+           *line != ' ' &&
+           *line != '\t') {
+      ++line;
+    }
+
+    if (!*line) {
+      return KSC_ERR_VALUE;
+    }
+
+    *line++ = 0;
+
+    while (*line == ' ' ||
+           *line == '\t') {
+      ++line;
+    }
+
+    char *endp = nullptr;
+    const long value =
+      strtol(
+        line,
+        &endp,
+        10
+      );
+
+    if (!path[0] ||
+        !line[0] ||
+        !endp ||
+        *endp != 0) {
+      return KSC_ERR_VALUE;
+    }
+
+    return _local.write(
+      path,
+      value
+    );
+  }
+
+  return KSC_ERR_VALUE;
+}
+
+KscResult KscHostMountTarget::launch(
+  const char *path,
+  Print &out,
+  bool &handled
+) {
+  handled = false;
+
+  if (!isHostPath(path)) {
+    return KSC_ERR_TARGET;
+  }
+
+  const size_t pathLenText =
+    strlen(path);
+
+  if (pathLenText < 4) {
+    return KSC_ERR_TARGET;
+  }
+
+  const char *ext =
+    path + pathLenText - 4;
+
+  if (!(ext[0] == '.' &&
+        (ext[1] == 'K' || ext[1] == 'k') &&
+        (ext[2] == 'S' || ext[2] == 's') &&
+        (ext[3] == 'C' || ext[3] == 'c'))) {
+    return KSC_ERR_TARGET;
+  }
+
+  handled = true;
+
+  uint8_t handle = 0;
+
+  if (!remoteOpen(
+        path,
+        handle
+      )) {
+    return KSC_ERR_TARGET;
+  }
+
+  out.println(F("[RUN]"));
+
+  uint32_t offset = 0;
+  char line[64];
+  uint8_t lineLen = 0;
+  uint8_t retryCount = 0;
+  KscResult result = KSC_OK;
+  bool stopRequested = false;
+
+  for (;;) {
+    uint8_t chunk[32];
+    uint8_t chunkLen = 0;
+    bool eof = false;
+    uint8_t errorCode = 0;
+
+    if (!remoteRead(
+          handle,
+          offset,
+          chunk,
+          sizeof(chunk),
+          chunkLen,
+          eof,
+          errorCode
+        )) {
+      if (retryCount < 2 &&
+          errorCode ==
+            KscHostMuxStream::ERR_TIMEOUT) {
+        ++retryCount;
+        ++_streamRecoveries;
+        continue;
+      }
+
+      if (retryCount < 2 &&
+          errorCode ==
+            KscHostMuxStream::ERR_BAD_HANDLE) {
+        ++retryCount;
+        ++_streamRecoveries;
+
+        uint8_t reopened = 0;
+
+        if (!remoteOpen(
+              path,
+              reopened
+            )) {
+          ++_hostErrors;
+          result = KSC_ERR_TARGET;
+          break;
+        }
+
+        handle = reopened;
+        continue;
+      }
+
+      ++_hostErrors;
+      result = KSC_ERR_TARGET;
+      break;
+    }
+
+    retryCount = 0;
+
+    for (uint8_t i = 0;
+         i < chunkLen;
+         ++i) {
+      const char ch =
+        (char)chunk[i];
+
+      if (ch == '\r') {
+        continue;
+      }
+
+      if (ch == '\n') {
+        line[lineLen] = 0;
+
+        result =
+          executeScriptLine(
+            line,
+            out,
+            stopRequested
+          );
+
+        lineLen = 0;
+
+        if (result != KSC_OK ||
+            stopRequested) {
+          break;
+        }
+
+        continue;
+      }
+
+      if (lineLen >=
+          sizeof(line) - 1) {
+        result = KSC_ERR_VALUE;
+        break;
+      }
+
+      line[lineLen++] = ch;
+    }
+
+    offset += chunkLen;
+
+    if (result != KSC_OK ||
+        stopRequested) {
+      break;
+    }
+
+    if (eof) {
+      if (lineLen) {
+        line[lineLen] = 0;
+
+        result =
+          executeScriptLine(
+            line,
+            out,
+            stopRequested
+          );
+      }
+
+      break;
+    }
+
+    if (chunkLen == 0) {
+      ++_hostErrors;
+      result = KSC_ERR_TARGET;
+      break;
+    }
+  }
+
+  remoteClose(handle);
+
+  out.print(F("[RUN] "));
+  out.println(
+    result == KSC_OK
+      ? F("DONE")
+      : F("ERROR")
+  );
+
+  return result;
+}
+
 KscResult KscHostMountTarget::write(
   const char *path,
   long value
