@@ -83,6 +83,10 @@ private:
   KscTarget &_local;
   KscHostMuxStream &_transport;
 
+  static void transportWaitHook(
+    void *context
+  );
+
   bool _mounted;
   uint16_t _hostErrors;
   uint16_t _streamRecoveries;
