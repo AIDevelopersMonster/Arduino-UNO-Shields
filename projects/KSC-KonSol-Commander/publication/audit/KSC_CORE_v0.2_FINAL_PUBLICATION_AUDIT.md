@@ -105,7 +105,8 @@ PASS criteria:
 - footer page numbers render correctly;
 - Cyrillic text in Appendix B renders correctly;
 - no broken-glyph boxes observed;
-- no private local user/profile path appears in the PDF.
+- no private local user/profile path appears in the PDF;
+- final manuscript wording consistently describes v0.2 as a final preprint.
 
 The large whitespace before Appendix A is acceptable and results from keeping
 the compact certified statement together as one code block.
@@ -117,13 +118,13 @@ the compact certified statement together as one code block.
 Generated PDF SHA-256:
 
 ```text
-b850d6d1aae07ff8463526a76c5b60ea6bea0a0d4ba79a3262b511952ce9bfe3
+4b9d4b1ba58e49098f9224cddd57d9ab84834fe68a543a047b94feb755c6442e
 ```
 
 Generated PDF size:
 
 ```text
-316981 bytes
+291802 bytes
 ```
 
 If the PDF is regenerated, the checksum must be recomputed and this audit
