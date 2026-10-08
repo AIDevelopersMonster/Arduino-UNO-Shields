@@ -658,3 +658,114 @@ Interpretation:
 
 Next gate: upload, start KSC Host 0.2, measure runtime free RAM, and test real
 `LS /host` plus Commander navigation.
+
+
+### KSC-03B first physical host mount result
+
+Status: **REMOTE /host SHELL ROUTE PHYSICAL PASS - COMMANDER/IR ROUTE STILL PENDING**
+
+Observed boot:
+
+```text
+KSC-03B Host Filesystem Mount
+Local VFS + remote /host over one COM link
+
+KSC Core 0.1
+Target: Arduino UNO + HY-M302
+FREE RAM: 510 B
+IR INIT: OK
+Host mount: /host lazy remote
+
+FREE RAM AFTER HOST MOUNT INIT: 510 B
+```
+
+Runtime memory:
+
+```text
+KSC-03A free RAM: 593 B
+KSC-03B free RAM: 510 B
+Delta:             -83 B
+
+KSC-03A global SRAM: 1396 B
+KSC-03B global SRAM: 1479 B
+Delta:               +83 B
+```
+
+The runtime free-RAM reduction exactly matches the compiler-reported global SRAM
+increase from KSC-03A to KSC-03B.
+
+Root namespace:
+
+```text
+LS /
+D dev
+D proc
+D sys
+D host
+```
+
+First lazy mount:
+
+```text
+MOUNT /host -> configured host-share directory
+```
+
+Remote host directory enumeration:
+
+```text
+LS /host
+D DOCS
+F DATA.TXT  RO
+F README.TXT  RO
+```
+
+Nested enumeration:
+
+```text
+LS /host/DOCS
+F HELLO.TXT  RO
+```
+
+Local HY-M302 path remained functional after remote enumeration:
+
+```text
+CAT /dev/light
+253
+49
+80
+568
+```
+
+A framed PING response was also observed after the /host route:
+
+```text
+PING_RESP seq=1 PASS
+```
+
+This proves the first shell-level remote directory mount:
+
+```text
+PC directory
+   |
+KSC Host 0.2
+   |
+HOSTFS MOUNT/STAT/LS
+   |
+COM4
+   |
+KSC HostMountTarget
+   |
+/host visible through ordinary KSC shell paths
+```
+
+Remaining KSC-03B certification items:
+
+- open /host in Commander;
+- enumerate /host and /host/DOCS through Commander;
+- verify local /dev navigation still works after remote navigation;
+- verify PC key navigation;
+- verify HY-M302 IR UP/DOWN/OK/RETURN/HOME;
+- complete a framed PING round trip while the remote Commander view is active;
+- record post-Commander MEM;
+- observe input-drop, IR-drop, and HOST error counters;
+- verify no TTY/frame corruption on the final route.
