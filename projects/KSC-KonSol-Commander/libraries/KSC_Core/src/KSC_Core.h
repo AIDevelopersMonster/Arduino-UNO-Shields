@@ -111,6 +111,17 @@ public:
     return KSC_ERR_TARGET;
   }
 
+  virtual KscResult launch(
+    const char *path,
+    Print &out,
+    bool &handled
+  ) {
+    (void)path;
+    (void)out;
+    handled = false;
+    return KSC_ERR_TARGET;
+  }
+
   virtual KscResult write(
     const char *path,
     long value
@@ -178,6 +189,8 @@ private:
     VIEW_DIR = 0,
     VIEW_NODE,
     VIEW_FILE,
+    VIEW_ACTIONS,
+    VIEW_RUN_RESULT,
     VIEW_HELP
   };
 
@@ -220,6 +233,8 @@ private:
   uint32_t _fileOffset;
   uint32_t _fileSize;
   uint16_t _fileBytesRead;
+  uint8_t _actionSelected;
+  KscResult _launchResult;
 
   bool queueEvent(
     uint8_t type,
@@ -270,6 +285,10 @@ private:
     KscResult result
   );
 
+  static bool isKscScript(
+    const char *path
+  );
+
   void shellPrompt();
   void shellHelp();
   void executeShellLine(char *line);
@@ -298,6 +317,8 @@ private:
   void renderDirectory();
   void renderNode();
   void renderFile();
+  void renderActions();
+  void renderRunResult();
   void renderHelp();
   void renderStatusLine();
 
@@ -306,6 +327,7 @@ private:
   void appendDigit(uint8_t digit);
   void applyEdit();
   void backFromNode();
+  void runSelectedFile();
 
   void handleCommanderChar(uint8_t c);
   void handleCommanderKey(KscSpecialKey key);
