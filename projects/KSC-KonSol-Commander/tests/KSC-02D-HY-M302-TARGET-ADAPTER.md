@@ -110,7 +110,7 @@ Maximum is 2048 bytes.
 
 Build status: PASS.
 
-Runtime free RAM is still to be measured on the physical HY-M302 target.
+Runtime free RAM is measured at 734 B on the physical HY-M302 target.
 
 ## Upload
 
@@ -143,6 +143,32 @@ Type KSC to open Commander, HELP for shell commands.
 
 KSC:/>
 ```
+
+## Physical boot measurement
+
+The HY-M302 target adapter booted successfully through KSC Raw TTY 0.3 using
+the same KSC_Core source as the previously certified Reference Target.
+
+Observed startup:
+
+```text
+KSC Core 0.1
+Hardware-independent ANSI VFS core
+Target: Arduino UNO + HY-M302
+FREE RAM: 734 B
+IR INIT: OK
+Target backend: physical HY-M302
+Storage: virtual namespace only
+Type KSC to open Commander, HELP for shell commands.
+
+KSC:/>
+```
+
+Physical boot status: PASS.
+
+Measured runtime free RAM after initialization: 734 B.
+
+IR initialization status: PASS.
 
 ## Physical route
 
