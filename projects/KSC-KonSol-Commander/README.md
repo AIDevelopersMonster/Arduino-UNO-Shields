@@ -2,7 +2,16 @@
 
 ## Status
 
-**DESIGN OPENED.**
+**KSC-02 FULL PHYSICAL PASS.**
+
+Certified milestones:
+
+- KSC-01A - virtual VFS / TTY core: FULL PHYSICAL PASS;
+- KSC-01B - unified physical keyboard sources: FULL PHYSICAL PASS;
+- KSC-01C - CHAR vs KEY semantic input model: FULL PHYSICAL PASS;
+- KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS.
+
+Current next milestone: **KSC-03 - Host Filesystem Mount**.
 
 KSC is a new experimental branch of the Arduino UNO & Shields project.
 
@@ -693,6 +702,19 @@ Physical PASS gate:
 ## 16. Second physical milestone
 
 ### KSC-02 - KonSol Commander ANSI navigator
+
+Status: **FULL PHYSICAL PASS**
+
+KSC-02 certified resource envelope:
+
+```text
+Flash:              18026 / 32256 B = 55%
+Global SRAM:         1172 / 2048 B  = 57%
+Boot free RAM:       818 B
+Commander free RAM:  782 B
+IR drops:             0 / 0 observed
+```
+
 
 Goal:
 
