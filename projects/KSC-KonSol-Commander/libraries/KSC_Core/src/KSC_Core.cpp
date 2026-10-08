@@ -1531,11 +1531,7 @@ void KscCore::renderActions() {
     F("----------------------------------------")
   );
 
-  _io.println(F("KSC SCRIPT"));
-
-  _io.println(
-    F("----------------------------------------")
-  );
+  _io.println(F("ACTIONS"));
 
   if (_actionSelected == 0) {
     ansiInverseOn();
@@ -1569,13 +1565,8 @@ void KscCore::renderActions() {
     F("----------------------------------------")
   );
 
-  _io.println(
-    F("UP/DOWN Select   ENTER/RIGHT Action")
-  );
-
-  _io.println(
-    F("LEFT/BACK Return F10/POWER/Q Shell")
-  );
+  _io.println(F("UP/DOWN Select  ENTER Action"));
+  _io.println(F("BACK Return"));
 
   renderStatusLine();
 }
@@ -1589,26 +1580,14 @@ void KscCore::renderRunResult() {
     F("----------------------------------------")
   );
 
-  _io.println(F("RUN RESULT"));
-
-  _io.print(F("Status: "));
+  _io.print(F("RUN "));
   _io.println(
     resultName(
       _launchResult
     )
   );
 
-  _io.println(
-    F("----------------------------------------")
-  );
-
-  _io.println(
-    F("ENTER/BACK Return")
-  );
-
-  _io.println(
-    F("F10/POWER/Q Shell")
-  );
+  _io.println(F("ENTER/BACK Return"));
 
   renderStatusLine();
 }
