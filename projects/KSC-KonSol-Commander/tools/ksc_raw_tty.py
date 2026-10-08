@@ -13,6 +13,10 @@ ANSI = {
     "RIGHT": b"\x1b[C",
     "LEFT": b"\x1b[D",
     "HOME": b"\x1b[H",
+    "END": b"\x1b[F",
+    "DELETE": b"\x1b[3~",
+    "F9": b"\x1b[20~",
+    "F10": b"\x1b[21~",
 }
 
 
@@ -26,23 +30,74 @@ def reader_loop(ser, stop_event):
             break
 
         if data:
-            sys.stdout.write(data.decode("utf-8", errors="replace"))
+            sys.stdout.write(
+                data.decode("utf-8", errors="replace")
+            )
             sys.stdout.flush()
 
 
+def send_special(ser, prefix, code):
+    if prefix == "\xe0":
+        mapping = {
+            "H": "UP",
+            "P": "DOWN",
+            "K": "LEFT",
+            "M": "RIGHT",
+            "G": "HOME",
+            "O": "END",
+            "S": "DELETE",
+        }
+
+        name = mapping.get(code)
+
+        if name:
+            ser.write(ANSI[name])
+            return True
+
+    if prefix == "\x00":
+        function_keys = {
+            "C": "F9",
+            "D": "F10",
+        }
+
+        name = function_keys.get(code)
+
+        if name:
+            ser.write(ANSI[name])
+            return True
+
+    return False
+
+
 def main():
-    parser = argparse.ArgumentParser(description="KSC Raw TTY")
-    parser.add_argument("-p", "--port", default="COM4")
-    parser.add_argument("-b", "--baud", type=int, default=115200)
+    parser = argparse.ArgumentParser(
+        description="KSC Raw TTY"
+    )
+
+    parser.add_argument(
+        "-p",
+        "--port",
+        default="COM4"
+    )
+
+    parser.add_argument(
+        "-b",
+        "--baud",
+        type=int,
+        default=115200
+    )
+
     args = parser.parse_args()
 
     ser = serial.Serial()
+
     ser.port = args.port
     ser.baudrate = args.baud
     ser.timeout = 0.05
     ser.write_timeout = 1
     ser.dtr = False
     ser.rts = False
+
     ser.open()
 
     stop_event = threading.Event()
@@ -50,21 +105,23 @@ def main():
     reader = threading.Thread(
         target=reader_loop,
         args=(ser, stop_event),
-        daemon=True,
+        daemon=True
     )
+
     reader.start()
 
     print()
-    print("KSC RAW TTY")
+    print("KSC RAW TTY 0.2")
     print(f"PORT={args.port} BAUD={args.baud}")
     print()
-    print("Arrow keys -> ANSI arrows")
-    print("Home       -> ANSI Home")
-    print("Backspace  -> BACK")
-    print("Esc        -> BACK after KSC timeout")
-    print("Enter      -> ENTER")
-    print("M/P/0..9   -> ordinary KSC keys")
-    print("Ctrl-C     -> exit")
+    print("Printable keys -> CHAR")
+    print("Arrows         -> KEY")
+    print("Enter          -> ENTER")
+    print("Backspace/Esc  -> BACK")
+    print("Home           -> HOME")
+    print("F9             -> MENU")
+    print("F10            -> POWER")
+    print("Ctrl-C         -> exit")
     print()
 
     try:
@@ -77,18 +134,11 @@ def main():
             if ch in ("\x00", "\xe0"):
                 ext = msvcrt.getwch()
 
-                mapping = {
-                    "H": "UP",
-                    "P": "DOWN",
-                    "K": "LEFT",
-                    "M": "RIGHT",
-                    "G": "HOME",
-                }
-
-                name = mapping.get(ext)
-
-                if name:
-                    ser.write(ANSI[name])
+                send_special(
+                    ser,
+                    ch,
+                    ext
+                )
 
                 continue
 
@@ -105,17 +155,24 @@ def main():
                 continue
 
             try:
-                ser.write(ch.encode("ascii"))
+                encoded = ch.encode("ascii")
             except UnicodeEncodeError:
-                pass
+                continue
+
+            ser.write(encoded)
 
     except KeyboardInterrupt:
         pass
+
     finally:
         stop_event.set()
+
         time.sleep(0.1)
+
         ser.close()
-        print("\nKSC RAW TTY CLOSED")
+
+        print()
+        print("KSC RAW TTY CLOSED")
 
 
 if __name__ == "__main__":
