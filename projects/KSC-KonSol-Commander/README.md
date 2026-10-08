@@ -12,9 +12,9 @@ Certified milestones:
 - KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS;
 - KSC-02C Reference Target - bare UNO synthetic VFS: FULL PHYSICAL PASS.
 
-Current active milestone: **KSC-02C - Core Extraction & Multi-Target Proof**.
+Current active milestone: **KSC-02D - HY-M302 Target Adapter on KSC_Core**.
 
-The bare-UNO Reference Target is **FULL PHYSICAL PASS**. The remaining KSC-02C step is to move the HY-M302 physical target onto the same unchanged KSC_Core.
+The bare-UNO Reference Target is **FULL PHYSICAL PASS**. The HY-M302 target adapter implementation is now ready for compile and physical certification against the same unchanged KSC_Core.
 
 KSC-03 - Host Filesystem Mount remains the next transport/backend milestone after the core-independence experiment.
 
@@ -810,6 +810,41 @@ Important claim discipline:
 Passing the bare-UNO Reference Target demonstrates that KSC_Core can execute
 without HY-M302 hardware. A stronger hardware-independence claim requires the
 same KSC_Core source to pass with a second physical target adapter.
+
+---
+
+## 16B. KSC-02D - HY-M302 Target Adapter on KSC_Core
+
+Goal:
+
+Use the same extracted KSC_Core that passed the bare-UNO Reference Target with a
+second, physically different target adapter for the HY-M302 shield.
+
+Status: **IMPLEMENTATION READY FOR PHYSICAL TEST**
+
+Architecture:
+
+```text
+                  SAME KSC_Core
+                  /           \
+                 /             \
+Reference Target                 HY-M302 Target
+bare UNO                         physical shield
+synthetic VFS                    sensors/actuators
+FULL PASS                        TEST PENDING
+```
+
+The HY-M302-specific code lives only in the target adapter and the existing
+HY_M302 libraries. KSC_Core remains free of HY_M302 includes, DHT code, IR
+decoder code, and physical pin mappings.
+
+Physical certification repeats the already certified KSC-02 routes through the
+new adapter: live sensors, LED/RGB/buzzer RW nodes, PC keyboard, HY-M302 IR
+remote, shared shell/Commander state, memory measurements, and drop counters.
+
+A KSC-02D FULL PHYSICAL PASS establishes the stronger empirical two-target
+hardware-independence claim. It does not claim universal portability to
+arbitrary MCUs or interfaces.
 
 ---
 
