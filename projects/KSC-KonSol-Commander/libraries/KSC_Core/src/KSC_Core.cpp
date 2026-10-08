@@ -41,7 +41,9 @@ KscCore::KscCore(
     _lastRenderMs(0),
     _fileOffset(0),
     _fileSize(0),
-    _fileBytesRead(0) {
+    _fileBytesRead(0),
+    _actionSelected(0),
+    _launchResult(KSC_OK) {
   strcpy(_shellCwd, "/");
   _shellLine[0] = 0;
   strcpy(_commanderPath, "/");
@@ -621,6 +623,30 @@ const __FlashStringHelper *KscCore::resultName(
   }
 }
 
+bool KscCore::isKscScript(
+  const char *path
+) {
+  if (!path) {
+    return false;
+  }
+
+  const size_t len =
+    strlen(path);
+
+  if (len < 4) {
+    return false;
+  }
+
+  const char *ext =
+    path + len - 4;
+
+  return
+    (ext[0] == '.') &&
+    (ext[1] == 'K' || ext[1] == 'k') &&
+    (ext[2] == 'S' || ext[2] == 's') &&
+    (ext[3] == 'C' || ext[3] == 'c');
+}
+
 void KscCore::shellPrompt() {
   _io.print(F("KSC:"));
   _io.print(_shellCwd);
@@ -1113,6 +1139,15 @@ void KscCore::openSelected() {
       NODE_MSG_NONE;
 
     if (type == KSC_NODE_RO) {
+      if (isKscScript(
+            _nodePath
+          )) {
+        _actionSelected = 0;
+        _view = VIEW_ACTIONS;
+        renderCommander();
+        return;
+      }
+
       bool handled = false;
       uint16_t bytesRead = 0;
       uint32_t totalSize = 0;
@@ -1487,6 +1522,97 @@ void KscCore::renderFile() {
   renderStatusLine();
 }
 
+void KscCore::renderActions() {
+  ansiClear();
+  renderHeader();
+
+  _io.println(_nodePath);
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  _io.println(F("KSC SCRIPT"));
+
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  if (_actionSelected == 0) {
+    ansiInverseOn();
+  }
+
+  _io.println(
+    _actionSelected == 0
+      ? F("> VIEW")
+      : F("  VIEW")
+  );
+
+  if (_actionSelected == 0) {
+    ansiNormal();
+  }
+
+  if (_actionSelected == 1) {
+    ansiInverseOn();
+  }
+
+  _io.println(
+    _actionSelected == 1
+      ? F("> RUN")
+      : F("  RUN")
+  );
+
+  if (_actionSelected == 1) {
+    ansiNormal();
+  }
+
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  _io.println(
+    F("UP/DOWN Select   ENTER/RIGHT Action")
+  );
+
+  _io.println(
+    F("LEFT/BACK Return F10/POWER/Q Shell")
+  );
+
+  renderStatusLine();
+}
+
+void KscCore::renderRunResult() {
+  ansiClear();
+  renderHeader();
+
+  _io.println(_nodePath);
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  _io.println(F("RUN RESULT"));
+
+  _io.print(F("Status: "));
+  _io.println(
+    resultName(
+      _launchResult
+    )
+  );
+
+  _io.println(
+    F("----------------------------------------")
+  );
+
+  _io.println(
+    F("ENTER/BACK Return")
+  );
+
+  _io.println(
+    F("F10/POWER/Q Shell")
+  );
+
+  renderStatusLine();
+}
+
 void KscCore::renderHelp() {
   ansiClear();
 
@@ -1570,6 +1696,14 @@ void KscCore::renderCommander() {
 
     case VIEW_FILE:
       renderFile();
+      break;
+
+    case VIEW_ACTIONS:
+      renderActions();
+      break;
+
+    case VIEW_RUN_RESULT:
+      renderRunResult();
       break;
 
     case VIEW_HELP:
@@ -1747,6 +1881,25 @@ void KscCore::backFromNode() {
   renderCommander();
 }
 
+void KscCore::runSelectedFile() {
+  bool handled = false;
+
+  _launchResult =
+    _target.launch(
+      _nodePath,
+      _io,
+      handled
+    );
+
+  if (!handled) {
+    _launchResult =
+      KSC_ERR_TARGET;
+  }
+
+  _view = VIEW_RUN_RESULT;
+  renderCommander();
+}
+
 void KscCore::handleCommanderChar(
   uint8_t c
 ) {
@@ -1757,7 +1910,9 @@ void KscCore::handleCommanderChar(
   }
 
   if (_view == VIEW_HELP ||
-      _view == VIEW_FILE) {
+      _view == VIEW_FILE ||
+      _view == VIEW_ACTIONS ||
+      _view == VIEW_RUN_RESULT) {
     return;
   }
 
@@ -1840,6 +1995,54 @@ void KscCore::handleCommanderKey(
 
       default:
         break;
+    }
+
+    return;
+  }
+
+  if (_view == VIEW_ACTIONS) {
+    switch (key) {
+      case KSC_KEY_UP:
+      case KSC_KEY_DOWN:
+        _actionSelected =
+          _actionSelected == 0
+            ? 1
+            : 0;
+        renderCommander();
+        break;
+
+      case KSC_KEY_ENTER:
+      case KSC_KEY_RIGHT:
+        if (_actionSelected == 0) {
+          _view = VIEW_FILE;
+          _fileOffset = 0;
+          _fileSize = 0;
+          _fileBytesRead = 0;
+          renderCommander();
+        } else {
+          runSelectedFile();
+        }
+        break;
+
+      case KSC_KEY_LEFT:
+      case KSC_KEY_BACK:
+        _view = VIEW_DIR;
+        renderCommander();
+        break;
+
+      default:
+        break;
+    }
+
+    return;
+  }
+
+  if (_view == VIEW_RUN_RESULT) {
+    if (key == KSC_KEY_ENTER ||
+        key == KSC_KEY_BACK ||
+        key == KSC_KEY_LEFT) {
+      _view = VIEW_ACTIONS;
+      renderCommander();
     }
 
     return;
