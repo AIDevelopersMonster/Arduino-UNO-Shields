@@ -1,6 +1,6 @@
 # KSC-04C - SW1 Runtime Profile
 
-Status: **IMPLEMENTED - BUILD/PHYSICAL TEST PENDING**
+Status: **FULL PHYSICAL PASS**
 
 ## Goal
 
@@ -112,3 +112,66 @@ Interpretation:
 - the firmware still fits with 1232 bytes of Flash headroom;
 - this build is suitable for the final controlled physical regression tests;
 - no further UNO feature growth is justified after this stage.
+
+
+## Final physical certification
+
+Status: **FULL PHYSICAL PASS**
+
+Final certified firmware build:
+
+```text
+Flash       31024 / 32256 B = 96%
+Global SRAM  1556 / 2048 B = 75%
+Flash headroom: 1232 B
+Compiler SRAM remainder: 492 B
+```
+
+Observed Commander/demo regression:
+
+```text
+Path: /host/DEMOS
+RAM 380 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+The previously failing long-comment scripts were re-tested after the parser and
+IR-service fixes. SOS completed as:
+
+```text
+SOS START
+SOS PASS
+RUN OK
+RAM 380 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+POLICE and the remaining demo pack were also physically confirmed by direct
+observation.
+
+The final SW1 profile behavior was physically confirmed:
+
+```text
+RUN SW1_0.KSC
+PRESS SW1
+=> RED ON, BLUE OFF
+
+RUN SW1_1.KSC
+PRESS the same SW1
+=> BLUE ON, RED OFF
+```
+
+No firmware rebuild, upload, or reset was used between the two loaded profiles.
+
+This certifies the intended KSC-04C result:
+
+**A streamed program stored on the PC can change the later runtime behavior of
+the same physical Arduino UNO input, with the resulting input-to-output action
+remaining resident in RAM after the script exits.**
+
+Final bounded non-claims:
+
+- this is a single fixed SW1 profile slot, not a general event-binding engine;
+- the profile is RAM-resident and is lost on reset;
+- only the two certified RED/BLUE SW1 actions are claimed here;
+- Arduino UNO is considered feature-saturated for this KSC line at 96% Flash;
+- further KSC feature growth should move to another MCU/platform rather than
+  consume the remaining UNO headroom.
