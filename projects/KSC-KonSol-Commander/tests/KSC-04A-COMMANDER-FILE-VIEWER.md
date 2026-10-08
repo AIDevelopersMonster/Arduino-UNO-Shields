@@ -256,3 +256,49 @@ BACK
 
 and confirm that the file offsets move as expected while the final counters
 remain `IN drop 0`, `IR drop 0/0`, and `HOST M/0`.
+
+
+## Physical viewer navigation pass
+
+Status: **PASS - FINAL END/BACK GATE STILL PENDING**
+
+Observed remote viewer sequence:
+
+```text
+FILE 0/12445
+FILE 192/12445
+FILE 384/12445
+FILE 576/12445
+FILE 768/12445
+FILE 576/12445
+FILE 384/12445
+FILE 192/12445
+FILE 0/12445
+```
+
+At every captured page:
+
+```text
+RAM 437 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+Confirmed:
+
+- real remote file data renders inside Commander;
+- forward page navigation advances by exactly 192 bytes;
+- reverse page navigation retreats by exactly 192 bytes;
+- repeated navigation returns exactly to offset 0;
+- runtime RAM remains stable at 437 B;
+- KSC input drops remain zero;
+- HY-M302 IR edge/frame drops remain 0/0 after the cooperative wait fix;
+- host errors remain zero;
+- no reset or visible transport corruption occurred in the captured route.
+
+The captured transcript does not yet include the two remaining 04A acceptance
+actions:
+
+1. `END` reaching the final byte-window;
+2. `BACK` returning from VIEW_FILE to `/host`.
+
+KSC-04A should therefore not be marked FULL PHYSICAL PASS until those two
+actions are captured.
