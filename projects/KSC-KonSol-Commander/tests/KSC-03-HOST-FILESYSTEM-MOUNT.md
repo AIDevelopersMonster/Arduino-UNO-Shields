@@ -769,3 +769,93 @@ Remaining KSC-03B certification items:
 - record post-Commander MEM;
 - observe input-drop, IR-drop, and HOST error counters;
 - verify no TTY/frame corruption on the final route.
+
+
+### KSC-03B Commander physical route result
+
+Status: **COMMANDER REMOTE-NAMESPACE ROUTE PHYSICAL PASS - FINAL INPUT-SOURCE/PING-IN-VIEW CHECK PENDING**
+
+Observed Commander root:
+
+```text
+Path: /
+> [dev/]
+  [proc/]
+  [sys/]
+  [host/]
+
+RAM 469 B   IN drop 0   IR drop 0/0   HOST M/0
+```
+
+Remote directory opened through Commander:
+
+```text
+Path: /host
+> [DOCS/]
+  DATA.TXT  [RO]
+  README.TXT  [RO]
+```
+
+Remote file placeholder opened as designed for KSC-03B:
+
+```text
+Path: /host/DATA.TXT
+Type: RO
+Value: REMOTE FILE: KSC-03C
+```
+
+Nested remote directory and file route also passed:
+
+```text
+Path: /host/DOCS
+> HELLO.TXT  [RO]
+
+Path: /host/DOCS/HELLO.TXT
+Type: RO
+Value: REMOTE FILE: KSC-03C
+```
+
+Return navigation back through `/host` to the root was observed.
+
+Runtime observations during Commander:
+
+```text
+Commander free RAM: 469 B
+IN drop:             0
+IR drop:             0/0
+HOST:                M/0
+```
+
+After Commander exit:
+
+```text
+KSC Commander closed.
+FREE RAM: 508 B
+
+MEM
+510
+```
+
+The 2-byte difference between the immediate post-Commander print and the
+subsequent shell MEM observation is recorded as an instantaneous free-RAM
+observation, not a leak claim. The shell returned to the established 510 B
+baseline.
+
+The log proves:
+
+- `/host` is visible and navigable in Commander;
+- remote file nodes are exposed as read-only entries;
+- nested `/host/DOCS/HELLO.TXT` is navigable;
+- the KSC-03B placeholder is shown instead of pretending that file streaming
+  already exists;
+- return to local root succeeds;
+- no input drops, IR drops, or host errors were reported in the captured route;
+- free RAM returns to the shell baseline after Commander exit.
+
+Not yet attributable from the captured transcript alone:
+
+- which navigation actions were performed from the PC keyboard versus HY-M302 IR;
+- a framed PING round trip while the Commander remote-directory view itself was
+  active.
+
+Those two checks remain the final gate before declaring **KSC-03B FULL PHYSICAL PASS**.
