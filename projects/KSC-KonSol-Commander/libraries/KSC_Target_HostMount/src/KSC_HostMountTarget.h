@@ -166,7 +166,7 @@ private:
   private:
     KscHostMountTarget &_owner;
     Print &_out;
-    char _line[64];
+    char _line[48];
     uint8_t _lineLen;
     KscResult _result;
     bool _stopRequested;
