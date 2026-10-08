@@ -88,6 +88,7 @@ private:
 
   KscTarget &_local;
   KscHostMuxStream &_transport;
+  KscCore *_core;
 
   static void transportWaitHook(
     void *context
