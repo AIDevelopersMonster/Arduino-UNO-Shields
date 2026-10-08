@@ -286,3 +286,26 @@ Interpretation:
 - further pre-test optimization is no longer mandatory;
 - proceed to physical upload and launcher certification before adding any new
   feature.
+
+
+## First physical runtime result
+
+Observed after entering the launcher result screen:
+
+```text
+ENTER/BACK Return
+RAM 399 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+Confirmed by this observation:
+
+- Commander reached the post-launch result view without reset;
+- runtime free RAM is 399 B;
+- input drops remain zero;
+- HY-M302 IR edge/frame drops remain 0/0;
+- host mount/error status remains clean at M/0;
+- no stream recovery was required (R0).
+
+This is a strong runtime stability result, but the KSC-04B FULL PHYSICAL PASS
+still additionally requires explicit confirmation of the script side effects
+(red/blue LED sequence) and the visible RUN success markers/status.
