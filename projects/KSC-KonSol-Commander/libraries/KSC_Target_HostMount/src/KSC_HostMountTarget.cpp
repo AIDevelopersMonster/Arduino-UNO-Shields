@@ -947,8 +947,8 @@ KscResult KscHostMountTarget::executeScriptLine(
 
   if (strcmp(cmd, "WAIT") == 0) {
     char *endp = nullptr;
-    const unsigned long waitMs =
-      strtoul(
+    const long waitValue =
+      strtol(
         line,
         &endp,
         10
@@ -956,9 +956,13 @@ KscResult KscHostMountTarget::executeScriptLine(
 
     if (!line[0] ||
         !endp ||
-        *endp != 0) {
+        *endp != 0 ||
+        waitValue < 0) {
       return KSC_ERR_VALUE;
     }
+
+    const unsigned long waitMs =
+      (unsigned long)waitValue;
 
     const unsigned long started =
       millis();
@@ -1016,6 +1020,78 @@ KscResult KscHostMountTarget::executeScriptLine(
   return KSC_ERR_VALUE;
 }
 
+KscHostMountTarget::ScriptSink::ScriptSink(
+  KscHostMountTarget &owner,
+  Print &out
+)
+  : _owner(owner),
+    _out(out),
+    _lineLen(0),
+    _result(KSC_OK),
+    _stopRequested(false) {
+}
+
+void KscHostMountTarget::ScriptSink::executeLine() {
+  if (_result != KSC_OK ||
+      _stopRequested) {
+    return;
+  }
+
+  _line[_lineLen] = 0;
+
+  bool stop = false;
+
+  _result =
+    _owner.executeScriptLine(
+      _line,
+      _out,
+      stop
+    );
+
+  _stopRequested = stop;
+  _lineLen = 0;
+}
+
+size_t KscHostMountTarget::ScriptSink::write(
+  uint8_t value
+) {
+  if (_result != KSC_OK ||
+      _stopRequested) {
+    return 1;
+  }
+
+  const char ch =
+    (char)value;
+
+  if (ch == '\r') {
+    return 1;
+  }
+
+  if (ch == '\n') {
+    executeLine();
+    return 1;
+  }
+
+  if (_lineLen >=
+      sizeof(_line) - 1) {
+    _result = KSC_ERR_VALUE;
+    return 1;
+  }
+
+  _line[_lineLen++] = ch;
+  return 1;
+}
+
+KscResult KscHostMountTarget::ScriptSink::finish() {
+  if (_result == KSC_OK &&
+      !_stopRequested &&
+      _lineLen) {
+    executeLine();
+  }
+
+  return _result;
+}
+
 KscResult KscHostMountTarget::launch(
   const char *path,
   Print &out,
@@ -1046,144 +1122,53 @@ KscResult KscHostMountTarget::launch(
 
   handled = true;
 
-  uint8_t handle = 0;
-
-  if (!remoteOpen(
-        path,
-        handle
-      )) {
-    return KSC_ERR_TARGET;
-  }
-
   out.println(F("[RUN]"));
 
+  ScriptSink sink(
+    *this,
+    out
+  );
+
   uint32_t offset = 0;
-  char line[64];
-  uint8_t lineLen = 0;
-  uint8_t retryCount = 0;
+  uint32_t totalSize = 0;
   KscResult result = KSC_OK;
-  bool stopRequested = false;
 
-  for (;;) {
-    uint8_t chunk[32];
-    uint8_t chunkLen = 0;
-    bool eof = false;
-    uint8_t errorCode = 0;
+  while (!sink.stopped()) {
+    uint16_t bytesRead = 0;
+    bool windowHandled = false;
 
-    if (!remoteRead(
-          handle,
-          offset,
-          chunk,
-          sizeof(chunk),
-          chunkLen,
-          eof,
-          errorCode
-        )) {
-      if (retryCount < 2 &&
-          errorCode ==
-            KscHostMuxStream::ERR_TIMEOUT) {
-        ++retryCount;
-        ++_streamRecoveries;
-        continue;
-      }
+    result =
+      streamWindow(
+        path,
+        offset,
+        192,
+        sink,
+        bytesRead,
+        totalSize,
+        windowHandled
+      );
 
-      if (retryCount < 2 &&
-          errorCode ==
-            KscHostMuxStream::ERR_BAD_HANDLE) {
-        ++retryCount;
-        ++_streamRecoveries;
-
-        uint8_t reopened = 0;
-
-        if (!remoteOpen(
-              path,
-              reopened
-            )) {
-          ++_hostErrors;
-          result = KSC_ERR_TARGET;
-          break;
-        }
-
-        handle = reopened;
-        continue;
-      }
-
-      ++_hostErrors;
-      result = KSC_ERR_TARGET;
+    if (!windowHandled ||
+        result != KSC_OK) {
       break;
     }
 
-    retryCount = 0;
+    offset += bytesRead;
 
-    for (uint8_t i = 0;
-         i < chunkLen;
-         ++i) {
-      const char ch =
-        (char)chunk[i];
-
-      if (ch == '\r') {
-        continue;
-      }
-
-      if (ch == '\n') {
-        line[lineLen] = 0;
-
-        result =
-          executeScriptLine(
-            line,
-            out,
-            stopRequested
-          );
-
-        lineLen = 0;
-
-        if (result != KSC_OK ||
-            stopRequested) {
-          break;
-        }
-
-        continue;
-      }
-
-      if (lineLen >=
-          sizeof(line) - 1) {
-        result = KSC_ERR_VALUE;
-        break;
-      }
-
-      line[lineLen++] = ch;
-    }
-
-    offset += chunkLen;
-
-    if (result != KSC_OK ||
-        stopRequested) {
-      break;
-    }
-
-    if (eof) {
-      if (lineLen) {
-        line[lineLen] = 0;
-
-        result =
-          executeScriptLine(
-            line,
-            out,
-            stopRequested
-          );
-      }
-
-      break;
-    }
-
-    if (chunkLen == 0) {
-      ++_hostErrors;
-      result = KSC_ERR_TARGET;
+    if (bytesRead == 0 ||
+        offset >= totalSize) {
       break;
     }
   }
 
-  remoteClose(handle);
+  if (result == KSC_OK) {
+    result = sink.finish();
+  }
+
+  if (result == KSC_OK &&
+      sink.result() != KSC_OK) {
+    result = sink.result();
+  }
 
   out.print(F("[RUN] "));
   out.println(
