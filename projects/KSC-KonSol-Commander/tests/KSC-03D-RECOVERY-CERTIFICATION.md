@@ -249,3 +249,55 @@ Interpretation:
 - flash remains below the Arduino UNO sketch limit;
 - runtime free-RAM and recovery-path measurements remain mandatory before
   certification.
+
+
+## Physical recovery test A - dropped READ response
+
+Status: **PHYSICAL PASS**
+
+Fault injection:
+
+```text
+--drop-read-at 10
+```
+
+Observed host diagnostic:
+
+```text
+FAULT drop READ response at request #10 offset=288
+```
+
+The stream then continued from the same explicit offset and completed the large
+test file through:
+
+```text
+LINE 095: ...
+END OF KSC-03C BIG FILE
+```
+
+Post-stream observations:
+
+```text
+MEM
+504
+
+Commander:
+RAM 463 B   IN drop 0   IR drop 0/0   HOST M/0 R1
+```
+
+Interpretation:
+
+- the deliberately lost READ response was recovered;
+- the stream reached the final marker without reset;
+- the recovery counter increased to R1;
+- the final host-error counter remained M/0;
+- input and IR drop counters remained zero;
+- shell free RAM returned to the 504 B runtime baseline.
+
+The captured terminal display shows the host diagnostic line interleaved into
+the human-readable text around LINE 001. This is console-output interleaving
+between the host diagnostic and the TTY stream, not evidence of a skipped file
+offset: the numbered file sequence continues through LINE 095 and the final
+marker is present.
+
+Result: **lost READ-response recovery route PASS**.
