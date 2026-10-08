@@ -1053,3 +1053,21 @@ KSC-03D replaces implicit-position READ with explicit-offset READ and adds
 bounded recovery for a lost READ response and for BAD_HANDLE. KSC Host 0.4
 contains deterministic fault injection so the two recovery paths can be
 physically reproduced and certified before the remote `/host` line is closed.
+
+
+### KSC-03D FULL PHYSICAL PASS
+
+KSC-03D is physically certified on Arduino UNO / ATmega328P + HY-M302.
+
+The remote `/host` line now includes framed transport coexistence, remote
+directory mount, bounded 32-byte file streaming, explicit-offset idempotent
+READ, retry after a lost READ response, and reopen/resume after BAD_HANDLE.
+
+Final recorded status:
+
+```text
+RAM 463 B   IN drop 0   IR drop 0/0   HOST M/0 R2
+```
+
+The two recoveries are the deliberately injected KSC-03D fault routes; no final
+host error remained.
