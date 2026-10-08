@@ -1,6 +1,6 @@
 # KSC-02C - Core Extraction & Reference Target
 
-Status: IMPLEMENTATION READY FOR PHYSICAL TEST
+Status: REFERENCE TARGET FULL PHYSICAL PASS - SECOND TARGET PROOF PENDING
 
 ## Goal
 
@@ -171,9 +171,10 @@ Physical boot status: PASS.
 Measured runtime free RAM after initialization: 1320 B.
 
 This confirms that the extracted KSC_Core executes on Arduino UNO without the
-HY-M302 target adapter or shield. Full KSC-02C certification still requires
-shell, Commander, RW/RO, and state-sharing checks, followed by a second target
-adapter using the same KSC_Core source.
+HY-M302 target adapter or shield. The full Reference Target shell, Commander,
+RW/RO, state-sharing, and navigation route was subsequently physically passed.
+The stronger multi-target hardware-independence claim still requires a second
+target adapter using the same unchanged KSC_Core source.
 
 ## Shell checks
 
@@ -278,6 +279,53 @@ After Commander exit, verify shell state:
 CAT /demo/value
 CAT /demo/flag
 ```
+
+## Reference Target certification result
+
+**REFERENCE TARGET FULL PHYSICAL PASS**
+
+The complete bare-UNO Reference Target route was physically exercised and
+reported as working.
+
+Observed evidence includes:
+
+- dynamic RO `/demo/counter` continuously refreshed from 174 through 221 while
+  the Commander remained open;
+- Commander RAM remained 1279 B through the long dynamic refresh run;
+- input drop counter remained 0;
+- `/demo/value` was observed at 200, edited through CHAR input to 128, and
+  committed with `Status: APPLIED`;
+- LEFT adjustment subsequently changed the value to 127 and 126;
+- `/demo/flag` was observed at 1, changed to 0 with `Status: APPLIED`, and
+  then changed back to 1 with `Status: APPLIED`;
+- directory navigation remained functional before and after RW operations;
+- the reference status marker remained `REF`.
+
+Recorded resource envelope:
+
+```text
+Flash:                    13658 / 32256 B = 42%
+Global SRAM:               669 / 2048 B  = 32%
+Boot free RAM:             1320 B
+Commander free RAM:        1279 B typical
+Minimum observed in proof: 1262 B
+Input drops:                  0
+External shield required:    no
+```
+
+Static core separation check:
+
+```text
+KSC_Core.h   -> no HY_M302 reference
+KSC_Core.cpp -> no HY_M302 reference
+KSC_Core     -> no DHT code
+KSC_Core     -> no target pin mappings
+```
+
+The Reference Target portion of KSC-02C is therefore certified. The remaining
+step for the stronger hardware-independence result is to implement HY-M302 as a
+second `KscTarget` adapter and repeat the physical KSC-02 route without changing
+the KSC_Core source.
 
 ## PASS gate
 
