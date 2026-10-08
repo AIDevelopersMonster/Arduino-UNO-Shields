@@ -1,12 +1,12 @@
 # Zenodo Metadata Template - KSC_Core v0.2
 
-Do not publish until fields marked **CONFIRM** are resolved.
+Do not publish until the remaining fields marked **CONFIRM** are resolved.
 
 ## DOI
 
-    Existing DOI for this exact object: NO
-    Action: reserve Zenodo DOI before final PDF if DOI is to appear in manuscript
-    Reserved DOI: <CONFIRM AFTER RESERVATION>
+    DOI: 10.5281/zenodo.23232216
+    URL: https://doi.org/10.5281/zenodo.23232216
+    Status: supplied for this publication object
 
 ## Resource type
 
@@ -30,16 +30,15 @@ record should use that publication date.
 
 ## Creators
 
-**CONFIRM**
+Creator 1:
 
-Do not infer publication authorship from Git commits or account display names.
+    Display name: A. A. Malachevsky
+    Family name: Malachevsky
+    Given name(s): A. A.
+    ORCID: 0009-0008-6009-3196
+    Affiliation: not supplied
 
-For each creator enter:
-
-    Family name:
-    Given name(s):
-    ORCID:
-    Affiliation:
+Creator order: single creator; confirmed by supplied metadata.
 
 ## Description / abstract
 
