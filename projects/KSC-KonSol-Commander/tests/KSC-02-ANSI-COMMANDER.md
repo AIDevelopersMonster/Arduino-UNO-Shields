@@ -1,6 +1,6 @@
 # KSC-02 - One-Panel ANSI KonSol Commander
 
-Status: TEST READY
+Status: FULL PHYSICAL PASS
 
 Target:
 
@@ -131,7 +131,7 @@ Maximum is 2048 bytes.
 
 Build status: PASS.
 
-Boot runtime free RAM is measured at 818 B; Commander-view runtime is still to be observed during physical navigation.
+Boot runtime free RAM is 818 B. Commander-view runtime is 782 B during physical navigation.
 
 ## Boot runtime measurement
 
@@ -179,10 +179,8 @@ IR dropped edges:   0
 IR dropped frames:  0
 ```
 
-Interactive smoke navigation was exercised by the user and the controls pressed
-during that session responded correctly. This establishes an initial ANSI UI
-and input-path PASS, but does not replace the complete node-by-node physical
-PASS gate below.
+Interactive ANSI navigation was exercised on the physical target. The complete
+node-by-node physical PASS gate below was subsequently reported as passed.
 
 ## Physical PASS gate
 
@@ -214,6 +212,66 @@ real hardware:
 23. IR POWER exits to shell.
 24. No input-event or IR drop condition is observed during normal test operation.
 25. Flash, global SRAM, and runtime free RAM are recorded.
+
+## Certification result
+
+**KSC-02 FULL PHYSICAL PASS**
+
+The complete physical test route was executed on the real Arduino UNO + HY-M302
+target and reported as passing.
+
+Certified behavior includes:
+
+- one-panel ANSI directory navigation through the same VFS used by the shell;
+- PC keyboard navigation and node control;
+- HY-M302 IR remote navigation and node control;
+- live RO sensor viewing;
+- /proc and /sys node viewing;
+- physical RW control of discrete LED, RGB channel, and buzzer;
+- numeric RW entry through the CHAR input path;
+- Help and clean return from Commander to the shell;
+- continued shell operation after Commander exit;
+- no observed IR drops during normal test operation.
+
+Final observed system screen included:
+
+```text
+Path: /sys
+----------------------------------------
+> version  [RO]
+  target  [RO]
+  storage  [RO]
+----------------------------------------
+UP/DOWN Select   ENTER/RIGHT Open
+LEFT/BACK Parent HOME Root
+F9/MENU Help     F10/POWER/Q Shell
+RAM 782 B   IR drop 0/0
+```
+
+and opening the version node produced:
+
+```text
+Path: /sys/version
+----------------------------------------
+Type: RO
+Value: KSC 0.2
+
+ENTER Refresh      LEFT/BACK Return
+HOME Root          F9/MENU Help
+F10/POWER/Q Shell
+----------------------------------------
+RAM 782 B
+```
+
+Recorded resource envelope:
+
+```text
+Flash:              18026 / 32256 B = 55%
+Global SRAM:         1172 / 2048 B  = 57%
+Boot free RAM:       818 B
+Commander free RAM:  782 B
+IR drops:             0 / 0 observed
+```
 
 ## Suggested first physical route
 
