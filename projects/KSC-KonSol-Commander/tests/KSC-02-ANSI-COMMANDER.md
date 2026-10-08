@@ -116,6 +116,23 @@ LEFT/RIGHT   decrement/increment and apply immediately
 BACK         cancel active edit; otherwise return
 ```
 
+## Build measurements
+
+Arduino CLI compile result:
+
+```text
+Sketch uses 18026 bytes (55%) of program storage space.
+Maximum is 32256 bytes.
+
+Global variables use 1172 bytes (57%) of dynamic memory,
+leaving 876 bytes for local variables.
+Maximum is 2048 bytes.
+```
+
+Build status: PASS.
+
+Runtime free RAM is still to be measured on the physical target.
+
 ## Physical PASS gate
 
 KSC-02 is FULL PHYSICAL PASS only after all of the following are observed on
