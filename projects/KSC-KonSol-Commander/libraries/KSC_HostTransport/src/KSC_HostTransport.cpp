@@ -1,5 +1,7 @@
 #include "KSC_HostTransport.h"
 
+#include <string.h>
+
 KscHostMuxStream::KscHostMuxStream(
   Stream &wire
 )
@@ -15,6 +17,12 @@ KscHostMuxStream::KscHostMuxStream(
     _crc(0),
     _discardRemaining(0),
     _lastParserByteMs(0),
+    _waitingResponse(false),
+    _responseReady(false),
+    _responseType(0),
+    _responseSeq(0),
+    _responseLen(0),
+    _requestSeq(0),
     _framesRx(0),
     _framesTx(0),
     _crcErrors(0),
@@ -83,6 +91,17 @@ void KscHostMuxStream::startFrame() {
   _lastParserByteMs = millis();
 }
 
+bool KscHostMuxStream::isKnownResponse(
+  uint8_t type
+) const {
+  return
+    type == TYPE_PING_RESP ||
+    type == TYPE_MOUNT_RESP ||
+    type == TYPE_LS_RESP ||
+    type == TYPE_STAT_RESP ||
+    type == TYPE_ERROR_RESP;
+}
+
 void KscHostMuxStream::sendFrame(
   uint8_t type,
   uint8_t seq,
@@ -137,6 +156,17 @@ void KscHostMuxStream::sendError(
 
 void KscHostMuxStream::handleFrame() {
   ++_framesRx;
+
+  if (isKnownResponse(_type)) {
+    if (_waitingResponse) {
+      _responseReady = true;
+      _responseType = _type;
+      _responseSeq = _seq;
+      _responseLen = _len;
+    }
+
+    return;
+  }
 
   if (_type == TYPE_PING_REQ) {
     if (_len != 0) {
@@ -329,9 +359,120 @@ void KscHostMuxStream::service() {
     processWireByte(
       (uint8_t)value
     );
+
+    if (_waitingResponse &&
+        _responseReady) {
+      break;
+    }
   }
 
   serviceTimeout();
+}
+
+bool KscHostMuxStream::exchange(
+  uint8_t requestType,
+  const uint8_t *requestPayload,
+  uint8_t requestLen,
+  uint8_t expectedResponseType,
+  uint8_t *responsePayload,
+  uint8_t responseCapacity,
+  uint8_t &responseLen,
+  uint8_t &errorCode,
+  unsigned long timeoutMs
+) {
+  responseLen = 0;
+  errorCode = 0;
+
+  if (requestLen > MAX_PAYLOAD) {
+    errorCode = ERR_BAD_LENGTH;
+    return false;
+  }
+
+  ++_requestSeq;
+
+  if (_requestSeq == 0) {
+    ++_requestSeq;
+  }
+
+  const uint8_t seq =
+    _requestSeq;
+
+  _responseReady = false;
+  _responseType = 0;
+  _responseSeq = 0;
+  _responseLen = 0;
+  _waitingResponse = true;
+
+  sendFrame(
+    requestType,
+    seq,
+    requestPayload,
+    requestLen
+  );
+
+  const unsigned long started =
+    millis();
+
+  while (millis() - started <
+         timeoutMs) {
+    service();
+
+    if (!_responseReady) {
+      continue;
+    }
+
+    if (_responseSeq != seq) {
+      _responseReady = false;
+      continue;
+    }
+
+    if (_responseType ==
+        TYPE_ERROR_RESP) {
+      if (_responseLen > 0) {
+        errorCode = _payload[0];
+      } else {
+        errorCode = ERR_UNSUPPORTED;
+      }
+
+      _responseReady = false;
+      _waitingResponse = false;
+      return false;
+    }
+
+    if (_responseType !=
+        expectedResponseType) {
+      _responseReady = false;
+      continue;
+    }
+
+    if (_responseLen >
+        responseCapacity) {
+      errorCode = ERR_BAD_LENGTH;
+      _responseReady = false;
+      _waitingResponse = false;
+      return false;
+    }
+
+    responseLen = _responseLen;
+
+    if (responsePayload &&
+        responseLen) {
+      memcpy(
+        responsePayload,
+        _payload,
+        responseLen
+      );
+    }
+
+    _responseReady = false;
+    _waitingResponse = false;
+    return true;
+  }
+
+  _responseReady = false;
+  _waitingResponse = false;
+  errorCode = ERR_TIMEOUT;
+  return false;
 }
 
 int KscHostMuxStream::available() {
