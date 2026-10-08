@@ -11,11 +11,17 @@ public:
   static const uint8_t TYPE_MOUNT_REQ = 0x02;
   static const uint8_t TYPE_LS_REQ = 0x03;
   static const uint8_t TYPE_STAT_REQ = 0x04;
+  static const uint8_t TYPE_OPEN_REQ = 0x05;
+  static const uint8_t TYPE_READ_REQ = 0x06;
+  static const uint8_t TYPE_CLOSE_REQ = 0x07;
 
   static const uint8_t TYPE_PING_RESP = 0x81;
   static const uint8_t TYPE_MOUNT_RESP = 0x82;
   static const uint8_t TYPE_LS_RESP = 0x83;
   static const uint8_t TYPE_STAT_RESP = 0x84;
+  static const uint8_t TYPE_OPEN_RESP = 0x85;
+  static const uint8_t TYPE_READ_RESP = 0x86;
+  static const uint8_t TYPE_CLOSE_RESP = 0x87;
 
   static const uint8_t TYPE_ERROR_RESP = 0x7F;
 
@@ -23,6 +29,12 @@ public:
   static const uint8_t ERR_BAD_CRC = 0x02;
   static const uint8_t ERR_TIMEOUT = 0x03;
   static const uint8_t ERR_UNSUPPORTED = 0x04;
+  static const uint8_t ERR_NOT_FOUND = 0x10;
+  static const uint8_t ERR_NOT_DIR = 0x11;
+  static const uint8_t ERR_PATH = 0x12;
+  static const uint8_t ERR_HOST_IO = 0x13;
+  static const uint8_t ERR_NOT_FILE = 0x14;
+  static const uint8_t ERR_BAD_HANDLE = 0x15;
 
   static const uint8_t MAX_PAYLOAD = 48;
   static const uint8_t TTY_QUEUE_SIZE = 32;
