@@ -1233,3 +1233,56 @@ Still not directly shown in this transcript:
 
 Those counters should be captured once before declaring **KSC-03C FULL PHYSICAL
 PASS**.
+
+
+### KSC-03C FULL PHYSICAL PASS
+
+Status: **FULL PHYSICAL PASS**
+
+Final Commander status:
+
+```text
+RAM 465 B   IN drop 0   IR drop 0/0   HOST M/0
+```
+
+Together with the previously recorded shell streaming route, KSC-03C physically
+verified:
+
+- KSC Host 0.3 and KSC-03C firmware startup;
+- lazy `/host` mount;
+- remote directory enumeration;
+- real `CAT /host/DATA.TXT`;
+- multi-chunk `CAT /host/STREAM.TXT`;
+- complete `CAT /host/BIG.TXT` from first marker through final marker;
+- sequential 32-byte bounded READ transactions;
+- a host file of about 12 KB streamed through an ATmega328P with 2 KB SRAM;
+- post-stream shell free RAM returned to the 506 B baseline;
+- Commander free RAM observed at 465 B;
+- input drops remained 0;
+- IR drops remained 0/0;
+- host error counter remained 0;
+- no reset or visible TTY/frame corruption was observed in the certified route.
+
+Bounded claim:
+
+**KSC-03C demonstrates sequential host-backed text-file streaming through the
+existing KSC virtual namespace and one multiplexed serial link, without requiring
+the complete host file to fit in ATmega328P SRAM.**
+
+The certified path is:
+
+```text
+CAT /host/<file>
+    -> OPEN
+    -> repeated READ <= 32 B
+    -> terminal output
+    -> CLOSE
+```
+
+Non-claims:
+
+- this stage does not certify arbitrary binary-safe streaming;
+- this stage does not yet provide a full-screen/multi-page Commander file viewer;
+- this stage does not claim concurrent multiple open host files from the AVR side;
+- the result is bounded to the tested Arduino UNO / ATmega328P + HY-M302 target,
+  KSC Host 0.3, and the recorded protocol implementation.
