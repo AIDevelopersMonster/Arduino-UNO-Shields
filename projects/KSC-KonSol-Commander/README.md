@@ -19,6 +19,27 @@ Both the bare-UNO Reference Target and the physical HY-M302 Target are **FULL PH
 
 KSC-03 - Host Filesystem Mount remains the next transport/backend milestone after the core-independence experiment.
 
+Publication status: **KSC_Core v0.2 PUBLICATION CANDIDATE** after adversarial
+pre-publication audit. The article now uses the narrower term
+**target-decoupled** in its title and preserves the bounded two-target
+hardware-independence claim only for the physically tested Arduino UNO target
+backends.
+
+Publication package:
+
+~~~text
+projects/KSC-KonSol-Commander/publication/
++-- KSC_CORE_TWO_TARGET_VALIDATION_v0.2.md
++-- audit/
+|   +-- KSC_CORE_v0.1_PREPUBLICATION_AUDIT.md
++-- zenodo/
+    +-- README.md
+    +-- REPRODUCIBILITY.md
+    +-- ZENODO_METADATA_TEMPLATE.md
+    +-- SOURCE_MANIFEST.txt
+~~~
+
+
 KSC is a new experimental branch of the Arduino UNO & Shields project.
 
 It is not a continuation of the frozen KonSol 0.8 firmware and does not promise
