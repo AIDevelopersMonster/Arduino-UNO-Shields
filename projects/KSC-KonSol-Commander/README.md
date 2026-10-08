@@ -11,7 +11,9 @@ Certified milestones:
 - KSC-01C - CHAR vs KEY semantic input model: FULL PHYSICAL PASS;
 - KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS.
 
-Current next milestone: **KSC-03 - Host Filesystem Mount**.
+Current active milestone: **KSC-02C - Core Extraction & Reference Target**.
+
+KSC-03 - Host Filesystem Mount remains the next transport/backend milestone after the core-independence experiment.
 
 KSC is a new experimental branch of the Arduino UNO & Shields project.
 
@@ -730,6 +732,61 @@ PASS gate:
 - RW values can be changed;
 - both PC keyboard and IR remote control the same UI state;
 - exit returns cleanly to the shell.
+
+---
+
+## 16A. KSC-02C - Core Extraction & Reference Target
+
+Goal:
+
+Extract the certified KSC-02 shell, ANSI Commander, CHAR/KEY input semantics,
+and VFS navigation into a reusable KSC_Core library that has no dependency on
+HY_M302.h or shield pin mappings.
+
+Reference architecture:
+
+```text
+                    KSC_Core
+          +------------+-------------+
+          |            |             |
+        Shell       Commander      Input
+          |            |             |
+          +------------+-------------+
+                       |
+                 KscTarget API
+                       |
+          +------------+-------------+
+          |                          |
+  Reference Target              HY-M302 Target
+  synthetic namespace           physical hardware
+```
+
+The first KSC-02C implementation adds the core library and a bare-UNO Reference
+Target. The certified KSC-02 HY-M302 sketch is intentionally left unchanged
+while extraction is tested.
+
+Reference target namespace:
+
+```text
+/
++-- demo/
+|   +-- counter     RO dynamic
+|   +-- value       RW 0..255
+|   +-- flag        RW 0..1
++-- proc/
+|   +-- mem
+|   +-- uptime
++-- sys/
+    +-- version
+    +-- target
+    +-- storage
+```
+
+Important claim discipline:
+
+Passing the bare-UNO Reference Target demonstrates that KSC_Core can execute
+without HY-M302 hardware. A stronger hardware-independence claim requires the
+same KSC_Core source to pass with a second physical target adapter.
 
 ---
 
