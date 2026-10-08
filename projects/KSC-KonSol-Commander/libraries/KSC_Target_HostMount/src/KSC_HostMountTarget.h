@@ -142,6 +142,38 @@ private:
     bool &stopRequested
   );
 
+  class ScriptSink : public Print {
+  public:
+    ScriptSink(
+      KscHostMountTarget &owner,
+      Print &out
+    );
+
+    size_t write(
+      uint8_t value
+    ) override;
+
+    KscResult finish();
+
+    bool stopped() const {
+      return _stopRequested;
+    }
+
+    KscResult result() const {
+      return _result;
+    }
+
+  private:
+    KscHostMountTarget &_owner;
+    Print &_out;
+    char _line[64];
+    uint8_t _lineLen;
+    KscResult _result;
+    bool _stopRequested;
+
+    void executeLine();
+  };
+
   static KscNodeType toNodeType(
     uint8_t hostType
   );
