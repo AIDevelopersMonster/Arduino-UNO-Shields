@@ -1,4 +1,5 @@
 import argparse
+import ctypes
 import msvcrt
 import sys
 import threading
@@ -18,6 +19,29 @@ ANSI = {
     "F9": b"\x1b[20~",
     "F10": b"\x1b[21~",
 }
+
+
+def enable_windows_vt():
+    if sys.platform != "win32":
+        return
+
+    kernel32 = ctypes.windll.kernel32
+    stdout_handle = kernel32.GetStdHandle(-11)
+
+    mode = ctypes.c_uint32()
+
+    if not kernel32.GetConsoleMode(
+        stdout_handle,
+        ctypes.byref(mode),
+    ):
+        return
+
+    enable_virtual_terminal_processing = 0x0004
+
+    kernel32.SetConsoleMode(
+        stdout_handle,
+        mode.value | enable_virtual_terminal_processing,
+    )
 
 
 def reader_loop(ser, stop_event):
@@ -89,6 +113,8 @@ def main():
 
     args = parser.parse_args()
 
+    enable_windows_vt()
+
     ser = serial.Serial()
 
     ser.port = args.port
@@ -111,17 +137,21 @@ def main():
     reader.start()
 
     print()
-    print("KSC RAW TTY 0.2")
+    print("KSC RAW TTY 0.3")
     print(f"PORT={args.port} BAUD={args.baud}")
     print()
-    print("Printable keys -> CHAR")
-    print("Arrows         -> KEY")
-    print("Enter          -> ENTER")
+    print("ANSI screen mode enabled")
+    print("Printable keys -> CHAR / shell text")
+    print("Arrows         -> navigation")
+    print("Enter          -> ENTER / open / apply")
     print("Backspace/Esc  -> BACK")
-    print("Home           -> HOME")
-    print("F9             -> MENU")
-    print("F10            -> POWER")
-    print("Ctrl-C         -> exit")
+    print("Home           -> root")
+    print("End            -> last item")
+    print("Delete         -> cancel numeric edit")
+    print("F9             -> MENU / help")
+    print("F10            -> POWER / exit to shell")
+    print("Q in Commander -> exit to shell")
+    print("Ctrl-C         -> close Raw TTY")
     print()
 
     try:
@@ -169,7 +199,11 @@ def main():
 
         time.sleep(0.1)
 
-        ser.close()
+        try:
+            ser.close()
+        finally:
+            sys.stdout.write("\x1b[0m\x1b[?25h")
+            sys.stdout.flush()
 
         print()
         print("KSC RAW TTY CLOSED")
