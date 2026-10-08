@@ -1797,7 +1797,8 @@ void KscCore::handleCommanderKey(
     return;
   }
 
-  if (key == KSC_KEY_HOME) {
+  if (key == KSC_KEY_HOME &&
+      _view != VIEW_FILE) {
     setCommanderRoot();
     renderCommander();
     return;
