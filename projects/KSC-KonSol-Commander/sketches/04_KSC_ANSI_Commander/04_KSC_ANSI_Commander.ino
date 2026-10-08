@@ -907,24 +907,6 @@ static bool queueKey(
   );
 }
 
-static bool popEvent(
-  KscInputEvent &event
-) {
-  if (eventCount == 0) {
-    return false;
-  }
-
-  event = eventQueue[eventTail];
-
-  eventTail =
-    (uint8_t)((eventTail + 1) %
-              EVENT_QUEUE_SIZE);
-
-  --eventCount;
-
-  return true;
-}
-
 // -----------------------------------------------------------------------------
 // IR input
 // -----------------------------------------------------------------------------
@@ -2453,22 +2435,29 @@ static void handleShellEvent(
 }
 
 static void serviceInputEvents() {
-  KscInputEvent event;
+  while (eventCount != 0) {
+    KscInputEvent inputEvent =
+      eventQueue[eventTail];
 
-  while (popEvent(event)) {
+    eventTail =
+      (uint8_t)((eventTail + 1) %
+                EVENT_QUEUE_SIZE);
+
+    --eventCount;
+
     if (commanderActive) {
-      if (event.type ==
+      if (inputEvent.type ==
             KSC_INPUT_CHAR) {
         handleCommanderChar(
-          event.code
+          inputEvent.code
         );
       } else {
         handleCommanderKey(
-          (KscSpecialKey)event.code
+          (KscSpecialKey)inputEvent.code
         );
       }
     } else {
-      handleShellEvent(event);
+      handleShellEvent(inputEvent);
     }
   }
 }
