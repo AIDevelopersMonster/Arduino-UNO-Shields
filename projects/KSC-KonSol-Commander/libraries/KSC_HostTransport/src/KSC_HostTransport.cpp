@@ -99,6 +99,9 @@ bool KscHostMuxStream::isKnownResponse(
     type == TYPE_MOUNT_RESP ||
     type == TYPE_LS_RESP ||
     type == TYPE_STAT_RESP ||
+    type == TYPE_OPEN_RESP ||
+    type == TYPE_READ_RESP ||
+    type == TYPE_CLOSE_RESP ||
     type == TYPE_ERROR_RESP;
 }
 
