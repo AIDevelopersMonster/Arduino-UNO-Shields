@@ -1099,3 +1099,29 @@ F10/POWER/Q   shell
 
 Page boundaries are byte-based in 04A. Line-aware text navigation remains a
 later stage.
+
+
+### KSC-04A FULL PHYSICAL PASS
+
+The first Commander remote-file viewer layer is physically certified on
+Arduino UNO / ATmega328P + HY-M302.
+
+Certified behavior:
+
+- remote `/host` file opens directly inside Commander;
+- logical viewer page is 192 bytes;
+- transport remains bounded to 32-byte streamed reads;
+- bidirectional page navigation is stable;
+- HOME returns to offset 0;
+- END reaches the correct final page;
+- BACK returns to `/host`;
+- no full-page or whole-file SRAM buffer is required.
+
+Final recorded status:
+
+```text
+RAM 437 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+The next stage is KSC-04B: line-aware text viewing on top of the certified
+byte-window viewer.
