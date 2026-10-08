@@ -95,6 +95,23 @@ arduino-cli compile `
 
 Record Flash and global SRAM.
 
+## Build measurements
+
+Arduino CLI compile result:
+
+```text
+Sketch uses 20806 bytes (64%) of program storage space.
+Maximum is 32256 bytes.
+
+Global variables use 1255 bytes (61%) of dynamic memory,
+leaving 793 bytes for local variables.
+Maximum is 2048 bytes.
+```
+
+Build status: PASS.
+
+Runtime free RAM is still to be measured on the physical HY-M302 target.
+
 ## Upload
 
 ```powershell
