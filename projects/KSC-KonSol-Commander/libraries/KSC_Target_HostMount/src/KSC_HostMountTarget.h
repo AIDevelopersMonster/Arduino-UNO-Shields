@@ -35,6 +35,12 @@ public:
     uint8_t outSize
   ) override;
 
+  KscResult streamRead(
+    const char *path,
+    Print &out,
+    bool &handled
+  ) override;
+
   KscResult write(
     const char *path,
     long value
@@ -88,6 +94,23 @@ private:
     uint8_t &hostType,
     char *nameOut,
     uint8_t nameOutSize
+  );
+
+  bool remoteOpen(
+    const char *path,
+    uint8_t &handle
+  );
+
+  bool remoteRead(
+    uint8_t handle,
+    uint8_t *dataOut,
+    uint8_t dataCapacity,
+    uint8_t &dataLen,
+    bool &eof
+  );
+
+  void remoteClose(
+    uint8_t handle
   );
 
   static KscNodeType toNodeType(
