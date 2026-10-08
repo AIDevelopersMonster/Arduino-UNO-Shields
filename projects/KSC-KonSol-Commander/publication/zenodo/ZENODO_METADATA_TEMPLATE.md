@@ -76,20 +76,13 @@ cross-MCU, cross-framework, transport, peripheral, or filesystem portability.
 
 ## License
 
-**CONFIRM**
-
-Zenodo requires a license for the record and currently defaults to CC BY 4.0 in
-the deposit interface.
-
-Do not accept the default silently.
-
-Candidate for the article/preprint if the creator chooses it:
-
     Creative Commons Attribution 4.0 International (CC BY 4.0)
 
-Software licensing must be decided separately if source code itself is uploaded
-as a licensed software artifact. A documentation license must not be silently
-treated as a software license.
+Status: confirmed for the article/preprint.
+
+This license applies to the publication text. Software licensing remains a
+separate decision if source code itself is uploaded as a licensed software
+artifact.
 
 ## Publisher
 
