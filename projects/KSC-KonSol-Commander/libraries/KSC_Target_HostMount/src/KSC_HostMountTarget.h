@@ -75,6 +75,7 @@ private:
 
   bool _mounted;
   uint16_t _hostErrors;
+  uint16_t _streamRecoveries;
 
   bool isHostPath(
     const char *path
@@ -103,10 +104,12 @@ private:
 
   bool remoteRead(
     uint8_t handle,
+    uint32_t offset,
     uint8_t *dataOut,
     uint8_t dataCapacity,
     uint8_t &dataLen,
-    bool &eof
+    bool &eof,
+    uint8_t &errorCode
   );
 
   void remoteClose(
