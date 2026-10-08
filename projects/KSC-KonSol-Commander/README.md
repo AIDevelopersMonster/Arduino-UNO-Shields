@@ -1032,3 +1032,14 @@ KSC-03C extends the certified KSC-03B remote directory mount with sequential
 `OPEN / READ / CLOSE` and a bounded 32-byte AVR read chunk. The primary proof
 target is `CAT /host/BIG.TXT`, where the host file is about 12 KB and therefore
 cannot fit in ATmega328P SRAM.
+
+
+### KSC-03C FULL PHYSICAL PASS
+
+KSC-03C is physically certified on Arduino UNO / ATmega328P + HY-M302.
+
+The validated route streams real PC-hosted text files through `/host` using
+sequential `OPEN / READ / CLOSE` transactions with 32-byte reads. A roughly
+12 KB test file was emitted completely through an AVR with 2 KB SRAM, with
+post-stream shell free RAM returning to baseline and final counters showing
+`IN drop 0`, `IR drop 0/0`, and `HOST M/0`.
