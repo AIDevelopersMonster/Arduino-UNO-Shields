@@ -1182,7 +1182,7 @@ The certified KSC Script v0.1 instruction set is deliberately small:
 `PRINT`, `WRITE`, `WAIT`, and `STOP`.
 
 
-### KSC-04C FULL PHYSICAL PASS - UNO KSC LINE CLOSED
+### KSC-04C FULL PHYSICAL PASS - HY-M302 TARGET PHASE CLOSED
 
 KSC-04C adds one deliberately small RAM-resident runtime profile for the HY-M302
 SW1 button:
@@ -1218,7 +1218,11 @@ Flash       31024 / 32256 B = 96%
 Global SRAM  1556 / 2048 B = 75%
 ```
 
-The Arduino UNO KSC line is now considered **functionally complete and
-feature-saturated**. Further development should reuse the architecture on other
-shields, microcontrollers, or single-board computers instead of consuming the
-remaining UNO program-memory margin.
+The **Arduino UNO + HY-M302 target phase** is now considered functionally complete
+and feature-saturated for this firmware image. The wider KSC programme remains
+open. The next work should test the same architecture against substantially
+different backends such as LCD Keypad Shield, relay/control shields, W5100/SD,
+and later other microcontrollers or single-board computers. The purpose is not
+to keep extending the already saturated HY-M302 image, but to test how much of
+KSC_Core, VFS, Commander, launcher semantics, and host transport survives when
+the target interaction model changes.
