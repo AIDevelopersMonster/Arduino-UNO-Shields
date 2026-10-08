@@ -174,3 +174,54 @@ Interpretation:
 - SRAM remains tight but within the same operational envelope as KSC-03;
 - runtime free-RAM and navigation counters remain mandatory for physical
   certification.
+
+
+## First physical viewer result
+
+Status: **PARTIAL PHYSICAL PASS - IR DROP REGRESSION FOUND**
+
+Observed Commander directory status before opening the file:
+
+```text
+Path: /host
+> BIG.TXT  [RO]
+RAM 437 B   IN drop 0   IR drop 181/0   HOST M/0 R0
+```
+
+Opening BIG.TXT entered the real streaming viewer:
+
+```text
+Path: /host/BIG.TXT
+FILE 0/12445
+KSC-03C BIG FILE - STREAMING PROOF
+LINE 000: ...
+LINE 001: ...
+RAM 437 B   IN drop 0   IR drop 181/0   HOST M/0 R0
+```
+
+Confirmed:
+
+- real remote file viewer opens from Commander;
+- file size is reported;
+- first window contains real host-file bytes;
+- runtime RAM observed at 437 B;
+- KSC input drops remain 0;
+- HOST errors remain 0.
+
+Blocking issue:
+
+```text
+IR drop 181/0
+```
+
+The first counter is HY-M302 async IR edge-buffer overflow. The host exchange
+path waits synchronously for serial responses, and before the fix the local
+HY-M302 service routine was not called inside those wait loops. That can allow
+captured IR edges to accumulate faster than they are decoded.
+
+KSC-04A is therefore not certified yet.
+
+A cooperative transport wait hook has been added so the local target service
+runs while an OPEN/READ/CLOSE exchange is waiting for its host response. A clean
+rebuild/reflash and fresh IR navigation test is required. A reset/reflash is
+important because the dropped-edge counter is cumulative within a boot.
