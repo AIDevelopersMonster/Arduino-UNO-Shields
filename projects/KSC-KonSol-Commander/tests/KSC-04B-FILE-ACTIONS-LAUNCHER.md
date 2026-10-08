@@ -357,3 +357,51 @@ This confirms that:
 
 The only remaining physical-side-effect acceptance item is direct human
 confirmation that the expected red-then-blue LED sequence was visibly observed.
+
+
+## KSC-04B FULL PHYSICAL PASS
+
+Status: **FULL PHYSICAL PASS**
+
+Final physical confirmation:
+
+- Commander recognized `/host/DEMO.KSC` as an actionable file;
+- ACTIONS exposed `VIEW` and `RUN`;
+- RUN streamed and executed the remote script;
+- terminal printed `KSC-04B RUN START`;
+- red discrete LED visibly turned on, then off;
+- blue discrete LED visibly turned on, then off;
+- terminal printed `KSC-04B RUN PASS`;
+- Commander reported `RUN OK`;
+- runtime free RAM remained 399 B;
+- `IN drop 0`;
+- `IR drop 0/0`;
+- `HOST M/0 R0`;
+- no reset or visible transport corruption occurred.
+
+Certified build:
+
+```text
+Flash       30630 / 32256 B = 94%
+Global SRAM  1537 / 2048 B = 75%
+Runtime free RAM after RUN: 399 B
+```
+
+Bounded claim:
+
+**KSC-04B demonstrates file-oriented actions in KonSol Commander and streamed
+execution of a remote host-backed KSC Script against the Arduino UNO local VFS,
+without loading the complete script into ATmega328P SRAM.**
+
+KSC Script v0.1 remains intentionally minimal:
+
+```text
+PRINT
+WRITE
+WAIT
+STOP
+```
+
+The stage is closed as FULL PHYSICAL PASS. Further demo scripts may be added
+without changing firmware logic, provided they use only this certified
+instruction set and existing writable VFS nodes.
