@@ -5,7 +5,7 @@
 **Author:** A. A. Malachevsky  
 **ORCID:** 0009-0008-6009-3196  
 **DOI:** https://doi.org/10.5281/zenodo.23232216  
-**Manuscript status:** v0.2 - publication candidate  
+**Manuscript status:** v0.2 - final preprint  
 **Experimental evidence snapshot:** `96487e66b159df75a1b3162098590cb23ab4af49`  
 **Project:** KSC - KonSol Commander  
 **Repository:** AIDevelopersMonster/Arduino-UNO-Shields  
@@ -647,11 +647,38 @@ projects/KSC-KonSol-Commander/tools/ksc_raw_tty.py
 
 The build and upload commands are recorded in the two physical test documents.
 
-For exact long-term rebuild reproducibility, the Zenodo package also requires a
-toolchain-capture file recording the exact Arduino CLI version, installed AVR
-core version, Python version, and pyserial version used for the final
-publication candidate. These metadata are intentionally treated as a
-pre-deposit gate rather than guessed from the source tree.
+### 11.5 Public toolchain record
+
+A privacy-scrubbed final environment capture is preserved with the publication
+package:
+
+```text
+OS: Windows 10 Home, version 2009, build 19045
+Git: 2.45.2.windows.1
+Arduino CLI: 1.5.2-rc.1
+Arduino CLI commit: fef6e48df
+Arduino AVR core: 1.8.8
+Board FQBN: arduino:avr:uno
+Python: 3.14.4
+pyserial: 3.5
+Core-separation check: PASS
+```
+
+The public capture intentionally omits local filesystem paths, user-profile
+identifiers, and unrelated working-tree filenames. The working tree was not
+clean at capture time; unrelated local modifications were present, while the
+experimental result remains tied to the frozen evidence snapshot and exact
+KSC_Core blob identifiers given above.
+
+The public record is stored as:
+
+```text
+projects/KSC-KonSol-Commander/publication/zenodo/toolchain-public.txt
+```
+
+A rebuild under different compiler or core versions may legitimately produce
+different flash/SRAM totals. Exact-size reproduction should therefore compare
+the captured toolchain as well as the source snapshot.
 
 ---
 
