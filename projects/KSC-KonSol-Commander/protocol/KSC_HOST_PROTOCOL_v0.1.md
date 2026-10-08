@@ -198,3 +198,119 @@ parser/counters/state:  measured by final build/runtime test
 
 KSC-03A physical certification must measure the actual whole-build flash/global
 SRAM delta and runtime free SRAM.
+
+
+## KSC-03B directory protocol
+
+KSC-03B activates the previously reserved MOUNT, STAT, and LS message types.
+
+### MOUNT
+
+Request:
+
+```text
+TYPE = 0x02 MOUNT_REQ
+LEN  = 0
+```
+
+Success response:
+
+```text
+TYPE = 0x82 MOUNT_RESP
+PAYLOAD:
+  [0] = 1
+```
+
+The mount is lazy: the firmware exposes `/host` in the root namespace and
+performs MOUNT on the first remote operation.
+
+### STAT
+
+Request:
+
+```text
+TYPE = 0x04 STAT_REQ
+PAYLOAD = ASCII KSC path
+example: /host/DOCS
+```
+
+Success response:
+
+```text
+TYPE = 0x84 STAT_RESP
+PAYLOAD:
+  [0] = host node type
+
+0 = NONE
+1 = DIR
+2 = FILE
+```
+
+Remote files are exposed to KSC_Core as read-only nodes. KSC-03B does not stream
+their contents; opening such a node displays a KSC-03C placeholder.
+
+### LS
+
+Request payload:
+
+```text
+[0]     entry index
+[1..N]  ASCII KSC directory path
+```
+
+Special index:
+
+```text
+0xFF = count-only query
+```
+
+Count response:
+
+```text
+TYPE = 0x83 LS_RESP
+PAYLOAD:
+  [0] = visible entry count
+```
+
+Entry response:
+
+```text
+TYPE = 0x83 LS_RESP
+PAYLOAD:
+  [0] = total visible entry count
+  [1] = host node type
+  [2] = name length
+  [3..] ASCII name
+```
+
+KSC-03B v0.1 limits a visible remote basename to 15 ASCII bytes. Longer or
+non-ASCII host names are omitted from the exported view. This is an explicit
+first-version constraint matching the current Commander entry buffer.
+
+### Host containment
+
+The host tool exports exactly one configured directory.
+
+The service rejects:
+
+- paths outside `/host`;
+- `.` and `..` components;
+- drive-letter/colon components;
+- backslash path injection;
+- resolved paths that escape the configured export root.
+
+The default exported test directory is:
+
+```text
+projects/KSC-KonSol-Commander/host-share/
+```
+
+It contains:
+
+```text
+/host
++-- DOCS/
+|   +-- HELLO.TXT
++-- DATA.TXT
++-- README.TXT
+```
