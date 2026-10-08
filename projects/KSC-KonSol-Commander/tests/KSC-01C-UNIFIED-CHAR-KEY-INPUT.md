@@ -1,6 +1,6 @@
 # KSC-01C - Unified Character & Special-Key Input Model
 
-Status: PHYSICAL FUNCTIONAL PASS
+Status: FULL PHYSICAL PASS
 
 Date: 2026-10-08
 
@@ -43,6 +43,22 @@ Global variables use 639 bytes (31%) of dynamic memory,
 leaving 1409 bytes for local variables.
 Maximum is 2048 bytes.
 ```
+
+## Runtime measurements
+
+KSC-01C startup banner on the physical target:
+
+```text
+KSC 0.1C
+Unified Character & Special-Key Input Model
+Arduino UNO / ATmega328P + HY-M302
+IR INIT: OK
+FREE RAM: 1396 B
+EVENT QUEUE: 8
+```
+
+The runtime event queue is fixed at 8 entries and the measured free RAM after
+initialization is 1396 B.
 
 ## Physical result
 
@@ -172,5 +188,6 @@ shell and the future KonSol Commander UI.
 
 Functional physical behavior is PASS.
 
-Build-size measurements are now recorded. Runtime free-RAM from the KSC-01C
-startup banner is still required before marking the test record FULL PHYSICAL PASS.
+Build-size and runtime memory measurements are recorded. Functional TTY and IR
+input behavior, source preservation, and CHAR/KEY separation have all been
+physically verified. KSC-01C is certified FULL PHYSICAL PASS.
