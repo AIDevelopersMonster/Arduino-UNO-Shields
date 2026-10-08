@@ -31,6 +31,19 @@ SRC=TTY
 SRC=IR
 ```
 
+## Build measurements
+
+Arduino CLI compile result:
+
+```text
+Sketch uses 6314 bytes (19%) of program storage space.
+Maximum is 32256 bytes.
+
+Global variables use 639 bytes (31%) of dynamic memory,
+leaving 1409 bytes for local variables.
+Maximum is 2048 bytes.
+```
+
 ## Physical result
 
 The following runtime log was captured from the physical Arduino UNO + HY-M302
@@ -159,6 +172,5 @@ shell and the future KonSol Commander UI.
 
 Functional physical behavior is PASS.
 
-Build-size and runtime free-RAM measurements for KSC-01C were not included in
-the captured test log and should be appended before marking the test record
-FULL PHYSICAL PASS.
+Build-size measurements are now recorded. Runtime free-RAM from the KSC-01C
+startup banner is still required before marking the test record FULL PHYSICAL PASS.
