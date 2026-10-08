@@ -183,3 +183,36 @@ Non-claims:
 - remote script editing is not included;
 - interrupted physical actions are not transactional;
 - script authentication or trust policy is not yet implemented.
+
+
+## Build result
+
+Physical build on Arduino UNO / ATmega328P:
+
+```text
+Sketch uses 31656 bytes (98%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1525 bytes (74%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 523 bytes.
+```
+
+Comparison with KSC-04A:
+
+```text
+                         KSC-04A      KSC-04B      Delta
+Flash                    28816 B      31656 B      +2840 B
+Global SRAM               1499 B       1525 B        +26 B
+Compiler SRAM remainder    549 B        523 B        -26 B
+Flash headroom             3440 B        600 B      -2840 B
+```
+
+Interpretation:
+
+- the build technically fits;
+- 600 bytes of remaining Flash headroom is too small for a comfortable physical
+  certification baseline;
+- SRAM growth is acceptable, but Flash has become the primary blocker;
+- KSC-04B should undergo a Flash audit/optimization before upload and physical
+  launcher testing.
