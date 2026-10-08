@@ -1,0 +1,41 @@
+KSC_Core two-target validation source manifest
+================================================
+
+Experimental evidence snapshot:
+96487e66b159df75a1b3162098590cb23ab4af49
+
+Repository:
+https://github.com/AIDevelopersMonster/Arduino-UNO-Shields
+
+Validated core blobs:
+projects/KSC-KonSol-Commander/libraries/KSC_Core/src/KSC_Core.h
+blob 9190ef5d231acc82498b46a897e32b6e4327ed92
+
+projects/KSC-KonSol-Commander/libraries/KSC_Core/src/KSC_Core.cpp
+blob 211803fcc045b8a2dbba029fa0f7f62b2f6ac8e0
+
+Reference Target:
+projects/KSC-KonSol-Commander/sketches/05_KSC_Core_Reference/05_KSC_Core_Reference.ino
+projects/KSC-KonSol-Commander/sketches/05_KSC_Core_Reference/KSC_ReferenceTarget.h
+projects/KSC-KonSol-Commander/sketches/05_KSC_Core_Reference/KSC_ReferenceTarget.cpp
+
+HY-M302 Target:
+projects/KSC-KonSol-Commander/sketches/06_KSC_Core_HY_M302/06_KSC_Core_HY_M302.ino
+projects/KSC-KonSol-Commander/sketches/06_KSC_Core_HY_M302/KSC_HYM302Target.h
+projects/KSC-KonSol-Commander/sketches/06_KSC_Core_HY_M302/KSC_HYM302Target.cpp
+
+Physical certification:
+projects/KSC-KonSol-Commander/tests/KSC-02C-CORE-REFERENCE-TARGET.md
+projects/KSC-KonSol-Commander/tests/KSC-02D-HY-M302-TARGET-ADAPTER.md
+
+Terminal helper:
+projects/KSC-KonSol-Commander/tools/ksc_raw_tty.py
+
+Publication:
+projects/KSC-KonSol-Commander/publication/KSC_CORE_TWO_TARGET_VALIDATION_v0.2.md
+
+Audit:
+projects/KSC-KonSol-Commander/publication/audit/KSC_CORE_v0.1_PREPUBLICATION_AUDIT.md
+
+Excluded future result:
+KSC-03 /host
