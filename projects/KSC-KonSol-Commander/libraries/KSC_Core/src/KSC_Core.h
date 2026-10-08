@@ -92,6 +92,25 @@ public:
     return KSC_ERR_TARGET;
   }
 
+  virtual KscResult streamWindow(
+    const char *path,
+    uint32_t offset,
+    uint16_t maxBytes,
+    Print &out,
+    uint16_t &bytesRead,
+    uint32_t &totalSize,
+    bool &handled
+  ) {
+    (void)path;
+    (void)offset;
+    (void)maxBytes;
+    (void)out;
+    bytesRead = 0;
+    totalSize = 0;
+    handled = false;
+    return KSC_ERR_TARGET;
+  }
+
   virtual KscResult write(
     const char *path,
     long value
@@ -158,6 +177,7 @@ private:
   enum CommanderView : uint8_t {
     VIEW_DIR = 0,
     VIEW_NODE,
+    VIEW_FILE,
     VIEW_HELP
   };
 
@@ -197,6 +217,9 @@ private:
   uint16_t _editValue;
   NodeMessage _nodeMessage;
   unsigned long _lastRenderMs;
+  uint32_t _fileOffset;
+  uint32_t _fileSize;
+  uint16_t _fileBytesRead;
 
   bool queueEvent(
     uint8_t type,
@@ -274,6 +297,7 @@ private:
   void renderHeader();
   void renderDirectory();
   void renderNode();
+  void renderFile();
   void renderHelp();
   void renderStatusLine();
 
