@@ -41,6 +41,16 @@ public:
     bool &handled
   ) override;
 
+  KscResult streamWindow(
+    const char *path,
+    uint32_t offset,
+    uint16_t maxBytes,
+    Print &out,
+    uint16_t &bytesRead,
+    uint32_t &totalSize,
+    bool &handled
+  ) override;
+
   KscResult write(
     const char *path,
     long value
