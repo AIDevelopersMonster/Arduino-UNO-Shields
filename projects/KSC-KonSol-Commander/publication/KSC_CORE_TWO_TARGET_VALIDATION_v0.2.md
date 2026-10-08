@@ -742,7 +742,7 @@ It does not establish universal hardware or platform independence.
 The next experimental question is whether the same namespace discipline can
 cross a transport boundary and represent streamed host files without violating
 the memory constraints of a 2 KB SRAM system. That question belongs to KSC-03
-and is deliberately left outside this publication candidate.
+and is deliberately left outside this preprint.
 
 ---
 
