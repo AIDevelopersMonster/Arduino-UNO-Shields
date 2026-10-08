@@ -1,8 +1,18 @@
 # KSC_Core Zenodo Package
 
-Status: PRE-DEPOSIT PACKAGE
+Status: PRE-DEPOSIT PACKAGE - DOI AND CREATOR METADATA FILLED
 
 This directory prepares the KSC_Core v0.2 publication candidate for Zenodo.
+
+Publication DOI:
+
+    10.5281/zenodo.23232216
+    https://doi.org/10.5281/zenodo.23232216
+
+Creator:
+
+    A. A. Malachevsky
+    ORCID 0009-0008-6009-3196
 
 The experimental evidence is frozen at commit:
 
@@ -52,14 +62,14 @@ inside the document.
 
 Do not publish the Zenodo record until all items below are resolved.
 
-- [ ] creator name(s) confirmed;
-- [ ] creator order confirmed;
-- [ ] ORCID(s) confirmed;
+- [x] creator name(s) confirmed;
+- [x] creator order confirmed;
+- [x] ORCID(s) confirmed;
 - [ ] publication/document license explicitly selected;
 - [ ] code-license status explicitly decided or code kept as external repository reference;
 - [ ] final toolchain capture recorded;
 - [ ] final manuscript reviewed after DOI insertion;
-- [ ] DOI reserved if it will be printed in the manuscript;
+- [x] DOI supplied and inserted into the manuscript;
 - [ ] PDF/Markdown source pair visually and textually checked;
 - [ ] source snapshot and core blob identifiers unchanged;
 - [ ] final Zenodo description matches the bounded claim;
@@ -67,12 +77,13 @@ Do not publish the Zenodo record until all items below are resolved.
 
 ## DOI workflow
 
-If the manuscript should contain its own Zenodo DOI, create the Zenodo draft and
-reserve a DOI before producing the final PDF.
+The publication DOI is now fixed as:
 
-Keep the draft. Deleting the draft loses the reserved DOI.
+    10.5281/zenodo.23232216
 
-After inserting the DOI into the manuscript:
+It has been inserted into the Markdown publication candidate.
+
+Next:
 
 1. generate the final publication PDF;
 2. verify the PDF;
