@@ -318,3 +318,37 @@ Input drops:
 IR drops:
 Any visible frame leakage into TTY:
 ```
+
+
+### KSC-03A build result
+
+Physical build on Arduino UNO / ATmega328P:
+
+```text
+Sketch uses 22986 bytes (71%) of program storage space.
+Maximum: 32256 bytes.
+
+Global variables use 1396 bytes (68%) of dynamic memory.
+Maximum: 2048 bytes.
+Compiler-reported space left for locals: 652 bytes.
+```
+
+Comparison with the certified KSC-02D HY-M302 build:
+
+```text
+                         KSC-02D      KSC-03A       Delta
+Flash                    20806 B      22986 B      +2180 B
+Global SRAM               1255 B       1396 B       +141 B
+Compiler SRAM remainder    793 B        652 B       -141 B
+```
+
+Interpretation:
+
+- build PASS;
+- transport + reusable target packaging fit within UNO flash/SRAM limits;
+- the SRAM margin is materially smaller than KSC-02D and must be verified at
+  runtime before KSC-03A can be certified;
+- no runtime free-RAM claim is made from compiler globals alone.
+
+Next gate: upload and measure boot/free RAM through KSC Host while testing
+TTY/HOSTFS coexistence.
