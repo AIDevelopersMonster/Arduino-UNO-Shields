@@ -1,0 +1,10 @@
+# Return all writable outputs to a quiet state
+PRINT RESET OUTPUTS
+WRITE /dev/buzzer 0
+WRITE /dev/led/red 0
+WRITE /dev/led/blue 0
+WRITE /dev/rgb/red 0
+WRITE /dev/rgb/green 0
+WRITE /dev/rgb/blue 0
+PRINT RESET PASS
+STOP
