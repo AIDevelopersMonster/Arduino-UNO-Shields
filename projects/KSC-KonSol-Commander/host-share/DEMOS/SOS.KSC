@@ -1,0 +1,39 @@
+# Active buzzer SOS rhythm: short short short, long long long, short short short
+PRINT SOS START
+WRITE /dev/buzzer 1
+WAIT 120
+WRITE /dev/buzzer 0
+WAIT 120
+WRITE /dev/buzzer 1
+WAIT 120
+WRITE /dev/buzzer 0
+WAIT 120
+WRITE /dev/buzzer 1
+WAIT 120
+WRITE /dev/buzzer 0
+WAIT 300
+WRITE /dev/buzzer 1
+WAIT 360
+WRITE /dev/buzzer 0
+WAIT 120
+WRITE /dev/buzzer 1
+WAIT 360
+WRITE /dev/buzzer 0
+WAIT 120
+WRITE /dev/buzzer 1
+WAIT 360
+WRITE /dev/buzzer 0
+WAIT 300
+WRITE /dev/buzzer 1
+WAIT 120
+WRITE /dev/buzzer 0
+WAIT 120
+WRITE /dev/buzzer 1
+WAIT 120
+WRITE /dev/buzzer 0
+WAIT 120
+WRITE /dev/buzzer 1
+WAIT 120
+WRITE /dev/buzzer 0
+PRINT SOS PASS
+STOP
