@@ -151,6 +151,39 @@ Boot status: PASS.
 
 Measured runtime free RAM after initialization: 818 B.
 
+## First ANSI Commander runtime
+
+The first real one-panel ANSI Commander screen was opened successfully on the
+physical Arduino UNO + HY-M302 target.
+
+Observed root screen:
+
+```text
+Path: /
+----------------------------------------
+> [dev/]
+  [proc/]
+  [sys/]
+----------------------------------------
+UP/DOWN Select   ENTER/RIGHT Open
+LEFT/BACK Parent HOME Root
+F9/MENU Help     F10/POWER/Q Shell
+RAM 782 B   IR drop 0/0
+```
+
+Observed runtime state:
+
+```text
+Commander free RAM: 782 B
+IR dropped edges:   0
+IR dropped frames:  0
+```
+
+Interactive smoke navigation was exercised by the user and the controls pressed
+during that session responded correctly. This establishes an initial ANSI UI
+and input-path PASS, but does not replace the complete node-by-node physical
+PASS gate below.
+
 ## Physical PASS gate
 
 KSC-02 is FULL PHYSICAL PASS only after all of the following are observed on
