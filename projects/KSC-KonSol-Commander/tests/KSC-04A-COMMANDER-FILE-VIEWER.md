@@ -302,3 +302,64 @@ actions:
 
 KSC-04A should therefore not be marked FULL PHYSICAL PASS until those two
 actions are captured.
+
+
+## KSC-04A FULL PHYSICAL PASS
+
+Status: **FULL PHYSICAL PASS**
+
+Final physical acceptance route confirmed:
+
+```text
+FILE 0/12445
+...
+FILE 12288/12445
+...
+END OF KSC-03C BIG FILE
+...
+BACK -> /host
+```
+
+The final page offset is correct for a 192-byte viewer window:
+
+```text
+floor((12445 - 1) / 192) * 192 = 12288
+```
+
+Final runtime status remained:
+
+```text
+RAM 437 B   IN drop 0   IR drop 0/0   HOST M/0 R0
+```
+
+Physical acceptance now covers:
+
+- opening a real remote host file from Commander;
+- rendering the first remote byte window;
+- repeated forward navigation in exact 192-byte steps;
+- repeated reverse navigation in exact 192-byte steps;
+- HOME returning to offset 0;
+- END reaching the mathematically correct final window offset 12288;
+- final marker `END OF KSC-03C BIG FILE` visible on the last window;
+- BACK returning from `VIEW_FILE` to `/host`;
+- runtime RAM stable at 437 B throughout captured viewer navigation;
+- `IN drop 0`;
+- `IR drop 0/0`;
+- `HOST M/0 R0`;
+- no reset or visible transport corruption.
+
+Bounded claim:
+
+**KSC-04A demonstrates bounded-window interactive viewing of a remote PC-hosted
+file inside KonSol Commander on Arduino UNO, using 192-byte logical pages over
+32-byte streamed host reads without storing the complete page or complete file
+in ATmega328P SRAM.**
+
+Non-claims remain:
+
+- page boundaries are byte-based and may split text lines;
+- editing is not provided;
+- arbitrary binary-safe rendering is not certified;
+- multi-pane Commander is not part of KSC-04A.
+
+KSC-04A is closed. The next stage is KSC-04B: line-aware text viewing.
