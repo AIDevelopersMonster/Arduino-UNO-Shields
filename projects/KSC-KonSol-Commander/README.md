@@ -1071,3 +1071,31 @@ RAM 463 B   IN drop 0   IR drop 0/0   HOST M/0 R2
 
 The two recoveries are the deliberately injected KSC-03D fault routes; no final
 host error remained.
+
+
+### KSC-04A implementation status
+
+**COMMANDER STREAMING WINDOW VIEWER READY FOR FIRST PHYSICAL BUILD/TEST**
+
+KSC-04A adds a dedicated `VIEW_FILE` mode to KonSol Commander. Remote read-only
+files under `/host` can be opened interactively and rendered in bounded
+192-byte logical windows while the existing host transport continues to fetch
+data in 32-byte chunks.
+
+The viewer keeps only offset/size/window counters as persistent state; it does
+not allocate a 192-byte page buffer.
+
+Current 04A controls:
+
+```text
+UP/LEFT       previous window
+DOWN/RIGHT    next window
+ENTER         next window
+HOME          first window
+END           final window
+BACK          return to directory
+F10/POWER/Q   shell
+```
+
+Page boundaries are byte-based in 04A. Line-aware text navigation remains a
+later stage.
