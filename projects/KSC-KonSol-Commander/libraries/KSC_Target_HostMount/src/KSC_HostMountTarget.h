@@ -51,6 +51,12 @@ public:
     bool &handled
   ) override;
 
+  KscResult launch(
+    const char *path,
+    Print &out,
+    bool &handled
+  ) override;
+
   KscResult write(
     const char *path,
     long value
@@ -128,6 +134,12 @@ private:
 
   void remoteClose(
     uint8_t handle
+  );
+
+  KscResult executeScriptLine(
+    char *line,
+    Print &out,
+    bool &stopRequested
   );
 
   static KscNodeType toNodeType(
