@@ -8,7 +8,15 @@ public:
   static const uint8_t SOF2 = 0x5D;
 
   static const uint8_t TYPE_PING_REQ = 0x01;
+  static const uint8_t TYPE_MOUNT_REQ = 0x02;
+  static const uint8_t TYPE_LS_REQ = 0x03;
+  static const uint8_t TYPE_STAT_REQ = 0x04;
+
   static const uint8_t TYPE_PING_RESP = 0x81;
+  static const uint8_t TYPE_MOUNT_RESP = 0x82;
+  static const uint8_t TYPE_LS_RESP = 0x83;
+  static const uint8_t TYPE_STAT_RESP = 0x84;
+
   static const uint8_t TYPE_ERROR_RESP = 0x7F;
 
   static const uint8_t ERR_BAD_LENGTH = 0x01;
@@ -35,6 +43,18 @@ public:
   ) override;
 
   using Print::write;
+
+  bool exchange(
+    uint8_t requestType,
+    const uint8_t *requestPayload,
+    uint8_t requestLen,
+    uint8_t expectedResponseType,
+    uint8_t *responsePayload,
+    uint8_t responseCapacity,
+    uint8_t &responseLen,
+    uint8_t &errorCode,
+    unsigned long timeoutMs = 400UL
+  );
 
   uint16_t framesRx() const {
     return _framesRx;
@@ -98,6 +118,13 @@ private:
   uint16_t _discardRemaining;
   unsigned long _lastParserByteMs;
 
+  bool _waitingResponse;
+  bool _responseReady;
+  uint8_t _responseType;
+  uint8_t _responseSeq;
+  uint8_t _responseLen;
+  uint8_t _requestSeq;
+
   uint16_t _framesRx;
   uint16_t _framesTx;
   uint16_t _crcErrors;
@@ -113,7 +140,12 @@ private:
   void resetParser();
   void startFrame();
 
+  bool isKnownResponse(
+    uint8_t type
+  ) const;
+
   void handleFrame();
+
   void sendFrame(
     uint8_t type,
     uint8_t seq,
