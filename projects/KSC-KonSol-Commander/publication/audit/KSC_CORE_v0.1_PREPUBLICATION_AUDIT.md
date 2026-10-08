@@ -450,3 +450,37 @@ Zenodo metadata readiness:     BLOCKED ON CREATOR/LICENSE
 KSC-03 separation:             PASS
 Overall manuscript decision:   REVISE -> v0.2 PUBLICATION CANDIDATE
 ```
+
+
+---
+
+## 10. Post-audit metadata resolution
+
+After the v0.1 audit, the following publication metadata were supplied:
+
+```text
+Creator:
+A. A. Malachevsky
+
+ORCID:
+0009-0008-6009-3196
+
+Zenodo DOI:
+10.5281/zenodo.23232216
+https://doi.org/10.5281/zenodo.23232216
+```
+
+Resolved audit blockers:
+
+- creator identity: RESOLVED;
+- creator order: RESOLVED (single creator);
+- ORCID: RESOLVED;
+- DOI: RESOLVED and inserted into v0.2 publication candidate.
+
+Remaining pre-deposit/final-release blockers:
+
+- publication/document license must be explicitly selected;
+- final toolchain capture must be recorded;
+- final PDF must be generated and visually audited;
+- if source code is uploaded as a licensed software artifact, its software
+  license must be decided separately.
