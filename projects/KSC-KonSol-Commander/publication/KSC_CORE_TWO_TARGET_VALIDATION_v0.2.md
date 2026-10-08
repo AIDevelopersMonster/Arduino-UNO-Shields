@@ -10,7 +10,8 @@
 **Project:** KSC - KonSol Commander  
 **Repository:** AIDevelopersMonster/Arduino-UNO-Shields  
 **Validated platform:** Arduino UNO / ATmega328P  
-**Date:** 2026-10-08
+**Date:** 2026-10-08  
+**License:** CC BY 4.0 (article/preprint only; source-code licensing is separate)
 
 ---
 
@@ -19,6 +20,14 @@
 Malachevsky, A. A. (2026). **KSC_Core: A Target-Decoupled Virtual Namespace and ANSI Commander Core for Resource-Constrained 8-bit Systems**. Zenodo. https://doi.org/10.5281/zenodo.23232216
 
 ORCID: https://orcid.org/0009-0008-6009-3196
+
+---
+
+## License
+
+This article/preprint is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.
+
+The license statement in this manuscript applies to the publication text and does not by itself assign a software license to the project source code.
 
 ---
 
