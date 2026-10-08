@@ -24,6 +24,22 @@ Core blob identity:
 
 ## 2. Required final environment capture
 
+A helper script is provided:
+
+    projects/KSC-KonSol-Commander/publication/zenodo/capture-toolchain.ps1
+
+Run it from the repository root:
+
+~~~powershell
+powershell -ExecutionPolicy Bypass -File .\projects\KSC-KonSol-Commander\publication\zenodo\capture-toolchain.ps1
+~~~
+
+It writes:
+
+    projects/KSC-KonSol-Commander/publication/zenodo/toolchain-final.txt
+
+The equivalent manual commands are shown below.
+
 Run from PowerShell before deposit:
 
 ~~~powershell
