@@ -36,7 +36,7 @@ powershell -ExecutionPolicy Bypass -File .\projects\KSC-KonSol-Commander\publica
 
 It writes:
 
-    projects/KSC-KonSol-Commander/publication/zenodo/toolchain-final.txt
+    projects/KSC-KonSol-Commander/publication/zenodo/toolchain-public.txt
 
 The equivalent manual commands are shown below.
 
@@ -95,11 +95,34 @@ Save the complete output:
 
   "=== PYSERIAL ==="
   python -m pip show pyserial
-} *> .\projects\KSC-KonSol-Commander\publication\zenodo\toolchain-final.txt
+} *> .\projects\KSC-KonSol-Commander\publication\zenodo\toolchain-public.txt
 ~~~
 
-Important: working-tree status is recorded because exact rebuild claims should
-distinguish the committed snapshot from unrelated local modifications.
+Privacy rule: the public capture records only whether the working tree was clean
+and the number of uncommitted entries. It intentionally omits local filesystem
+paths, profile identifiers, and unrelated working-tree filenames.
+
+## 2A. Certified public toolchain record
+
+The publication capture produced the following non-identifying environment
+record:
+
+    OS: Windows 10 Home, version 2009, build 19045
+    Git: 2.45.2.windows.1
+    Arduino CLI: 1.5.2-rc.1
+    Arduino CLI commit: fef6e48df
+    Arduino AVR core: 1.8.8
+    Board FQBN: arduino:avr:uno
+    Python: 3.14.4
+    pyserial: 3.5
+    Core-separation check: PASS
+
+The local working tree was not clean at capture time, but the names and paths of
+unrelated local files are intentionally excluded from the public record.
+
+The public record is stored in:
+
+    projects/KSC-KonSol-Commander/publication/zenodo/toolchain-public.txt
 
 ## 3. Reference Target rebuild
 
