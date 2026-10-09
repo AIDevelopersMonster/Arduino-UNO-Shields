@@ -126,9 +126,13 @@ Shield. This is separate from the original LAB-01 with SD 4GB.
 - TEST-03 minimal HTTP server: **FULL PASS** (browser HTML and HTTP 200).
 - TEST-04 Ethernet browser GPIO control: **PENDING** (firmware published,
   actual hardware verification still required).
+- TEST-05 TCP and TEST-06 UDP: **FULL PASS** for their bounded echo tests.
+- [TEST-07 Network Robustness](labs/01-W5100-Ethernet/TEST-07_Network_Robustness/):
+  DHCP retries, UDP/TCP recovery, bounded soak and PowerShell event logs;
+  **BUILD VERIFIED / HARDWARE PENDING**.
 
 The lab README includes full pin mapping, serial/Arduino CLI commands,
-certification evidence and the proposed TEST-05–10 programme.
+certification evidence and the TEST-01–10 programme.
 
 See: [labs/01-W5100-Ethernet](labs/01-W5100-Ethernet/)
 

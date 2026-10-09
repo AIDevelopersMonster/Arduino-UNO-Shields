@@ -5,6 +5,7 @@ build/
 *.eep
 *.map
 *.bin
+labs/01-W5100-Ethernet/TEST-07_Network_Robustness/runs/
 
 # Python test tools
 __pycache__/
