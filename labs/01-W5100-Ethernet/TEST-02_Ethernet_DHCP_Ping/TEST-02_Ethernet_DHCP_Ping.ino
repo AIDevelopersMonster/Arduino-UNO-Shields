@@ -1,10 +1,19 @@
-/*
-  Arduino UNO + W5100 Ethernet Shield
-  LAB-01 / TEST-02: Ethernet DHCP + IP + PC ping
-  microSD absent. W5100 CS=D10, SD CS=D4 (disabled).
-  W5100 linkStatus() may report Unknown: inspect LINK LED.
-  Serial 115200.
-*/
+/**
+ * Arduino UNO & Shields | LAB-01 (W5100 Ethernet, no microSD)
+ * TEST-02: DHCP, IPv4 and External ICMP Ping
+ *
+ * Purpose: Initialize Ethernet, obtain an IPv4 DHCP lease and expose network settings for PC ping.
+ * Target: Arduino UNO / ATmega328P (16 MHz, 32 KB flash, 2 KB SRAM).
+ * Hardware: Blue WIZnet W5100 Ethernet Shield (HanRun RJ45 sample).
+ * Setup: Ethernet library; W5100 D10; disabled SD D4; RJ45 to DHCP LAN.
+ * Serial monitor: 115200 baud. Build: arduino-cli --fqbn arduino:avr:uno.
+ * Expected: PASS: W5100 identified, DHCP lease obtained, and PC ping replies verified separately.
+ * Limitations: Firmware cannot certify Ping by itself; W5100 linkStatus may be UNKNOWN.
+ * Source: https://github.com/AIDevelopersMonster/Arduino-UNO-Shields
+ * Evidence: see sibling RESULT_2026-10-09.md when the test is certified.
+ * Documentation-only revision: operational logic preserved.
+ */
+
 #include <SPI.h>
 #include <Ethernet.h>
 
@@ -19,6 +28,7 @@ void printAddress(const __FlashStringHelper *label, IPAddress address) {
   Serial.println(address);
 }
 
+// Older W5100 silicon does not expose a reliable link status to this library.
 void printLink() {
   EthernetLinkStatus status = Ethernet.linkStatus();
   Serial.print(F("Library link status: "));
@@ -27,6 +37,7 @@ void printLink() {
   else Serial.println(F("UNKNOWN (normal for W5100; inspect LINK LED)"));
 }
 
+// Initialize Ethernet, request DHCP, and print parameters for PC-side ping.
 void setup() {
   Serial.begin(115200);
   pinMode(ETH_CS, OUTPUT); digitalWrite(ETH_CS, HIGH);
@@ -64,6 +75,7 @@ void setup() {
   Serial.println(F("Record LINK LED state and ping result."));
 }
 
+// Renew DHCP leases periodically without resetting the networking stack.
 void loop() {
   if (!dhcpOK) return;
   if (millis() - lastCheck >= 30000UL) {
