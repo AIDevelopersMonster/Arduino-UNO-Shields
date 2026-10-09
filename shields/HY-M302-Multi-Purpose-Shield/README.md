@@ -10,8 +10,10 @@ documented as the **Keyestudio KS0183 Multi-purpose Shield V1**. For this
 repository, KS0183 documentation is therefore used as a **family-level reference**
 only.
 
-The exact electrical behavior of our physical HY-M302 sample must still be
-bench-certified before family-level assumptions are promoted to verified facts.
+Family-level documentation is used only as a reference. The primary onboard
+mapping and the major functions listed below have now been bench-certified on
+our physical HY-M302 sample; untested expansion interfaces remain explicitly
+marked as family reference rather than silently promoted to PASS.
 
 Current repository status:
 
@@ -352,13 +354,15 @@ A claim becomes **bench-verified** only after it is reproduced on our own sample
 
 ## Arduino library
 
-Initial low-overhead library:
+Low-overhead library:
 
 [HY_M302](../../libraries/HY_M302/)
 
-The first version intentionally uses compact in-house routines for the DHT11 and
-basic NEC IR decoding so Flash/SRAM cost stays visible on ATmega328P. Hardware
-behavior remains subject to physical certification on our shield.
+The current v0.2.0 library uses compact in-house routines for the DHT11 and a
+non-blocking NEC decoder so Flash/SRAM cost remains visible on ATmega328P.
+Buttons, LEDs, RGB, potentiometer, LDR, DHT11, active buzzer and the async NEC
+path are physically certified on the tested sample. The fitted LM35 remains a
+sample-specific FAIL.
 
 
 ## Physical bench results
@@ -388,3 +392,24 @@ Previously in the same manual test:
 - RGB polarity is direct: 0=off, 255=full;
 - D12 = red discrete LED;
 - D13 = blue discrete LED.
+
+
+## KSC / KonSol Commander stage
+
+This shield also became the first demanding physical target for the
+target-decoupled KSC / KonSol Commander architecture.
+
+The completed Arduino UNO + HY-M302 KSC phase physically validated a unified
+`/dev /proc /sys /host` namespace, ANSI Commander, PC+IR semantic input,
+streamed host files, recoverable explicit-offset reads, remote file viewing,
+streamed `.KSC` execution, and a RAM-resident SW1 runtime profile selected by
+host-side programs.
+
+Stage preprint:
+https://doi.org/10.5281/zenodo.23251546
+
+KSC-04 video:
+https://youtu.be/pqV5DG1o-WA
+
+Project:
+[projects/KSC-KonSol-Commander](../../projects/KSC-KonSol-Commander/)
