@@ -1,6 +1,6 @@
 # LAB-01B — Arduino UNO + W5100 Ethernet Shield (blue board, no SD)
 
-> **Scope and naming.** This directory is the independently tested **blue W5100 Ethernet Shield** sequence (TEST-01–05) with microSD **removed**. It supplements, but does not supersede, the older [LAB-01 — UNO + W5100 + SD 4GB](../01-UNO-W5100-SD-4GB/README.md) and the [shield hardware inventory](../../shields/W5100-Ethernet-SD/README.md). Evidence and PASS reports apply to the **specific tested sample**, not all W5100 clones.
+> **Scope and naming.** This directory is the independently tested **blue W5100 Ethernet Shield** sequence (TEST-01–06) with microSD **removed**. It supplements, but does not supersede, the older [LAB-01 — UNO + W5100 + SD 4GB](../01-UNO-W5100-SD-4GB/README.md) and the [shield hardware inventory](../../shields/W5100-Ethernet-SD/README.md). Evidence and PASS reports apply to the **specific tested sample**, not all W5100 clones.
 
 ## Hardware and wiring
 
@@ -19,6 +19,7 @@
 | [TEST-03 HTTP Server](TEST-03_HTTP_Server/) | HTTP 200 on /health and /; HTML displayed; repeated requests | **FULL PASS** — DHCP 192.168.1.80; both HTTP endpoints 200; browser HTML; 19 requests, uptime 375s observed | [Result](TEST-03_HTTP_Server/RESULT_2026-10-09.md) |
 | [TEST-04 Web Control](TEST-04_Web_Control/) | Browser commands for D6/D7; independent physical output verification | **SOFTWARE PASS** — browser, 10 request routes; physical GPIO still pending | [Evidence](TEST-04_Web_Control/RESULT_2026-10-09.md) |
 | [TEST-05 TCP Echo](TEST-05_TCP_Echo/) | 20 independent TCP exchanges, 64-byte boundary, reconnect after abort | **FULL PASS** — 22 exact echoes, 23 connections, expected aborted request | [Result](TEST-05_TCP_Echo/RESULT_2026-10-09.md) |
+| [TEST-06 UDP Echo](TEST-06_UDP_Communication/) | Binary echo 1–128 bytes, 20 sequenced packets, host byte verification | **PENDING** — Arduino + PowerShell sources published | [Guide](TEST-06_UDP_Communication/README.md) |
 
 **Pass granularity:** TEST-01–03 certify only their listed functions; TEST-04 has a software-only result; TEST-05 has FULL PASS for the specified TCP echo protocol. Neither short Ping nor a few HTTP requests certify throughput, uptime over days, security, or operation of the microSD subsystem. TEST-04 software state and actual pin voltage are separate measurements.
 
@@ -49,13 +50,13 @@ Leave microSD out. Check the current Arduino DHCP IP. In another PowerShell wind
 | --- | --- | --- |
 | TEST-04 | Browser Web Control | D6/D7 UI + JSON + independent output level measurement |
 | TEST-05 | TCP echo server + Windows client | **FULL PASS**; 20 sessions, 64-byte boundary, interrupted client/reconnect |
-| TEST-06 | UDP communication | Datagram send/receive and integrity checks in LAN |
+| TEST-06 | UDP communication | **Published; hardware PENDING** — binary Echo, four payload sizes and 20 datagrams |
 | TEST-07 | Network robustness | DHCP renewal, link unplug/reconnect, bounded soak run and failure logs |
 | TEST-08 | microSD hardware certification | Card presence, init, read/write, file integrity; separate SPI/CS verification |
 | TEST-09 | W5100 + microSD integration | Network traffic together with SD file read/write, SRAM pressure |
 | TEST-10 | Applied miniature network device | Reproducible GPIO / telemetry demonstration with documented limits |
 
-TEST-05 firmware and host client are hardware-verified for this bounded test. TEST-06 and later are proposed. The older LAB-01 SD branch has separate historic results and should not be silently merged with these outcomes.
+TEST-05 firmware and host client are hardware-verified for this bounded test. TEST-06 is published but awaiting hardware results; TEST-07 onward are proposed. The older LAB-01 SD branch has separate historic results and should not be silently merged with these outcomes.
 
 ## Documentation map
 
@@ -64,4 +65,5 @@ TEST-05 firmware and host client are hardware-verified for this bounded test. TE
 - [TEST-03](TEST-03_HTTP_Server/README.md) — browser and HTTP endpoint validation.
 - [TEST-04](TEST-04_Web_Control/README.md) — Web Control API, software test evidence and outstanding GPIO measurements.
 - [TEST-05](TEST-05_TCP_Echo/README.md) — TCP echo firmware, Windows client and reconnection protocol.
+- [TEST-06](TEST-06_UDP_Communication/README.md) — binary UDP Echo and PowerShell verification.
 - [Hardware inventory](../../shields/W5100-Ethernet-SD/README.md) and [legacy lab with SD](../01-UNO-W5100-SD-4GB/README.md).
