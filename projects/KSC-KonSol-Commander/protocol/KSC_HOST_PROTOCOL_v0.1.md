@@ -1,6 +1,11 @@
-# KSC Host Protocol v0.1 - Framing Draft
+# KSC Host Protocol - Framing v0.1 + Recoverable READ v0.2
 
-Status: KSC-03A DESIGN BASELINE
+Status: **PHYSICALLY VALIDATED THROUGH KSC-03D**
+
+The original v0.1 framing, message type allocation, CRC-8/ATM rule, 48-byte
+payload bound and TTY/HOSTFS coexistence are physically certified on Arduino
+UNO / ATmega328P. KSC-03D retains that frame format while upgrading READ to the
+explicit-offset v0.2 payload documented below.
 
 ## Objective
 
@@ -11,7 +16,7 @@ The framing is deliberately small and binary.
 
 ## Frame format
 
-Candidate v0.1 frame:
+Certified v0.1 frame:
 
 ```text
 +------+-----+------+-----+------+---------+-------+
@@ -35,8 +40,8 @@ Maximum complete v0.1 frame size:
 2 + 1 + 1 + 1 + 48 + 1 = 54 bytes
 ```
 
-The exact SOF choice is provisional until KSC-03A proves that it coexists
-cleanly with the existing terminal parser.
+The SOF pair was subsequently physically validated through KSC-03A..03D while
+sharing the same serial connection with ordinary terminal traffic.
 
 ## Initial message types
 
@@ -65,7 +70,8 @@ cleanly with the existing terminal parser.
 0x7F ERROR_RESP
 ```
 
-KSC-03A needs only PING_REQ/PING_RESP plus explicit malformed-frame handling.
+KSC-03A initially exercised PING/error handling; KSC-03B..03D subsequently
+activated MOUNT, STAT, LS, OPEN, READ, and CLOSE on the same message type map.
 
 ## Parser policy
 
@@ -196,8 +202,8 @@ TTY queue:              32 B
 parser/counters/state:  measured by final build/runtime test
 ```
 
-KSC-03A physical certification must measure the actual whole-build flash/global
-SRAM delta and runtime free SRAM.
+KSC-03A physical certification measured the whole-build Flash/global SRAM delta
+and runtime free SRAM; later KSC-03 stages reused the same bounded transport.
 
 
 ## KSC-03B directory protocol
@@ -459,3 +465,33 @@ KSC-03D recovery policy:
 
 This protocol change is the recovery basis for final remote `/host`
 certification.
+
+
+## Final certification summary
+
+The protocol line was physically exercised through KSC-03D with:
+
+- one Serial/COM link carrying both TTY and HOSTFS traffic;
+- maximum framed payload 48 bytes;
+- CRC-8/ATM over TYPE, SEQ, LEN and PAYLOAD;
+- remote `/host` mount and directory enumeration;
+- host file streaming in requests of at most 32 data bytes;
+- explicit 32-bit offset in recoverable READ v0.2;
+- successful retry after one deliberately lost READ response;
+- successful reopen/resume after a deliberately invalidated file handle.
+
+Representative KSC-03D status:
+
+```text
+RAM 463 B   IN drop 0   IR drop 0/0   HOST M/0 R2
+```
+
+`R2` is the cumulative count of the two deliberately injected and recovered
+faults. `HOST M/0` indicates no final host error remained.
+
+The protocol is intentionally bounded to the certified implementation. This
+document does not claim arbitrary binary-safe terminal multiplexing, general
+distributed transactions, or unlimited concurrent remote handles.
+
+Stage preprint:
+https://doi.org/10.5281/zenodo.23251546
