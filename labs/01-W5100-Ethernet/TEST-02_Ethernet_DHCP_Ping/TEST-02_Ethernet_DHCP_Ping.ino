@@ -38,17 +38,11 @@ void setup() {
   Serial.println(F("Connect RJ45 to router/switch with DHCP"));
   Ethernet.init(ETH_CS);
 
-  int hw = Ethernet.hardwareStatus();
-  Serial.print(F("Controller before begin: "));
-  if (hw == EthernetW5100) Serial.println(F("W5100"));
-  else if (hw == EthernetNoHardware) Serial.println(F("NOT DETECTED (may require begin)"));
-  else Serial.println(F("OTHER / UNKNOWN"));
-
   Serial.println(F("DHCP request..."));
   // Timeout 10 seconds, response timeout 2 seconds
   dhcpOK = (Ethernet.begin(mac, 10000, 2000) != 0);
 
-  hw = Ethernet.hardwareStatus();
+  int hw = Ethernet.hardwareStatus();
   Serial.print(F("Controller: "));
   if (hw == EthernetW5100) Serial.println(F("W5100"));
   else if (hw == EthernetNoHardware) Serial.println(F("NO HARDWARE"));
