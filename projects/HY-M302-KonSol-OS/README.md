@@ -1,5 +1,28 @@
 # Project 01 — HY-M302 KonSol Operating Environment
 
+## Status and relationship to KSC
+
+This directory is retained as the earlier **driver-based KonSol-HY design
+branch**. It is not the current KSC / KonSol Commander implementation and should
+not be read as the present project status.
+
+The hardware/library work that originated here remains useful, but the
+target-decoupled execution line moved to:
+
+[../KSC-KonSol-Commander](../KSC-KonSol-Commander/)
+
+That KSC line has now completed the Arduino UNO + HY-M302 target phase through
+KSC-04C, including `/host` streaming, Commander File Viewer, streamed
+`.KSC` execution and a RAM-resident SW1 runtime profile.
+
+HY-M302 stage preprint:
+https://doi.org/10.5281/zenodo.23251546
+
+This document remains a design/reference record for ideas such as explicit
+driver resource ownership, optional Bluetooth/SD/display integration and
+conflict analysis. Those proposed stages are not silently treated as completed
+unless separately physically certified.
+
 ## Concept
 
 A special-purpose KonSol operating environment for Arduino UNO / ATmega328P +
@@ -401,13 +424,17 @@ test.
 
 ## Current status
 
-**DESIGN OPENED / HARDWARE CERTIFICATION IN PROGRESS.**
+**LEGACY DESIGN BRANCH / HARDWARE FOUNDATION CERTIFIED; ACTIVE KSC WORK MOVED
+TO KSC-KonSol-Commander.**
 
-The shared HY_M302 library already has physical PASS results for buttons, LEDs,
-RGB, potentiometer, LDR, DHT11, active buzzer and the non-blocking NEC IR path.
-The IR path has also passed its zero-drop live stress test. The tested LM35
-remains a sample-specific FAIL. Expansion interfaces remain open before P0 is
-closed.
+The shared HY_M302 library has physical PASS results for buttons, LEDs, RGB,
+potentiometer, LDR, DHT11, active buzzer and the non-blocking NEC IR path. The
+IR path also passed its zero-drop live stress test. The tested LM35 remains a
+sample-specific FAIL. D7/D8, I2C and TTL UART expansion remain separate
+compatibility questions.
+
+The completed KSC HY-M302 phase should be used for current executable-system
+status rather than this older proposed P0..P9 roadmap.
 
 Related:
 
