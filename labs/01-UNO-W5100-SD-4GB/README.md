@@ -82,3 +82,12 @@ The same stand can then be used for real applications:
 
 A practical project is added only after the underlying hardware path has been
 verified by a smaller laboratory example.
+
+## Parallel blue W5100 Ethernet laboratory (without SD)
+
+There is now a separate [LAB-01B blue W5100 track](../01-W5100-Ethernet/README.md).
+Its TEST-01 SPI, TEST-02 DHCP/Ping and TEST-03 HTTP are certified on the
+blue W5100 sample; TEST-04 Web Control is pending. **Do not transfer** those
+PASS verdicts to the original RobotDyn or to the microSD portion of this
+laboratory without direct hardware measurements. Refer to the LAB-01B README
+for the consolidated roadmap, pin map, current Arduino CLI and result files.
