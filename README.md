@@ -116,6 +116,22 @@ then use the verified stand for practical network projects.
 
 See: [labs/01-UNO-W5100-SD-4GB](labs/01-UNO-W5100-SD-4GB/)
 
+### LAB-01B — Blue W5100 Ethernet Shield (no microSD)
+
+Independent evidence-driven test series for the blue WIZnet W5100 Ethernet
+Shield. This is separate from the original LAB-01 with SD 4GB.
+
+- TEST-01 raw SPI register probe: **PASS** (read/write/restore).
+- TEST-02 DHCP + host-side Ping: **PASS** (4/4 replies, 0% loss).
+- TEST-03 minimal HTTP server: **FULL PASS** (browser HTML and HTTP 200).
+- TEST-04 Ethernet browser GPIO control: **PENDING** (firmware published,
+  actual hardware verification still required).
+
+The lab README includes full pin mapping, serial/Arduino CLI commands,
+certification evidence and the proposed TEST-05–10 programme.
+
+See: [labs/01-W5100-Ethernet](labs/01-W5100-Ethernet/)
+
 ### LAB-02 — Arduino UNO + Multi-Function Shield
 
 Unified diagnostic firmware plus a PC GUI with tabs for live video-friendly
