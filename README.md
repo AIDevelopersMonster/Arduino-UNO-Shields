@@ -129,7 +129,8 @@ Shield. This is separate from the original LAB-01 with SD 4GB.
 - TEST-05 TCP and TEST-06 UDP: **FULL PASS** for their bounded echo tests.
 - [TEST-07 Network Robustness](labs/01-W5100-Ethernet/TEST-07_Network_Robustness/):
   DHCP retries, UDP/TCP recovery, bounded soak and PowerShell event logs;
-  **BUILD VERIFIED / HARDWARE PENDING**.
+  **BUILD VERIFIED / Baseline 60s PASS / remaining six scenarios PENDING**;
+  [hardware result](labs/01-W5100-Ethernet/TEST-07_Network_Robustness/RESULT_2026-10-10.md).
 
 The lab README includes full pin mapping, serial/Arduino CLI commands,
 certification evidence and the TEST-01–10 programme.
