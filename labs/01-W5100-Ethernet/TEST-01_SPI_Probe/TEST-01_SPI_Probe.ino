@@ -1,7 +1,25 @@
+/**
+ * Arduino UNO & Shields | LAB-01 (W5100 Ethernet, no microSD)
+ * TEST-01: Raw SPI Register Probe
+ *
+ * Purpose: Verify W5100 register-level access without Ethernet library or cable.
+ * Target: Arduino UNO / ATmega328P (16 MHz, 32 KB flash, 2 KB SRAM).
+ * Hardware: Blue WIZnet W5100 Ethernet Shield (HanRun RJ45 sample).
+ * Setup: SPI Mode 0 at 1 MHz; W5100 D10; disabled SD D4; no microSD.
+ * Serial monitor: 115200 baud. Build: arduino-cli --fqbn arduino:avr:uno.
+ * Expected: PASS: RTR test pattern 0x1234 is read back and original RTR restored.
+ * Limitations: No proof of Ethernet PHY, DHCP, link, HTTP or SD.
+ * Source: https://github.com/AIDevelopersMonster/Arduino-UNO-Shields
+ * Evidence: see sibling RESULT_2026-10-09.md when the test is certified.
+ * Documentation-only revision: operational logic preserved.
+ */
+
+// The core SPI library is sufficient; no Ethernet stack is used in this test.
 #include <SPI.h>
 const uint8_t ETH_CS = 10;
 const uint8_t SD_CS = 4;
 SPISettings cfg(1000000, MSBFIRST, SPI_MODE0);
+// Read one W5100 register using the legacy 4-byte SPI transaction (0x0F).
 uint8_t rd(uint16_t a) {
   SPI.beginTransaction(cfg);
   digitalWrite(ETH_CS, LOW);
@@ -11,6 +29,7 @@ uint8_t rd(uint16_t a) {
   SPI.endTransaction();
   return v;
 }
+// Write one W5100 register using opcode 0xF0; caller controls test values.
 void wr(uint16_t a, uint8_t v) {
   SPI.beginTransaction(cfg);
   digitalWrite(ETH_CS, LOW);
@@ -23,6 +42,7 @@ void hex8(uint8_t v) {
   if (v < 16) Serial.print('0');
   Serial.print(v, HEX);
 }
+// Execute a reversible write/read/restore test on the retry-time register (RTR).
 void setup() {
   Serial.begin(115200);
   pinMode(ETH_CS, OUTPUT); digitalWrite(ETH_CS, HIGH);
@@ -42,4 +62,5 @@ void setup() {
     F("RESULT: PASS / W5100 SPI READ WRITE OK") :
     F("RESULT: FAIL / W5100 SPI NOT VERIFIED"));
 }
+// One-shot diagnostic: no periodic work is necessary.
 void loop() {}
