@@ -1,0 +1,64 @@
+KSC HY-M302 stage publication manifest
+====================================
+
+DOI:
+10.5281/zenodo.23251546
+https://doi.org/10.5281/zenodo.23251546
+
+Creator:
+A. A. Malachevsky
+ORCID 0009-0008-6009-3196
+
+Experimental evidence snapshot:
+cd7669ed905d03c50d5559665e619441b522bf9e
+
+Repository:
+https://github.com/AIDevelopersMonster/Arduino-UNO-Shields
+
+Core/project documentation:
+projects/KSC-KonSol-Commander/README.md
+projects/KSC-KonSol-Commander/QUICKSTART.md
+projects/KSC-KonSol-Commander/protocol/KSC_HOST_PROTOCOL_v0.1.md
+
+Stage article spine:
+projects/KSC-KonSol-Commander/publication/KSC_HYM302_STAGE_ARTICLE_SPINE_v0.1.md
+
+Physical certification:
+projects/KSC-KonSol-Commander/tests/KSC-01A-VFS-TTY-CORE.md
+projects/KSC-KonSol-Commander/tests/KSC-01B-UNIFIED-KEYBOARD.md
+projects/KSC-KonSol-Commander/tests/KSC-01C-UNIFIED-CHAR-KEY-INPUT.md
+projects/KSC-KonSol-Commander/tests/KSC-02-ANSI-COMMANDER.md
+projects/KSC-KonSol-Commander/tests/KSC-02C-CORE-REFERENCE-TARGET.md
+projects/KSC-KonSol-Commander/tests/KSC-02D-HY-M302-TARGET-ADAPTER.md
+projects/KSC-KonSol-Commander/tests/KSC-03-HOST-FILESYSTEM-MOUNT.md
+projects/KSC-KonSol-Commander/tests/KSC-03D-RECOVERY-CERTIFICATION.md
+projects/KSC-KonSol-Commander/tests/KSC-04A-COMMANDER-FILE-VIEWER.md
+projects/KSC-KonSol-Commander/tests/KSC-04B-FILE-ACTIONS-LAUNCHER.md
+projects/KSC-KonSol-Commander/tests/KSC-04C-SW1-RUNTIME-PROFILE.md
+
+Final firmware target:
+projects/KSC-KonSol-Commander/sketches/12_KSC_04B_FileActionsLauncher/
+
+Libraries:
+projects/KSC-KonSol-Commander/libraries/KSC_Core/
+projects/KSC-KonSol-Commander/libraries/KSC_HostTransport/
+projects/KSC-KonSol-Commander/libraries/KSC_Target_HostMount/
+projects/KSC-KonSol-Commander/libraries/KSC_Target_HY_M302/
+
+Host tool:
+projects/KSC-KonSol-Commander/tools/ksc_host.py
+
+Host files / demos:
+projects/KSC-KonSol-Commander/host-share/
+
+Final demonstration video:
+https://youtu.be/pqV5DG1o-WA
+
+Earlier related publication:
+KSC_Core DOI 10.5281/zenodo.23232216
+
+Explicitly outside this stage record:
+future LCD Keypad Shield targets
+future relay/control targets
+future W5100/SD KSC targets
+future MCU/SBC target phases
