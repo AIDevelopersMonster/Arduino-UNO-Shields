@@ -29,3 +29,12 @@ First shield in the **Arduino UNO & Shields** project.
 - 4 GB SD card
 
 Pin mapping and verified examples will be added after bench tests.
+
+## Verified blue W5100 sample (separate no-SD test track)
+
+The [blue W5100 Ethernet laboratory](../../labs/01-W5100-Ethernet/README.md)
+currently certifies SPI (TEST-01), DHCP/Ping (TEST-02) and HTTP serving
+(TEST-03). TEST-04 browser-controlled D6/D7 is published but **not yet bench
+certified**. No result of these tests is evidence that the microSD slot works.
+The older [LAB-01 W5100 + SD 4GB](../../labs/01-UNO-W5100-SD-4GB/README.md)
+remains a separate hardware track. [Full test roadmap and CLI](../../labs/01-W5100-Ethernet/README.md).
