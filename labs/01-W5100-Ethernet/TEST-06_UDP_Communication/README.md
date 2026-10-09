@@ -1,6 +1,6 @@
 # TEST-06 — Binary UDP Communication
 
-**Status: PENDING hardware test.** Arduino UNO + blue W5100 Shield; no microSD.
+**Status: FULL PASS (2026-10-09).** [Observed test evidence](RESULT_2026-10-09.md). Arduino UNO + blue W5100 Shield; no microSD.
 
 UDP port **5001** receives binary payloads of 1–128 bytes and sends exact bytes back to the sender. No TCP connection, no HTTP. UDP does not guarantee delivery or ordering.
 
@@ -38,3 +38,6 @@ $ip = '192.168.1.83' # EXAMPLE ONLY; replace with new address
 Expected final result: `RESULT: PASS / sent=24 verified=24 failures=0 timeouts=0`. This is a target, not an observed result. Share complete host and Arduino logs before certification.
 
 Refer to [LAB-01B programme](../README.md).
+## Certified result
+
+User logs confirm 24/24 exact UDP Echo replies, zero failures/timeouts, Arduino IP 192.168.1.84 and 13592-byte Flash / 637-byte global SRAM use. See [RESULT_2026-10-09.md](RESULT_2026-10-09.md) for the full observed record and non-claims.
