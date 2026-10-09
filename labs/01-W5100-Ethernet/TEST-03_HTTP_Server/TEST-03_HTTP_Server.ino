@@ -1,7 +1,19 @@
-/*
- KON LAB-01 / TEST-03: W5100 HTTP server (no microSD)
- DHCP network, HTTP GET / and GET /health, serial 115200.
-*/
+/**
+ * Arduino UNO & Shields | LAB-01 (W5100 Ethernet, no microSD)
+ * TEST-03: Minimal HTTP Server
+ *
+ * Purpose: Serve diagnostic HTML at / and plain text at /health.
+ * Target: Arduino UNO / ATmega328P (16 MHz, 32 KB flash, 2 KB SRAM).
+ * Hardware: Blue WIZnet W5100 Ethernet Shield (HanRun RJ45 sample).
+ * Setup: Ethernet library; DHCP; TCP port 80; SD disabled; 115200 baud.
+ * Serial monitor: 115200 baud. Build: arduino-cli --fqbn arduino:avr:uno.
+ * Expected: PASS: HTTP 200 for / and /health; request count and uptime progress.
+ * Limitations: No authentication/TLS; basic parser, no endurance or security certification.
+ * Source: https://github.com/AIDevelopersMonster/Arduino-UNO-Shields
+ * Evidence: see sibling RESULT_2026-10-09.md when the test is certified.
+ * Documentation-only revision: operational logic preserved.
+ */
+
 #include <SPI.h>
 #include <Ethernet.h>
 const uint8_t ETH_CS=10, SD_CS=4;
@@ -11,6 +23,7 @@ uint32_t requests=0;
 bool started=false;
 unsigned long lastMaintenance=0;
 
+// Stream the HTML page from flash-resident string literals to save AVR SRAM.
 void printPage(EthernetClient &c) {
   c.println(F("HTTP/1.1 200 OK"));
   c.println(F("Content-Type: text/html; charset=utf-8"));
@@ -26,6 +39,7 @@ void printPage(EthernetClient &c) {
   c.print(F("<p>Requests: "));c.print(requests);c.println(F("</p>"));
   c.println(F("<p>SPI and DHCP tested earlier. SD not used.</p></body></html>"));
 }
+// Provide a small, machine-readable text health endpoint.
 void printHealth(EthernetClient &c) {
   c.println(F("HTTP/1.1 200 OK"));
   c.println(F("Content-Type: text/plain; charset=utf-8"));
@@ -36,6 +50,7 @@ void printHealth(EthernetClient &c) {
   c.print(F("uptime_s="));c.println(millis()/1000UL);
   c.print(F("requests="));c.println(requests);
 }
+// Keep both SPI peripherals deselected until Ethernet initialization.
 void setup() {
   Serial.begin(115200);
   pinMode(ETH_CS,OUTPUT);digitalWrite(ETH_CS,HIGH);
@@ -57,6 +72,7 @@ void setup() {
   Serial.println(F("HEALTH: /health"));
   Serial.println(F("RESULT: SERVER STARTED / HTTP REQUEST PENDING"));
 }
+// Handle one short HTTP request at a time using fixed-size stack buffers.
 void loop() {
   if(!started)return;
   if(millis()-lastMaintenance>=30000UL) {
@@ -75,6 +91,7 @@ void loop() {
   uint8_t stage=0;
   unsigned long deadline=millis()+1500UL;
   bool lineDone=false;
+  // Limit request-line waiting time to prevent an indefinitely stalled client.
   while(c.connected() && (long)(deadline-millis())>0 && !lineDone) {
     if(!c.available())continue;
     char ch=c.read();
