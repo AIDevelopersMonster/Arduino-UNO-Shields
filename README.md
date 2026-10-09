@@ -73,14 +73,16 @@ Keyestudio KS0183 Multi-purpose Shield V1 family:
 - DHT11 temperature/humidity sensor
 - LM35 analog temperature sensor
 - LDR light sensor and potentiometer
-- IR receiver and passive buzzer
+- IR receiver and active/self-oscillating buzzer on the tested sample
 - RGB LED plus two indicator LEDs
 - two user buttons
 - D7/D8 digital, A3 analog, I2C and TTL UART expansion
 
-The published family pin map is documented as a working reference. Exact pin
-polarity, RGB channel order and clone-specific wiring remain to be certified on
-our physical HY-M302 sample before they are marked PASS.
+The primary onboard pin map, RGB channel order/polarity, buttons, DHT11,
+potentiometer, LDR, discrete LEDs, RGB, active buzzer and asynchronous NEC IR
+path are bench-certified on the tested HY-M302 sample. The LM35 fitted to this
+individual sample failed the cooling-response test and is not treated as a
+certified temperature source.
 
 See: [shields/HY-M302-Multi-Purpose-Shield](shields/HY-M302-Multi-Purpose-Shield/)
 
@@ -90,16 +92,16 @@ Overview video: https://youtube.com/shorts/t4WG9GA9Qws
 
 ### HY_M302
 
-Initial low-overhead Arduino library for Shield 04:
+Low-overhead Arduino library for Shield 04, currently v0.2.0:
 
 - buttons;
-- LED1/LED2;
-- raw PWM RGB channels D9-D11;
-- passive buzzer;
-- potentiometer, LDR, LM35 and A3;
+- named red/blue indicator LEDs;
+- bench-certified RGB control D9=R, D10=G, D11=B;
+- active/self-oscillating buzzer control on D5;
+- potentiometer, LDR, LM35 raw path and A3;
 - compact dependency-free DHT11 reader;
-- compact NEC IR decoder;
-- D7/D8 GPIO helpers.
+- non-blocking NEC IR decoder with zero-drop counters;
+- symbolic remote-key layer and D7/D8 GPIO helpers.
 
 See: [libraries/HY_M302](libraries/HY_M302/)
 
@@ -162,7 +164,13 @@ KonSol 0.4 physical certification:
 - 1228 / 2048 bytes SRAM globals (59%);
 - measured free RAM: 812 B after boot, 750 B in the active shell.
 
-KonSol 0.7 article: https://doi.org/10.5281/zenodo.23197956\n\nStandalone KonSol 0.6 article: https://doi.org/10.5281/zenodo.23161379
+KonSol 0.8 / TEST-11 publication: https://doi.org/10.5281/zenodo.23223036
+
+KonSol 0.8 / TEST-11 video: https://youtu.be/FmeGiIh2ii0
+
+KonSol 0.7 article: https://doi.org/10.5281/zenodo.23197956
+
+Standalone KonSol 0.6 article: https://doi.org/10.5281/zenodo.23161379
 
 This 0.6 record is a separate technical article for the TEST-08 multi-label result,
 not a replacement/version update of the KonSol 0.5 publication.
@@ -200,7 +208,7 @@ See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
 ## Projects
 
-### Project 01 — HY-M302 KonSol Operating Environment
+### Project 01 — HY-M302 KonSol Operating Environment (design branch)
 
 Driver-based KonSol line for Arduino UNO + HY-M302:
 
@@ -219,6 +227,43 @@ Arduino library can own the same pins simultaneously.
 
 See: [projects/HY-M302-KonSol-OS](projects/HY-M302-KonSol-OS/)
 
+### Project 02 — KSC / KonSol Commander
+
+KSC is the active target-decoupled research line built around one navigable
+VFS-like namespace for physical devices, runtime state, configuration and
+remote PC files.
+
+The completed Arduino UNO + HY-M302 phase physically validated:
+
+- `/dev`, `/proc`, `/sys`, and remote `/host`;
+- one-panel ANSI Commander and shared shell/VFS semantics;
+- PC keyboard + HY-M302 IR as semantic CHAR/KEY sources;
+- TTY + framed HOSTFS multiplexing on one Serial/COM link;
+- streamed host files larger than AVR SRAM using <=32-byte reads;
+- explicit-offset retry and BAD_HANDLE reopen/resume;
+- 192-byte logical file-view windows without a 192-byte page buffer;
+- streamed `.KSC` execution with PRINT / WRITE / WAIT / STOP;
+- runtime-selected SW1 behavior loaded from PC without compile, upload or reset.
+
+Final HY-M302 image:
+
+```text
+Flash       31024 / 32256 B = 96%
+Global SRAM  1556 / 2048 B = 75%
+Observed Commander free RAM ~380 B
+```
+
+Stage preprint DOI:
+https://doi.org/10.5281/zenodo.23251546
+
+Earlier KSC_Core two-target DOI:
+https://doi.org/10.5281/zenodo.23232216
+
+KSC-04 video:
+https://youtu.be/pqV5DG1o-WA
+
+See: [projects/KSC-KonSol-Commander](projects/KSC-KonSol-Commander/)
+
 ## Project structure
 
 - `boards/` — Arduino UNO boards and hardware notes
@@ -234,6 +279,6 @@ See: [projects/HY-M302-KonSol-OS](projects/HY-M302-KonSol-OS/)
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
-- **LAB-05** — **KonSol 0.7 TEST-09 + TEST-10 FULL PHYSICAL PASS**. TEST-09 adds HOST1 over the existing USB-TTL Serial link: machine-readable INFO/MEM/PS/LS, verified PUT/GET file transfer, RUN/STOP/DELETE and an exact SHA-256 round-trip without removing microSD or reflashing the ATmega328P. TEST-10 adds the host-side KonSol Host Manager GUI with SD browsing, Install/Download/Run/Stop/Delete and KASM -> KAP integration. Verified KonSol 0.7 resources: 30442 / 32256 B Flash (94%), 1316 / 2048 B globals (64%), 724 B free RAM at boot, 652 B resident shell RAM, 621 B while a KAP app is active, returning to 652 B after EXIT/STOP. KonSol 0.6 remains published separately at DOI 10.5281/zenodo.23161379; KonSol 0.5 remains at DOI 10.5281/zenodo.23149141.
+- **LAB-05** — **KonSol 0.8 / TEST-11 FULL PHYSICAL PASS and frozen**. The resident cooperative environment, external KAP1/KAP2 applications, KASM, TFT/Touch services, APPS/FILES navigation, HOST1, Host Manager and SD-backed boot resource are treated as a completed reproducible research result. Publication DOI: 10.5281/zenodo.23223036.
 
 Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
