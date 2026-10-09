@@ -1,8 +1,10 @@
 # KSC_Core Zenodo Package
 
-Status: READY FOR ZENODO FILE UPLOAD AND RECORD PREVIEW
+Status: **PUBLISHED / FROZEN PRESERVATION PACKAGE**
 
-This directory prepares the KSC_Core v0.2 publication candidate for Zenodo.
+This directory preserves the publication package for the already published
+KSC_Core v0.2 two-target result. It is historical publication infrastructure,
+not the package for the later HY-M302 stage preprint.
 
 Publication DOI:
 
@@ -18,7 +20,7 @@ The experimental evidence is frozen at commit:
 
     96487e66b159df75a1b3162098590cb23ab4af49
 
-The article candidate is:
+The published manuscript source is:
 
     ../KSC_CORE_TWO_TARGET_VALIDATION_v0.2.md
 
@@ -28,15 +30,15 @@ The adversarial audit is:
 
 ## Deposit object
 
-Recommended Zenodo resource type:
+Published Zenodo resource type:
 
     Publication / Preprint
 
-Recommended primary title:
+Published primary title:
 
     KSC_Core: A Target-Decoupled Virtual Namespace and ANSI Commander Core for Resource-Constrained 8-bit Systems
 
-Recommended subtitle:
+Published subtitle:
 
     Two-target physical validation on Arduino UNO using a synthetic Reference Target and the HY-M302 multifunction shield
 
@@ -56,12 +58,13 @@ Recommended final package additionally contains:
     KSC_CORE_TWO_TARGET_VALIDATION_v0.2.pdf
     toolchain-public.txt
 
-The PDF should be generated only after a DOI is reserved if the DOI is to appear
-inside the document.
+The DOI is already fixed and the KSC_Core record is published. Do not reuse
+this package for later KSC-03/KSC-04 claims.
 
 ## Pre-deposit gates
 
-Do not publish the Zenodo record until all items below are resolved.
+The checklist below is retained as a historical record of the publication
+workflow that preceded the published deposit.
 
 - [x] creator name(s) confirmed;
 - [x] creator order confirmed;
@@ -94,10 +97,12 @@ Next:
 
 ## Version policy
 
-This deposit should represent the KSC_Core two-target result only.
+This deposit represents the KSC_Core two-target result only.
 
-KSC-03 /host is a future result and should not be added to this record as if it
-were part of the validated experiment.
+KSC-03/KSC-04 are later results and must not be retroactively added to this
+frozen record. The later HY-M302 stage is published separately at:
+
+https://doi.org/10.5281/zenodo.23251546
 
 A later substantive revision should be a new Zenodo version rather than silent
 replacement of the experimental claim.
