@@ -1,6 +1,11 @@
-# Zenodo Metadata Template - KSC_Core v0.2
+# Zenodo Metadata Record - KSC_Core v0.2
 
-Do not publish until the remaining fields marked **CONFIRM** are resolved.
+Status: **PUBLISHED / FROZEN**
+
+This file is retained as the metadata record/template used for the published
+KSC_Core two-target deposit. Any historical **CONFIRM** notes below should be
+read as publication-workflow residue, not as evidence that the DOI is still
+unpublished.
 
 ## DOI
 
@@ -141,7 +146,10 @@ ATmega328P. Both configurations used the same KSC_Core source blobs:
     KSC_Core.cpp
     211803fcc045b8a2dbba029fa0f7f62b2f6ac8e0
 
-KSC-03 /host is future work and is not part of the validated result.
+KSC-03/KSC-04 are later work and are not part of this frozen validated result.
+
+The later Arduino UNO + HY-M302 stage preprint is a separate record:
+https://doi.org/10.5281/zenodo.23251546
 
 ## Communities
 
