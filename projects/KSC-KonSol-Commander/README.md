@@ -2,7 +2,7 @@
 
 ## Status
 
-**KSC-02D MULTI-TARGET FULL PHYSICAL PASS.**
+**Arduino UNO + HY-M302 target phase: FULL PHYSICAL PASS through KSC-04C.**
 
 Certified milestones:
 
@@ -10,35 +10,71 @@ Certified milestones:
 - KSC-01B - unified physical keyboard sources: FULL PHYSICAL PASS;
 - KSC-01C - CHAR vs KEY semantic input model: FULL PHYSICAL PASS;
 - KSC-02 - one-panel ANSI KonSol Commander: FULL PHYSICAL PASS;
-- KSC-02C Reference Target - bare UNO synthetic VFS: FULL PHYSICAL PASS;
-- KSC-02D - HY-M302 adapter on unchanged KSC_Core: FULL PHYSICAL PASS;
+- KSC-02C - bare-UNO Reference Target: FULL PHYSICAL PASS;
+- KSC-02D - HY-M302 adapter on the same extracted KSC_Core: FULL PHYSICAL PASS;
+- KSC-03A - multiplexed TTY/HOSTFS serial transport: PHYSICAL PASS;
+- KSC-03B - remote PC directory mounted as `/host`: FULL PHYSICAL PASS;
+- KSC-03C - bounded host-file streaming in <=32-byte READ chunks: FULL PHYSICAL PASS;
+- KSC-03D - explicit-offset retry and BAD_HANDLE reopen/resume: FULL PHYSICAL PASS;
+- KSC-04A - Commander remote file viewer, 192-byte logical windows: FULL PHYSICAL PASS;
+- KSC-04B - File Actions & streamed KSC Script launcher: FULL PHYSICAL PASS;
+- KSC-04C - RAM-resident SW1 runtime profile selected by remote scripts: FULL PHYSICAL PASS.
 
-Core-independence experiment status: **COMPLETE FOR TWO TESTED TARGETS**.
-
-Both the bare-UNO Reference Target and the physical HY-M302 Target are **FULL PHYSICAL PASS** on the same unchanged KSC_Core. KSC-03 - Host Filesystem Mount is now the next implementation milestone. The two-target result is sufficient to support a bounded hardware-independence article claim, while explicitly excluding universal portability.
-
-KSC-03 - Host Filesystem Mount remains the next transport/backend milestone after the core-independence experiment.
-
-Publication status: **KSC_Core v0.2 PUBLICATION CANDIDATE** after adversarial
-pre-publication audit. The article now uses the narrower term
-**target-decoupled** in its title and preserves the bounded two-target
-hardware-independence claim only for the physically tested Arduino UNO target
-backends.
-
-Publication package:
+Final HY-M302 target build:
 
 ~~~text
-projects/KSC-KonSol-Commander/publication/
-+-- KSC_CORE_TWO_TARGET_VALIDATION_v0.2.md
-+-- audit/
-|   +-- KSC_CORE_v0.1_PREPUBLICATION_AUDIT.md
-+-- zenodo/
-    +-- README.md
-    +-- REPRODUCIBILITY.md
-    +-- ZENODO_METADATA_TEMPLATE.md
-    +-- SOURCE_MANIFEST.txt
+Flash       31024 / 32256 B = 96%
+Global SRAM  1556 / 2048 B = 75%
+Observed Commander free RAM ~380 B
+
+IN drop 0
+IR drop 0/0
+HOST M/0 R0
 ~~~
 
+This closes the **HY-M302 target phase only**. The wider KSC programme remains
+open for structurally different targets such as LCD Keypad Shield,
+relay/control hardware, W5100 + SD, and later other MCU/SBC platforms.
+
+## Publications
+
+### HY-M302 stage preprint
+
+**KonSol Commander on Arduino UNO with HY-M302: A Resident Cooperative
+Environment with a Unified Virtual Namespace, Streamed Host Files, and Loadable
+Runtime Behavior**
+
+DOI: https://doi.org/10.5281/zenodo.23251546
+
+Final KSC-04 demonstration video:
+
+https://youtu.be/pqV5DG1o-WA
+
+The stage publication records the completed Arduino UNO + HY-M302 realization.
+It is not the final KSC programme paper.
+
+### KSC_Core two-target publication
+
+**KSC_Core: A Target-Decoupled Virtual Namespace and ANSI Commander Core for
+Resource-Constrained 8-bit Systems**
+
+DOI: https://doi.org/10.5281/zenodo.23232216
+
+Video:
+
+https://youtu.be/QRReKMaaRMk
+
+This earlier publication freezes the bounded two-target result: the same
+KSC_Core source was physically validated against the synthetic Reference Target
+and the physical HY-M302 target adapter on Arduino UNO.
+
+## Start here
+
+- [Quick start - build, upload, run KSC Host and launch demo programs](QUICKSTART.md)
+- [KSC Host protocol](protocol/KSC_HOST_PROTOCOL_v0.1.md)
+- [Physical test records](tests/)
+- [Publication index](publication/README.md)
+- [HY-M302 stage article spine](publication/KSC_HYM302_STAGE_ARTICLE_SPINE_v0.1.md)
 
 KSC is a new experimental branch of the Arduino UNO & Shields project.
 
@@ -1097,8 +1133,9 @@ BACK          return to directory
 F10/POWER/Q   shell
 ```
 
-Page boundaries are byte-based in 04A. Line-aware text navigation remains a
-later stage.
+Page boundaries are byte-based in 04A. Line-aware text navigation was intentionally
+not pursued in the saturated HY-M302 target image; the viewer became a bounded
+preview/action layer for KSC-04B instead.
 
 
 ### KSC-04A FULL PHYSICAL PASS
@@ -1183,6 +1220,10 @@ The certified KSC Script v0.1 instruction set is deliberately small:
 
 
 ### KSC-04C FULL PHYSICAL PASS - HY-M302 TARGET PHASE CLOSED
+
+Stage preprint DOI:
+
+https://doi.org/10.5281/zenodo.23251546
 
 Video:
 
