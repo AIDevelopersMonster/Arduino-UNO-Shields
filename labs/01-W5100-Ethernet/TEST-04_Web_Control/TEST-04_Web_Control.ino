@@ -1,8 +1,19 @@
-/*
- TEST-04 W5100 Ethernet Web Control.
- D6/D7: outputs, LOW on startup. No SD.
- Local trusted LAN only (no authentication/TLS).
-*/
+/**
+ * Arduino UNO & Shields | LAB-01 (W5100 Ethernet, no microSD)
+ * TEST-04: Local Ethernet GPIO Web Control
+ *
+ * Purpose: Serve a browser control panel and JSON state for digital outputs D6 and D7.
+ * Target: Arduino UNO / ATmega328P (16 MHz, 32 KB flash, 2 KB SRAM).
+ * Hardware: Blue WIZnet W5100 Ethernet Shield (HanRun RJ45 sample).
+ * Setup: Ethernet library; DHCP; W5100 D10; SD D4 disabled; outputs LOW at boot.
+ * Serial monitor: 115200 baud. Build: arduino-cli --fqbn arduino:avr:uno.
+ * Expected: PASS target: HTTP controls, JSON state, and separately measured GPIO electrical levels.
+ * Limitations: Trusted LAN only. No auth/TLS/CSRF protection; do not attach mains loads.
+ * Source: https://github.com/AIDevelopersMonster/Arduino-UNO-Shields
+ * Evidence: see sibling RESULT_2026-10-09.md when the test is certified.
+ * Documentation-only revision: operational logic preserved.
+ */
+
 #include <SPI.h>
 #include <Ethernet.h>
 #include <string.h>
@@ -12,6 +23,7 @@ EthernetServer server(80);
 bool ready=false, s6=false, s7=false;
 unsigned long tick=0, count=0;
 
+// Send common no-cache HTTP headers; each response closes its connection.
 void header(EthernetClient &c, const __FlashStringHelper *type) {
   c.println(F("HTTP/1.1 200 OK"));
   c.print(F("Content-Type: ")); c.println(type);
@@ -19,6 +31,7 @@ void header(EthernetClient &c, const __FlashStringHelper *type) {
   c.println(F("Cache-Control: no-store"));
   c.println();
 }
+// Browser commands redirect to the dashboard after changing an output.
 void redirect(EthernetClient &c) {
   c.println(F("HTTP/1.1 303 See Other"));
   c.println(F("Location: /"));
@@ -41,6 +54,7 @@ void control(EthernetClient &c, byte pin, bool val) {
   c.print(F("<a href='/d"));c.print(pin);c.println(F("/on'>ON</a>"));
   c.print(F("<a href='/d"));c.print(pin);c.println(F("/off'>OFF</a></section>"));
 }
+// Generate the dashboard directly from PROGMEM-backed F() strings.
 void page(EthernetClient &c) {
   header(c,F("text/html; charset=utf-8"));
   c.println(F("<!doctype html><html><head><meta charset='utf-8'>"));
@@ -57,6 +71,7 @@ void page(EthernetClient &c) {
   c.println(F("<p><a href='/'>Refresh</a><a href='/api'>JSON API</a></p>"));
   c.println(F("<p>No SD. Trusted local network only.</p></body></html>"));
 }
+// Report application state; physical GPIO level needs an independent check.
 void api(EthernetClient &c) {
   header(c,F("application/json; charset=utf-8"));
   c.print(F("{\"d6\":"));c.print(s6?F("true"):F("false"));
@@ -65,11 +80,13 @@ void api(EthernetClient &c) {
   c.print(F(",\"requests\":"));c.print(count);
   c.println(F("}"));
 }
+// Apply the output level and mirror it into the page/API state.
 void setPin(byte pin, bool value) {
   digitalWrite(pin,value?HIGH:LOW);
   if(pin==P6)s6=value;
   else if(pin==P7)s7=value;
 }
+// Force outputs LOW before starting any network operation.
 void setup() {
   Serial.begin(115200);
   pinMode(P6,OUTPUT);digitalWrite(P6,LOW);
@@ -90,6 +107,7 @@ void setup() {
   Serial.print(F("OPEN: http://"));Serial.print(Ethernet.localIP());Serial.println('/');
   Serial.println(F("SERVER STARTED / TEST PENDING"));
 }
+// Parse only the bounded HTTP request line; handle one client at a time.
 void loop() {
   if(!ready)return;
   if(millis()-tick>=30000UL) {
