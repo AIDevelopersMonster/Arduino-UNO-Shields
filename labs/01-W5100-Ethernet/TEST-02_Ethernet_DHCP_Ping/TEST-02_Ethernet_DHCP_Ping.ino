@@ -1,5 +1,5 @@
 /**
- * Arduino UNO & Shields | LAB-01 (W5100 Ethernet, no microSD)
+ * Arduino UNO & Shields | LAB-01B (blue W5100, no microSD)
  * TEST-02: DHCP, IPv4 and External ICMP Ping
  *
  * Purpose: Initialize Ethernet, obtain an IPv4 DHCP lease and expose network settings for PC ping.
