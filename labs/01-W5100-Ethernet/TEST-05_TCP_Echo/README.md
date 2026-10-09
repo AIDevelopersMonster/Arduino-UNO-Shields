@@ -1,6 +1,6 @@
 # TEST-05 — TCP Client / Server: echo and reconnection
 
-**Status: PENDING physical test.** Source published, not yet hardware-certified.
+**Status: FULL PASS (2026-10-09).** [Certified host and Arduino evidence](RESULT_2026-10-09.md).
 
 ## Test scope
 
@@ -47,4 +47,4 @@ Replace `192.168.1.81` with actual printed DHCP IP. If already running PowerShel
 
 **PASS** if script prints `RESULT: PASS`, 20 normal requests plus boundary and reconnect checks succeed, and the UART log contains `TCP CONNECT`, `TCP ECHO`, `TCP CLOSE`. On the deliberately aborted session an `incomplete` error is expected and must not prevent the next connection.
 
-Record both host and UART logs in a `RESULT_YYYY-MM-DD.md` file; do not mark as PASS before user hardware evidence. The initial 64-byte test is application payload, not Ethernet MTU/bandwidth.
+Both host and UART logs were supplied and independently reviewed; see the dated [TEST-05 result](RESULT_2026-10-09.md). The initial 64-byte test is application payload, not Ethernet MTU/bandwidth.
