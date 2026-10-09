@@ -91,6 +91,63 @@ function Test-TcpProbe {
     [pscustomobject]@{ Code = $code; Detail = $detail; Ms = $timer.Elapsed.TotalMilliseconds }
 }
 
+function Wait-NetworkPreparation {
+    param([int]$TimeoutSeconds=60, [string]$MarkerFile)
+    Write-Host 'ШАГ 1: ОТКЛЮЧИТЕ Ethernet-кабель от UNO. USB оставьте подключённым.' -ForegroundColor Yellow
+    Write-Host "После отключения нажмите Enter здесь. Ожидание ограничено ${TimeoutSeconds} s."
+    if ($MarkerFile) { Write-Host "Для подтверждения через файл добавьте строку READY: $MarkerFile" }
+    elseif ([Console]::IsInputRedirected) { throw 'Startup preparation needs an interactive terminal or MarkerFile with READY' }
+    $timer=[Diagnostics.Stopwatch]::StartNew()
+    while ($timer.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
+        if ($MarkerFile) {
+            if ((Test-Path $MarkerFile) -and 'READY' -in @(Get-Content -LiteralPath $MarkerFile)) { return $timer.Elapsed.TotalSeconds }
+        } elseif ([Console]::KeyAvailable) {
+            $key=[Console]::ReadKey($true)
+            if ($key.Key -eq [ConsoleKey]::Enter) { return $timer.Elapsed.TotalSeconds }
+            if ($key.Key -eq [ConsoleKey]::Q) { throw 'Preparation cancelled' }
+        }
+        Start-Sleep -Milliseconds 50
+    }
+    throw 'Preparation deadline: cable removal was not confirmed; hardware run did not start'
+}
+
+function Update-NetworkOutage {
+    param([System.Collections.IDictionary]$State, [string]$Code, [long]$NowMs)
+    if ($Code -eq 'PASS') {
+        if ($State.FaultConfirmed) { $State.EarlyRestore=$true }
+        else { $State.FailureStreak=0; $State.FirstFailureMs=-1 }
+    } elseif ($Code -in @('TIMEOUT','SOCKET','TIMEOUT_OR_SOCKET','NO_IP')) {
+        if ($State.FailureStreak -eq 0) { $State.FirstFailureMs=$NowMs }
+        $State.FailureStreak++
+        if ($State.FailureStreak -ge 3 -and -not $State.FaultConfirmed) {
+            $State.FaultConfirmed=$true; $State.CutMs=$State.FirstFailureMs
+        }
+    } elseif (-not $State.FaultConfirmed) {
+        $State.FailureStreak=0; $State.FirstFailureMs=-1
+    }
+}
+
+function Get-NetworkGuidance {
+    param([System.Collections.IDictionary]$Metrics, [System.Collections.IDictionary]$State, [long]$NowMs)
+    if ($Metrics.Scenario -notin @('Cable','StartupDhcp','DhcpOutage')) { return '' }
+    if ($State.Phase -eq 'HEALTHY') {
+        if ($Metrics.HealthyFail -gt 0 -or $Metrics.SendFail -gt 0 -or $Metrics.Corrupt -gt 0 -or $Metrics.Drop -gt 0) { return 'STOP_BASELINE' }
+        if ($NowMs-$State.HealthyStart -ge 20000 -and $Metrics.HealthyOK -ge 24 -and $Metrics.TcpOK -ge 3 -and $Metrics.Boundaries -eq 4) {
+            return $(if($Metrics.Scenario -eq 'Cable'){'REQUEST_DISCONNECT'}else{'REQUEST_DHCP_STOP'})
+        }
+    }
+    if ($State.Phase -eq 'OUTAGE') {
+        if ($Metrics.Corrupt -gt 0) { return 'STOP_INTEGRITY' }
+        if ($State.EarlyRestore) { return 'STOP_EARLY_RESTORE' }
+        $causeObserved=($Metrics.Scenario -eq 'Cable' -or
+            ($Metrics.Scenario -eq 'StartupDhcp' -and $Metrics.DhcpFailuresBeforeRestore -gt 0) -or
+            ($Metrics.Scenario -eq 'DhcpOutage' -and $Metrics.MaintainFailuresBeforeRestore -gt 0))
+        if ($State.FaultConfirmed -and $causeObserved -and $NowMs-$State.CutMs -ge 15000) { return 'REQUEST_RESTORE' }
+        if ($Metrics.Scenario -eq 'Cable' -and -not $State.FaultConfirmed -and $NowMs-$State.FaultRequestedMs -gt 60000) { return 'STOP_NO_DISCONNECT' }
+    }
+    return ''
+}
+
 function Get-NetworkVerdict {
     param([System.Collections.IDictionary]$Metrics)
     $reasons = [Collections.Generic.List[string]]::new()
@@ -110,6 +167,10 @@ function Get-NetworkVerdict {
     if ($Metrics.SendFail -gt 0 -or $Metrics.Drop -gt 0) { $reasons.Add('firmware send/drop error') }
     if ($Metrics.ManualDhcp -gt 0) { $reasons.Add('UART-triggered DHCP cannot certify automatic recovery') }
     if ($Metrics.Scenario -in @('Cable','StartupDhcp','DhcpOutage')) {
+        if ($Metrics.Contains('GuidanceVersion') -and $Metrics.GuidanceVersion -eq 2) {
+            if (-not $Metrics.FaultConfirmed -or -not $Metrics.RestoreRequested) { $reasons.Add('guided fault/restore sequence not completed') }
+            if ($Metrics.PrematureRestore) { $reasons.Add('connection restored before script instruction') }
+        }
         if (-not $Metrics.Restored -or -not $Metrics.Recovered -or $Metrics.RecoveryMs -gt $Metrics.RecoveryLimitMs) {
             $reasons.Add('recovery absent or over time limit')
         }
@@ -134,4 +195,4 @@ function Get-NetworkVerdict {
     }
     [pscustomobject]@{ Status = $(if ($reasons.Count) { 'FAIL' } else { 'PASS' }); Reasons = @($reasons) }
 }
-Export-ModuleMember -Function ConvertFrom-NetworkLine,New-ProbePayload,Test-UdpProbe,Test-TcpProbe,Get-NetworkVerdict
+Export-ModuleMember -Function ConvertFrom-NetworkLine,New-ProbePayload,Test-UdpProbe,Test-TcpProbe,Get-NetworkVerdict,Wait-NetworkPreparation,Update-NetworkOutage,Get-NetworkGuidance

@@ -31,6 +31,43 @@ $obj=ConvertFrom-NetworkLine 'EVT ms=123 name=DHCP_MAINTAIN rc=2 elapsed_ms=51'
 Assert ($obj.name -eq 'DHCP_MAINTAIN' -and $obj.rc -eq '2') 'UART event parsing'
 $data=New-ProbePayload 128 42 ([guid]::NewGuid().ToByteArray())
 Assert ($data.Length -eq 128 -and [BitConverter]::ToUInt32($data,8) -eq 42) 'binary sequence encoding'
+$g=$m.Clone();$g.Scenario='Cable'
+$s=@{Phase='HEALTHY';HealthyStart=1000;FaultRequestedMs=0;FaultConfirmed=$false;EarlyRestore=$false;FailureStreak=0;FirstFailureMs=-1;CutMs=-1}
+Assert ((Get-NetworkGuidance $g $s 20999) -eq '') 'no disconnect instruction before automatic baseline interval'
+Assert ((Get-NetworkGuidance $g $s 21000) -eq 'REQUEST_DISCONNECT') 'script requests disconnect after complete baseline'
+$g.TcpOK=2
+Assert ((Get-NetworkGuidance $g $s 25000) -eq '') 'no disconnect instruction before three TCP exchanges'
+$g.TcpOK=3;$g.HealthyFail=1
+Assert ((Get-NetworkGuidance $g $s 25000) -eq 'STOP_BASELINE') 'bad baseline stops before physical fault instruction'
+$g.HealthyFail=0;$s.Phase='OUTAGE'
+Update-NetworkOutage $s 'TIMEOUT' 1000
+Update-NetworkOutage $s 'PASS' 2000
+Assert (-not $s.FaultConfirmed -and $s.FailureStreak -eq 0) 'isolated loss does not confirm cable outage'
+Update-NetworkOutage $s 'TIMEOUT' 3000
+Update-NetworkOutage $s 'CORRUPT' 4000
+Assert ($s.FailureStreak -eq 0) 'corrupt reply is not proof of no network response'
+foreach($time in @(5000,6000,7000)){Update-NetworkOutage $s 'TIMEOUT' $time}
+Assert ($s.FaultConfirmed -and $s.CutMs -eq 5000) 'three consecutive failures establish observation origin'
+Assert ((Get-NetworkGuidance $g $s 19999) -eq '') 'script keeps connection down through hold interval'
+Assert ((Get-NetworkGuidance $g $s 20000) -eq 'REQUEST_RESTORE') 'script gives restore instruction after measured hold'
+$g.Scenario='StartupDhcp';$g.DhcpFailuresBeforeRestore=0
+Assert ((Get-NetworkGuidance $g $s 20000) -eq '') 'startup does not restore without actual DHCP failure'
+$g.DhcpFailuresBeforeRestore=1
+Assert ((Get-NetworkGuidance $g $s 20000) -eq 'REQUEST_RESTORE') 'startup restores after DHCP failure and hold'
+$g.Scenario='DhcpOutage';$g.MaintainFailuresBeforeRestore=0
+Assert ((Get-NetworkGuidance $g $s 20000) -eq '') 'DHCP outage waits for natural maintenance failure'
+$g.MaintainFailuresBeforeRestore=1
+Assert ((Get-NetworkGuidance $g $s 20000) -eq 'REQUEST_RESTORE') 'DHCP outage instructs restart only after observed failure'
+Update-NetworkOutage $s 'PASS' 21000
+Assert ((Get-NetworkGuidance $g $s 21000) -eq 'STOP_EARLY_RESTORE') 'premature reconnection rejected'
+$g.Scenario='Cable';$s.FaultConfirmed=$false;$s.EarlyRestore=$false
+Assert ((Get-NetworkGuidance $g $s 60001) -eq 'STOP_NO_DISCONNECT') 'ignored disconnect instruction has bounded wait'
+$x=$m.Clone();$x.Scenario='Cable';$x.GuidanceVersion=2;$x.FaultConfirmed=$true;$x.RestoreRequested=$true;$x.PrematureRestore=$false
+Assert ((Get-NetworkVerdict $x).Status -eq 'PASS') 'complete guided cable accepted'
+$x.RestoreRequested=$false
+Assert ((Get-NetworkVerdict $x).Status -eq 'FAIL') 'missing automatic restore instruction rejected'
+$x.RestoreRequested=$true;$x.PrematureRestore=$true
+Assert ((Get-NetworkVerdict $x).Status -eq 'FAIL') 'early physical restoration invalidates guided cable'
 $file=Join-Path ([IO.Path]::GetTempPath()) ('test07-'+[guid]::NewGuid().ToString('N')+'.json')
 $proc=$null
 try {
