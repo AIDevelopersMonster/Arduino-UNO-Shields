@@ -145,24 +145,25 @@ See: [labs/03-UNO-MAR2406-TFT](labs/03-UNO-MAR2406-TFT/)
 
 ### LAB-05 — KonSol / KON-OS on Arduino UNO
 
-Experimental resident cooperative operating environment for Arduino UNO / ATmega328P.
+Frozen resident cooperative operating environment for Arduino UNO / ATmega328P
+with MAR2406 TFT/Touch and microSD.
 
-The published KonSol 0.4 baseline provides:
+The completed KonSol 0.8 / TEST-11 line includes:
 
-- resident cooperative kernel and five scheduled tasks;
+- resident cooperative kernel and scheduled services;
 - Serial shell and microSD filesystem services;
-- direct 8-bit ILI9341 TFT driver;
-- direct resistive-Touch service;
-- TFT dashboard and Touch File Browser;
-- streamed KAP1 VM for external applications stored on microSD;
-- RUN -> resident services -> WAIT_TOUCH -> EXIT -> return-to-KonSol lifecycle without reflashing.
+- direct 8-bit ILI9341 TFT and resistive-Touch services;
+- APPS launcher and general FILES browser;
+- external KAP1/KAP2 applications stored on microSD;
+- KASM host-side assembler/tooling;
+- HOST1 machine protocol and verified host file transfer;
+- Host Manager GUI plus PowerShell CLI workflows;
+- SD-backed boot resource through `/BOOT.TXT`;
+- TEST-11 FULL PHYSICAL PASS.
 
-KonSol 0.4 physical certification:
-
-- **FULL PHYSICAL PASS**;
-- 25720 / 32256 bytes Flash (79%);
-- 1228 / 2048 bytes SRAM globals (59%);
-- measured free RAM: 812 B after boot, 750 B in the active shell.
+KonSol 0.8 is frozen as a completed reproducible result. New feature growth
+requires a separate justified milestone rather than silently changing the
+published baseline.
 
 KonSol 0.8 / TEST-11 publication: https://doi.org/10.5281/zenodo.23223036
 
