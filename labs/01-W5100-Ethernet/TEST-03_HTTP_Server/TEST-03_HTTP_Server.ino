@@ -1,5 +1,5 @@
 /**
- * Arduino UNO & Shields | LAB-01 (W5100 Ethernet, no microSD)
+ * Arduino UNO & Shields | LAB-01B (blue W5100, no microSD)
  * TEST-03: Minimal HTTP Server
  *
  * Purpose: Serve diagnostic HTML at / and plain text at /health.
