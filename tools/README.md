@@ -31,3 +31,32 @@ It can compile/upload the dedicated mapper firmware, guide the user through
 named buttons, capture verified full NEC frames, reject duplicate assignments,
 and generate JSON plus reusable C++ `HY_M302_RemoteMap.h/.cpp` files for the
 test framework and KonSol-HY.
+
+
+## KSC Host - terminal + remote /host service
+
+The KSC / KonSol Commander project has its own host tool at:
+
+```text
+projects/KSC-KonSol-Commander/tools/ksc_host.py
+```
+
+It owns the Arduino COM port while KSC remote mounting is active and multiplexes:
+
+- ordinary terminal input/output;
+- framed HOSTFS requests;
+- `/host` directory and file service;
+- bounded OPEN / explicit-offset READ / CLOSE streaming;
+- KSC-03D fault injection for lost READ responses and invalidated handles.
+
+Quick start:
+
+```powershell
+python .\projects\KSC-KonSol-Commander\tools\ksc_host.py -p COM4
+```
+
+See:
+[projects/KSC-KonSol-Commander/QUICKSTART.md](../projects/KSC-KonSol-Commander/QUICKSTART.md)
+
+Stage preprint:
+https://doi.org/10.5281/zenodo.23251546
