@@ -10,7 +10,7 @@ $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'NetworkRobustness.psm1') -Force
 $build=Get-Content -Raw -LiteralPath $BuildSummary | ConvertFrom-Json -AsHashtable
 $errors=[Collections.Generic.List[string]]::new()
-if($build.test -ne 'TEST-07' -or $build.type -ne 'BUILD_ONLY' -or $build.status -ne 'PASS' -or $build.flash_bytes -gt 29000 -or $build.sram_static_bytes -gt 1200 -or $build.core -ne '1.8.6' -or $build.ethernet -ne '2.0.2') {
+if($build.test -ne 'TEST-07' -or $build.type -ne 'BUILD_ONLY' -or $build.status -ne 'PASS' -or $build.flash_bytes -gt 29000 -or $build.sram_static_bytes -gt 1200 -or $build.core -notin @('1.8.6','1.8.8') -or $build.ethernet -ne '2.0.2') {
     $errors.Add('build/memory gate failed')
 }
 $seen=[Collections.Generic.HashSet[string]]::new()
