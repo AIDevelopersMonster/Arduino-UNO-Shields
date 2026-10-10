@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <Ethernet.h>
+#include <string.h>
 
 const uint8_t ETHERNET_CS = 10;
 const uint8_t SD_CS = 4;
@@ -15,7 +16,39 @@ const unsigned long DHCP_RESPONSE_TIMEOUT_MS = 1000;
 byte mac[] = {0x02, 0x4C, 0x49, 0x42, 0x09, 0x01};
 
 bool finished = false;
+bool modeSelected = false;
+bool initializeSd = false;
 unsigned long lastHeartbeat = 0;
+
+void printMode() {
+  Serial.print(!modeSelected ? F("UNSET") :
+               (initializeSd ? F("SD_THEN_ETH") : F("ETH_ONLY")));
+}
+
+// The logger selects one mode per BOOT; both modes use the same binary.
+const __FlashStringHelper *selectMode() {
+  char command[16];
+  uint8_t length = 0;
+  unsigned long started = millis();
+  Serial.println(F("READY test=LIBRARY_STARTUP fw=0.2"));
+  while (millis() - started < 10000) {
+    while (Serial.available()) {
+      char c = Serial.read();
+      if (c == '\r') continue;
+      if (c == '\n') {
+        command[length] = '\0';
+        if (strcmp(command, "SD_THEN_ETH") == 0) initializeSd = true;
+        else if (strcmp(command, "ETH_ONLY") == 0) initializeSd = false;
+        else return F("INVALID_MODE");
+        modeSelected = true;
+        return NULL;
+      }
+      if (length >= sizeof(command) - 1) return F("COMMAND_OVERFLOW");
+      command[length++] = c;
+    }
+  }
+  return F("MODE_TIMEOUT");
+}
 
 int freeRam() {
   extern int __heap_start;
@@ -31,6 +64,8 @@ void result(bool pass, const __FlashStringHelper *stage) {
   Serial.print(pass ? F("PASS") : F("FAIL"));
   Serial.print(F(" stage="));
   Serial.print(stage);
+  Serial.print(F(" mode="));
+  printMode();
   Serial.print(F(" free="));
   Serial.println(freeRam());
   finished = true;
@@ -46,21 +81,36 @@ void setup() {
   Serial.begin(115200);
   delay(300);  // UART/reset settling, not an SPI handoff delay.
   Serial.println();
-  Serial.println(F("BOOT test=LIBRARY_STARTUP fw=0.1 eth_cs=10 sd_cs=4 uart=115200"));
+  Serial.println(F("BOOT test=LIBRARY_STARTUP fw=0.2 eth_cs=10 sd_cs=4 uart=115200"));
   Serial.print(F("START free="));
   Serial.println(freeRam());
 
-  Serial.println(F("STEP name=SD_BEGIN"));
-  Serial.flush();
-  unsigned long started = millis();
-  bool sdOK = SD.begin(SD_CS);
-  Serial.print(F("CHECK name=SD_BEGIN status="));
-  Serial.print(sdOK ? F("PASS") : F("FAIL"));
-  Serial.print(F(" elapsed_ms="));
-  Serial.println(millis() - started);
-  if (!sdOK) {
-    result(false, F("SD_BEGIN"));
+  const __FlashStringHelper *modeError = selectMode();
+  if (modeError) {
+    result(false, modeError);
     return;
+  }
+  Serial.print(F("MODE name="));
+  printMode();
+  Serial.println();
+
+  unsigned long started;
+  if (initializeSd) {
+    Serial.println(F("STEP name=SD_BEGIN"));
+    Serial.flush();
+    started = millis();
+    bool sdOK = SD.begin(SD_CS);
+    Serial.print(F("CHECK name=SD_BEGIN status="));
+    Serial.print(sdOK ? F("PASS") : F("FAIL"));
+    Serial.print(F(" elapsed_ms="));
+    Serial.println(millis() - started);
+    if (!sdOK) {
+      result(false, F("SD_BEGIN"));
+      return;
+    }
+  } else {
+    // Card stays physically present; the application never initializes SD.
+    Serial.println(F("CHECK name=SD_BEGIN status=SKIP reason=ETH_ONLY"));
   }
 
   // Ethernet.init selects CS; Ethernet.begin initializes the driver and DHCP.

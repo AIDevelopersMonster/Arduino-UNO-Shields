@@ -1,10 +1,18 @@
 # Контроль запуска через штатные библиотеки
 
-**Аппаратный статус: PENDING.** Это небольшой контроль старта UNO/W5100/SD
+**Наблюдение v0.1: SD_BEGIN PASS, обнаружение W5100 FAIL (NONE), DHCP
+не запускался. Режимы v0.2: аппаратный статус PENDING.** Это контроль старта UNO/W5100/SD
 для локализации отказа перед продолжением TEST-09. Он не заменяет критерии
 TEST-07/08/09 и не подтверждает обмен UDP или сохранность файлов.
 
-В приложении выполняются только публичные вызовы библиотек:
+v0.2 ждёт выбора режима от логгера после `READY test=LIBRARY_STARTUP fw=0.2`.
+В одном бинарнике доступны `SD_THEN_ETH` и `ETH_ONLY`. Команда отправляется
+автоматически, в UART и JSONL фиксируется выбранный режим. При отсутствии
+команды в течение 10 секунд получается MODE_TIMEOUT FAIL. Неверная или
+слишком длинная команда даёт INVALID_MODE/COMMAND_OVERFLOW FAIL. При этих
+отказах SPI-вызовы не выполняются.
+
+В режиме `SD_THEN_ETH` выполняются только публичные вызовы библиотек:
 
 1. Оба CS выставляются HIGH до переключения пинов в OUTPUT.
 2. `SD.begin(4)` проверяет инициализацию карты, FAT и корня.
@@ -12,6 +20,12 @@ TEST-07/08/09 и не подтверждает обмен UDP или сохра�
    `Ethernet.begin(mac, 6000, 1000)` запускает драйвер и DHCP.
 4. Печатаются обнаруженный чип, результат DHCP и IP. После этого только
    UART heartbeat раз в 5 секунд: дополнительных сетевых/SD операций нет.
+
+В режиме `ETH_ONLY` карта остаётся физически вставленной, CS D4 — HIGH,
+но `SD.begin` не вызывается. Вместо него выводится `SD_BEGIN status=SKIP`.
+Ethernet использует те же MAC, CS, библиотеку и параметры DHCP. RESULT
+содержит `mode=ETH_ONLY`; его PASS относится только к старту Ethernet и
+не является PASS совместной работы SD + Ethernet.
 
 Приложение не использует raw SPI, RTR, индексированные EthernetClient,
 принудительное закрытие сокетов, дополнительные idle clocks, повторные попытки
@@ -79,7 +93,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Upload failed' }
 ```
 
 Загружается бинарник из только что измеренного каталога `build\LibraryStartup`.
-Сборка проверена на AVR 1.8.6: **18 090 B Flash, 1 085 B static SRAM**.
+Сборка v0.2 проверена на AVR 1.8.6: **18 534 B Flash, 1 109 B static SRAM**.
+Оба режима выполняются в этом же измеренном бинарнике. Историческая v0.1:
+18 090 B Flash и 1 085 B static SRAM, включая подтверждённую сборку на AVR 1.8.8.
 Четыре предупреждения unused parameter относятся к `new.cpp` AVR core;
 предупреждений из скетча нет. На AVR 1.8.8 размеры нужно измерить заново.
 Свободная SRAM в UART — выборочные значения, не измерение максимального
@@ -95,18 +111,38 @@ if ($LASTEXITCODE -ne 0) { throw 'Upload failed' }
 ```powershell
 $watch = '.\labs\01-W5100-Ethernet\TEST-07_Network_Robustness\Watch-NetworkEvents.ps1'
 $logsRef = Join-Path $ref 'runs'
-& $watch -SerialPort COM4 -DurationSeconds 30 -OutputDirectory $logsRef
 ```
+
+Следующий контроль — `ETH_ONLY` с картой на месте. Полное отключение питания
+перед ним задаёт известное начальное состояние карты: сброс UNO через DTR
+сам по себе не отключает питание microSD. Это условие контроля начального
+состояния, а не предложенное исправление отказа.
+
+```powershell
+$null = Read-Host 'Отключи всё питание UNO/Shield. Карту и Ethernet-кабель оставь на месте. Затем нажми Enter'
+$null = Read-Host 'Подключи USB к UNO. Закрой монитор Arduino. Затем нажми Enter'
+& $watch -SerialPort COM4 -DurationSeconds 30 -OutputDirectory $logsRef -LibraryStartupMode ETH_ONLY
+```
+
+Для последующего сопоставления на той же прошивке используется
+`-LibraryStartupMode SD_THEN_ETH` с таким же начальным состоянием. Один
+прогон, а также сравнение разных начальных состояний карты, не устанавливают
+причину перемежающегося отказа. Эти режимы позволяют различить обнаружение
+W5100 после SD.begin и без этого вызова при физически вставленной карте.
 
 Путь `$ref` абсолютный: .NET и PowerShell используют один каталог логов.
 Открытие COM с DTR может сбросить UNO. Карту и кабель не трогать; клавиши не
-нужны. В логе должны быть один BOOT этой прошивки и один терминальный RESULT
+нужны. В логе должны быть один BOOT этой прошивки, подтверждение MODE и один терминальный RESULT
 того же запуска. Если BOOT пропущен, появился повторный BOOT, нет RESULT или
 есть FAIL, аппаратный PASS по этому наблюдению не устанавливается.
 
-Ограниченный **STARTUP PASS** требует одновременно: SD_BEGIN PASS,
+Ограниченный **SD_THEN_ETH STARTUP PASS** требует одновременно: SD_BEGIN PASS,
 HARDWARE chip=W5100 PASS, DHCP rc=1 PASS, ненулевой IP PASS и
-RESULT status=PASS stage=COMPLETE. SD_BEGIN FAIL не различает отказ CMD0,
+RESULT status=PASS stage=COMPLETE mode=SD_THEN_ETH.
+**ETH_ONLY STARTUP PASS** требует SD_BEGIN SKIP, MODE name=ETH_ONLY,
+HARDWARE chip=W5100 PASS, DHCP rc=1 PASS, ненулевой IP PASS и
+RESULT status=PASS stage=COMPLETE mode=ETH_ONLY. Это не критерий PASS SD.
+SD_BEGIN FAIL не различает отказ CMD0,
 FAT или открытия корня: публичный API возвращает один bool. HARDWARE FAIL
 означает отказ обнаружения ожидаемого чипа библиотекой в этой последовательности,
 но не устанавливает аппаратную причину. Даже полный STARTUP PASS не
