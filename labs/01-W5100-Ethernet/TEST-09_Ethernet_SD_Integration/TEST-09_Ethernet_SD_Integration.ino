@@ -1,4 +1,4 @@
-// TEST-09 v0.1: UDP -> exclusive scratch file -> uncached SD read -> UDP.
+// TEST-09 v0.2: UDP -> exclusive scratch file -> uncached SD read -> UDP.
 // UNO/W5100, SD 1.3.0, Ethernet 2.0.2. No heap-allocating File wrapper.
 #include <SPI.h>
 #include <Ethernet.h>
@@ -19,6 +19,7 @@ uint8_t packet[CAPACITY];
 char command[20], token[9];
 uint8_t commandLength = 0;
 bool overflow = false, used = false, active = false, ownsFile = false;
+bool sdReady = false, ethernetReady = false, udpBound = false, busFault = false;
 uint16_t received = 0, verified = 0, sent = 0;
 uint32_t bytes = 0;
 uint8_t errors = 0;
@@ -31,14 +32,22 @@ extern void *__brkval;
 int16_t freeRam() { int top; return (int)&top - (__brkval ? (int)__brkval : (int)&__heap_start); }
 void sampleRam() { int16_t value = freeRam(); if (value < minFree) minFree = value; }
 void prefix(const __FlashStringHelper *kind) { Serial.print(kind); Serial.print(F(" token=")); Serial.print(token); }
-void releaseBus() {
+void initializeChipSelects() {
   digitalWrite(ETH_CS, HIGH); digitalWrite(SD_CS, HIGH);
+  pinMode(ETH_CS, OUTPUT); pinMode(SD_CS, OUTPUT);
+  SPI.begin();
+}
+bool releaseBus() {
+  if (busFault || digitalRead(ETH_CS) != HIGH) { busFault = true; return false; }
+  if (sdReady) card.readEnd();
+  if (digitalRead(SD_CS) != HIGH) { busFault = true; return false; }
   SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
-  SPI.transfer(0xFF); // Both CS high: release SD DO before Ethernet selects W5100.
+  SPI.transfer(0xFF); // Complete SD handoff before the next Ethernet transaction.
   SPI.endTransaction();
+  return true;
 }
 uint8_t readEthernet(uint16_t address) {
-  releaseBus();
+  if (!releaseBus()) return 0xFF;
   SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
   digitalWrite(ETH_CS, LOW);
   SPI.transfer(0x0F); SPI.transfer(address >> 8); SPI.transfer(address & 0xFF);
@@ -65,9 +74,9 @@ void fail(const __FlashStringHelper *stage) {
 }
 void finish(bool requested) {
   active = false;
-  if (file.isOpen()) file.close();
+  if (!busFault && file.isOpen() && !file.close()) ++errors;
   bool cleanup = false;
-  if (requested && !errors && ownsFile && root.isOpen()) {
+  if (requested && !errors && !busFault && ownsFile && root.isOpen()) {
     cleanup = SdFile::remove(&root, FILE_NAME);
     bool exists = file.open(&root, FILE_NAME, O_READ);
     if (exists) file.close();
@@ -75,13 +84,18 @@ void finish(bool requested) {
     if (!cleanup) ++errors;
     ownsFile = !cleanup;
   }
-  if (root.isOpen()) root.close();
-  releaseBus();
-  uint16_t first = readRtr(), second = readRtr();
+  if (!busFault && root.isOpen() && !root.close()) ++errors;
+  uint16_t first = 0, second = 0;
+  if (ethernetReady && !busFault) {
+    if (releaseBus()) {
+      if (udpBound) { udp.stop(); udpBound = false; }
+      first = readRtr(); second = readRtr();
+    } else ++errors;
+  }
   bool rtrOK = first == originalRtr && second == originalRtr && originalRtr != 0 && originalRtr != 0xFFFF;
   sampleRam();
   bool ramOK = minFree >= 512 && freeRam() >= initialFree - 64;
-  bool passed = requested && !errors && cleanup && rtrOK && ramOK && received >= 24 && received == verified && verified == sent;
+  bool passed = requested && !errors && !busFault && cleanup && rtrOK && ramOK && received >= 24 && received == verified && verified == sent;
   prefix(F("RESULT")); Serial.print(F(" status=")); Serial.print(passed ? F("PASS") : F("FAIL"));
   Serial.print(F(" rx=")); Serial.print(received); Serial.print(F(" verified=")); Serial.print(verified);
   Serial.print(F(" tx=")); Serial.print(sent); Serial.print(F(" bytes=")); Serial.print(bytes);
@@ -90,15 +104,15 @@ void finish(bool requested) {
   Serial.print(F(" rtr2=")); hex16(second); Serial.print(F(" crc16=")); hex16(finalCrc);
   Serial.print(F(" initial_free=")); Serial.print(initialFree); Serial.print(F(" free=")); Serial.print(freeRam());
   Serial.print(F(" min_free=")); Serial.print(minFree); Serial.print(F(" max_sd_ms=")); Serial.print(maxSdMs);
+  Serial.print(F(" bus_fault=")); Serial.print(busFault);
   Serial.print(F(" elapsed_ms=")); Serial.println(started ? millis() - started : 0);
-  udp.stop();
 }
 bool prepare() {
   // Initialize SD before clocking the other slave on this cold/MCU-reset start.
-  bool initialized = card.init(SPI_HALF_SPEED, SD_CS);
+  sdReady = card.init(SPI_HALF_SPEED, SD_CS);
   prefix(F("CARD")); Serial.print(F(" error_code=")); Serial.print(card.errorCode());
   Serial.print(F(" error_data=")); Serial.println(card.errorData());
-  if (!initialized) { fail(F("CARD_INIT")); return false; }
+  if (!sdReady) { fail(F("CARD_INIT")); return false; }
   uint32_t blocks = card.cardSize(); uint8_t type = card.type();
   bool mounted = volume.init(&card);
   prefix(F("SD")); Serial.print(F(" type=")); Serial.print(type); Serial.print(F(" blocks=")); Serial.print(blocks);
@@ -108,14 +122,17 @@ bool prepare() {
   if (!file.open(&root, FILE_NAME, O_CREAT | O_EXCL | O_WRITE)) { fail(F("EXCLUSIVE_CREATE")); return false; }
   ownsFile = true;
   if (!file.close()) { fail(F("CREATE_CLOSE")); return false; }
-  releaseBus(); Ethernet.init(ETH_CS);
+  if (!releaseBus()) { fail(F("BUS_OWNERSHIP")); return false; }
+  Ethernet.init(ETH_CS);
   int dhcp = Ethernet.begin(mac, 6000UL, 1000UL);
   sampleRam();
   if (dhcp != 1 || Ethernet.hardwareStatus() != EthernetW5100 || Ethernet.localIP() == IPAddress(0,0,0,0)) { fail(F("DHCP_OR_W5100")); return false; }
+  ethernetReady = true;
   Ethernet.setRetransmissionTimeout(200); Ethernet.setRetransmissionCount(2);
   originalRtr = readRtr();
   if (!originalRtr || originalRtr == 0xFFFF || readRtr() != originalRtr) { fail(F("RTR_BEFORE")); return false; }
   if (!udp.begin(UDP_PORT)) { fail(F("UDP_BIND")); return false; }
+  udpBound = true;
   boundIP = Ethernet.localIP(); initialFree = freeRam(); sampleRam();
   started = statTick = maintainTick = millis(); active = true;
   prefix(F("NET")); Serial.print(F(" ip=")); Serial.print(boundIP); Serial.print(F(" udp=5001 chip=W5100 rtr=")); hex16(originalRtr);
@@ -123,7 +140,7 @@ bool prepare() {
   return true;
 }
 bool sdRoundtrip(uint16_t length) {
-  if (digitalRead(ETH_CS) != HIGH) return false;
+  if (busFault || digitalRead(ETH_CS) != HIGH || digitalRead(SD_CS) != HIGH) return false;
   uint16_t expected = crc16(length);
   uint32_t tick = millis();
   // The name is owned by this run; never truncate an existing external file.
@@ -150,7 +167,7 @@ void serviceUdp() {
   IPAddress peer = udp.remoteIP(); uint16_t port = udp.remotePort(); ++received;
   if (!sdRoundtrip(length)) { fail(F("SD_WRITE_READ")); return; }
   ++verified; bytes += length;
-  releaseBus(); // Required before the library's first W5100 operation after SD.
+  if (!releaseBus()) { fail(F("BUS_OWNERSHIP")); return; }
   bool ok = udp.beginPacket(peer, port) == 1;
   if (ok) { size_t count = udp.write(packet, length); int result = udp.endPacket(); ok = count == (size_t)length && result == 1; }
   if (!ok) { fail(F("UDP_SEND")); return; } ++sent;
@@ -179,9 +196,8 @@ void handleCommand() {
   } else Serial.println(F("COMMAND_REJECTED"));
 }
 void setup() {
-  pinMode(ETH_CS, OUTPUT); digitalWrite(ETH_CS, HIGH); pinMode(SD_CS, OUTPUT); digitalWrite(SD_CS, HIGH);
-  SPI.begin(); Serial.begin(115200); delay(300); Serial.println();
-  Serial.println(F("BOOT test=TEST09 fw=0.1 eth_cs=10 sd_cs=4 uart=115200")); Serial.println(F("READY"));
+  initializeChipSelects(); Serial.begin(115200); delay(300); Serial.println();
+  Serial.println(F("BOOT test=TEST09 fw=0.2 eth_cs=10 sd_cs=4 uart=115200")); Serial.println(F("READY"));
 }
 void loop() {
   while (Serial.available()) {
@@ -193,7 +209,8 @@ void loop() {
   if (!active) return;
   if (millis() - started > durationMs + 10000UL) { fail(F("STOP_DEADLINE")); finish(false); return; }
   if (millis() - maintainTick >= 1000UL) {
-    releaseBus(); int rc = Ethernet.maintain(); maintainTick = millis(); sampleRam();
+    if (!releaseBus()) { fail(F("BUS_OWNERSHIP")); finish(false); return; }
+    int rc = Ethernet.maintain(); maintainTick = millis(); sampleRam();
     if (rc) { prefix(F("DHCP_MAINTAIN")); Serial.print(F(" rc=")); Serial.println(rc); }
     if (rc == 1 || rc == 3 || Ethernet.localIP() != boundIP) { fail(F("LEASE_OR_IP")); finish(false); return; }
   }

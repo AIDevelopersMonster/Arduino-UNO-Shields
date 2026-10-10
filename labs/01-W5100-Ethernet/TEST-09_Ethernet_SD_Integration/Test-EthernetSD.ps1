@@ -10,7 +10,7 @@ Import-Module (Join-Path $PSScriptRoot 'EthernetSD.psm1') -Force
 $build=Get-Content -Raw -LiteralPath $BuildSummary | ConvertFrom-Json
 if($build.test -ne 'TEST-09' -or $build.type -ne 'BUILD_ONLY' -or $build.status -ne 'PASS' -or
    $build.flash_bytes -le 0 -or $build.flash_bytes -gt 29000 -or $build.sram_static_bytes -le 0 -or
-   $build.sram_static_bytes -gt 1536 -or $build.core -notin @('1.8.6','1.8.8') -or $build.sd -ne '1.3.0' -or $build.ethernet -ne '2.0.2'){
+   $build.sram_static_bytes -gt 1536 -or $build.core -notin @('1.8.6','1.8.8') -or $build.sd -ne '1.3.0' -or $build.ethernet -ne '2.0.2' -or $build.firmware_version -ne '0.2'){
     throw 'A measured PASS build with AVR 1.8.6/1.8.8, SD 1.3.0 and Ethernet 2.0.2 is required'
 }
 $hashes=[ordered]@{}
@@ -41,7 +41,7 @@ function Read-Uart {
             elseif($line -match '(?:^| )status=FAIL(?: |$)' -or $line -match '^FAIL '){Write-Host $line -ForegroundColor Red}
             else{Write-Host $line}
         if($line -ceq 'READY' -and -not $state.sent){
-            if(@($lines | Where-Object {$_ -ceq 'BOOT test=TEST09 fw=0.1 eth_cs=10 sd_cs=4 uart=115200'}).Count -ne 1){throw 'Expected one TEST09 fw=0.1 BOOT before READY; rebuild/upload'}
+            if(@($lines | Where-Object {$_ -ceq 'BOOT test=TEST09 fw=0.2 eth_cs=10 sd_cs=4 uart=115200'}).Count -ne 1){throw 'Expected one TEST09 fw=0.2 BOOT before READY; rebuild/upload'}
             $port.WriteLine("RUN $token $DurationSeconds");$state.sent=$true
         }
         $row=ConvertFrom-Test09Line $line
@@ -89,7 +89,7 @@ finally{
 }
 try{$verdict=Get-Test09Verdict -Lines $lines.ToArray() -Token $token -DurationSeconds $DurationSeconds -Probes $probes.ToArray() -LoadSeconds $load.Elapsed.TotalSeconds -Fatal $state.fatal}
 catch{$verdict=[pscustomobject]@{status='FAIL';reasons=@('incomplete/malformed evidence: '+$_.Exception.Message);metrics=$null}}
-$summary=[ordered]@{test='TEST-09';type='HARDWARE';runner_version='0.1';status=$verdict.status;utc=[DateTime]::UtcNow.ToString('o');
+$summary=[ordered]@{test='TEST-09';type='HARDWARE';runner_version='0.2';status=$verdict.status;utc=[DateTime]::UtcNow.ToString('o');
     port=$SerialPort;token=$token;requested_load_s=$DurationSeconds;actual_load_s=$load.Elapsed.TotalSeconds;total_ms=$clock.ElapsedMilliseconds;
     reasons=$verdict.reasons;metrics=$verdict.metrics;source_hashes=$hashes;build=$build;test_file='T09CHECK.BIN';run_directory=$run}
 $summary | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $run 'summary.json') -Encoding utf8

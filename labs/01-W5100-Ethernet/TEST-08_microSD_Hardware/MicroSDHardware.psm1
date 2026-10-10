@@ -25,7 +25,7 @@ function ConvertFrom-Test08Line {
         }
     }
     foreach($key in @('token','test','fw','eth_cs','sd_cs','uart','eth_spi_hz','free','index','name','status',
-        'type','blocks','fat','bytes','crc16','checks','failures','min_free','elapsed_ms',
+        'type','blocks','fat','bytes','crc16','checks','failures','min_free','elapsed_ms','bus_fault',
         'phase','expected','observed1','observed2','probe','restored')){
         if(-not $record.ContainsKey($key)){$record[$key]=$null}
     }
@@ -41,9 +41,9 @@ function Get-Test08Verdict {
     }
     $boots=@($records | Where-Object kind -eq 'BOOT')
     if($boots.Count -ne 1){$reasons.Add('exactly one BOOT required')}
-    elseif($boots[0].test -ne 'TEST08' -or $boots[0].fw -ne '0.3' -or
+    elseif($boots[0].test -ne 'TEST08' -or $boots[0].fw -ne '0.4' -or
            $boots[0].eth_cs -ne '10' -or $boots[0].sd_cs -ne '4' -or $boots[0].uart -ne '115200' -or
-           $boots[0].eth_spi_hz -ne '1000000'){
+           $boots[0].eth_spi_hz -ne '4000000'){
         $reasons.Add('unexpected firmware/pin/SPI banner')
     }
     $bootMarkers=0
@@ -60,7 +60,7 @@ function Get-Test08Verdict {
     $end=@($records | Where-Object kind -eq 'RESULT')
     if($start.Count -ne 1 -or $start[0].token -cne $Token){$reasons.Add('matching START required')}
     if($end.Count -ne 1 -or $end[0].token -cne $Token){$reasons.Add('matching terminal RESULT required')}
-    $expected=@('ETH_SPI_BEFORE','CARD_INIT','CARD_INFO','FAT_VOLUME','ROOT_OPEN',
+    $expected=@('CARD_INIT','ETH_SPI_BEFORE','CARD_INFO','FAT_VOLUME','ROOT_OPEN',
         'EXCLUSIVE_CREATE','WRITE_2048','REOPEN_VERIFY_2048','SEEK_BOUNDARIES','APPEND_64',
         'REOPEN_VERIFY_2112','REMOUNT_VERIFY','REMOVE_TEST_FILE','ETH_SPI_AFTER','RAM')
     $checks=@($records | Where-Object kind -eq 'CHECK')
@@ -87,7 +87,7 @@ function Get-Test08Verdict {
     if($spi.Count -ne 2){$reasons.Add('before/after RTR diagnostics required')}
     else {
         if($spi[0].phase -cne 'BEFORE' -or $spi[1].phase -cne 'AFTER' -or
-           $spi[0].expected -cnotmatch '^[0-9A-F]{4}$' -or $spi[0].probe -cne '1234' -or
+           $spi[0].expected -cnotmatch '^[0-9A-F]{4}$' -or $spi[0].expected -in @('0000','FFFF') -or $spi[0].probe -cne '1234' -or
            $spi[0].restored -cne $spi[0].expected -or $spi[1].expected -cne $spi[0].expected){
             $reasons.Add('RTR probe/restore diagnostics inconsistent')
         }
@@ -115,7 +115,7 @@ function Get-Test08Verdict {
             [int]::TryParse($last.free,[ref]$free) -and [int]::TryParse($last.min_free,[ref]$minimum) -and
             [uint32]::TryParse($last.elapsed_ms,[ref]$elapsed)
         if($last.status -cne 'PASS' -or $last.checks -ne '15' -or $last.failures -ne '0' -or
-           $last.bytes -ne '2112' -or $last.crc16 -cne (Get-Test08Crc 2112)){$reasons.Add('terminal result gates failed')}
+           $last.bus_fault -ne '0' -or $last.bytes -ne '2112' -or $last.crc16 -cne (Get-Test08Crc 2112)){$reasons.Add('terminal result gates failed')}
         if(-not $numbers -or $initial -lt 512 -or $initial -gt 2048 -or $free -gt 2048 -or
            $minimum -lt 512 -or $minimum -gt $free -or $minimum -gt $initial -or
            $free -lt $initial-64){$reasons.Add('SRAM minimum/drift gates failed')}

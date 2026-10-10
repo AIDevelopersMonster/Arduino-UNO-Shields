@@ -29,7 +29,7 @@ using __FlashStringHelper=char;
 const int HIGH=1,ETH_CS=10,SD_CS=4,O_WRITE=2,O_READ=1;
 const char FILE_NAME[]="T09CHECK.BIN";
 uint8_t packet[128];char command[20]={},token[9]={};uint8_t commandLength=0;
-bool overflow=false,active=false,used=false;
+bool overflow=false,active=false,used=false,busFault=false;
 uint32_t durationMs=0,maxSdMs=0;uint16_t finalCrc=0;
 int starts=0,finishes=0,rejections=0,samples=0;
 bool cacheWasDiscarded=false,corrupt=false,shortWrite=false,syncFailure=false,closeFailure=false;

@@ -28,7 +28,7 @@ foreach($name in @('TEST-09_Ethernet_SD_Integration.ino','EthernetSD.psm1','Test
     $hashes[$name]=(Get-FileHash (Join-Path $PSScriptRoot $name) -Algorithm SHA256).Hash
 }
 $hex=Join-Path $build 'TEST-09_Ethernet_SD_Integration.ino.hex'
-$summary=[ordered]@{test='TEST-09';type='BUILD_ONLY';status=$(if($passed){'PASS'}else{'FAIL'});
+$summary=[ordered]@{test='TEST-09';type='BUILD_ONLY';firmware_version='0.2';status=$(if($passed){'PASS'}else{'FAIL'});
     utc=[DateTime]::UtcNow.ToString('o');fqbn='arduino:avr:uno';core=$platform.version;sd=$library[0].version;ethernet=$ethernet[0].version;
     flash_bytes=$flash[0].size;flash_limit=29000;sram_static_bytes=$sram[0].size;sram_static_limit=1536;
     hex_sha256=(Get-FileHash $hex -Algorithm SHA256).Hash;source_hashes=$hashes;hardware_status='PENDING'}

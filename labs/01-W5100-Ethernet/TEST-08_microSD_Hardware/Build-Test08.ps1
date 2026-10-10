@@ -26,7 +26,7 @@ foreach($name in @('TEST-08_microSD_Hardware.ino','MicroSDHardware.psm1','Test-M
     $hashes[$name]=(Get-FileHash (Join-Path $PSScriptRoot $name) -Algorithm SHA256).Hash
 }
 $hex=Join-Path $build 'TEST-08_microSD_Hardware.ino.hex'
-$summary=[ordered]@{test='TEST-08';type='BUILD_ONLY';firmware_version='0.3';ethernet_spi_hz=1000000;
+$summary=[ordered]@{test='TEST-08';type='BUILD_ONLY';firmware_version='0.4';ethernet_spi_hz=4000000;
     sd_init_spi_hz=250000;sd_data_spi_hz=4000000;status=$(if($passed){'PASS'}else{'FAIL'});
     utc=[DateTime]::UtcNow.ToString('o');fqbn='arduino:avr:uno';core=$platform.version;sd=$library[0].version;
     flash_bytes=$flash[0].size;flash_limit=29000;sram_static_bytes=$sram[0].size;sram_static_limit=1200;

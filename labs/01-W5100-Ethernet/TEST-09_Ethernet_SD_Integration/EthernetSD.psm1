@@ -30,7 +30,7 @@ function ConvertFrom-Test09Line {
             $row[$Matches.key]=$Matches.value
         }
     }
-    foreach($key in @('token','test','fw','eth_cs','sd_cs','uart','duration_s','error_code','error_data','type','blocks','fat','ip','udp','chip','rtr','free','min_free','initial_free','elapsed_ms','rx','verified','tx','bytes','errors','cleanup','status','expected_rtr','rtr1','rtr2','crc16','max_sd_ms','rc')){
+    foreach($key in @('token','test','fw','eth_cs','sd_cs','uart','duration_s','error_code','error_data','type','blocks','fat','ip','udp','chip','rtr','free','min_free','initial_free','elapsed_ms','rx','verified','tx','bytes','errors','cleanup','status','expected_rtr','rtr1','rtr2','crc16','max_sd_ms','rc','bus_fault')){
         if(-not $row.ContainsKey($key)){$row[$key]=$null}
     }
     return $row
@@ -40,7 +40,7 @@ function Get-Test09Verdict {
     $reasons=[Collections.Generic.List[string]]::new()
     if($Fatal){$reasons.Add($Fatal)}
     $records=@($Lines | ForEach-Object {ConvertFrom-Test09Line $_} | Where-Object {$null -ne $_})
-    $banner='BOOT test=TEST09 fw=0.1 eth_cs=10 sd_cs=4 uart=115200'
+    $banner='BOOT test=TEST09 fw=0.2 eth_cs=10 sd_cs=4 uart=115200'
     if(@($Lines | Where-Object {$_ -ceq $banner}).Count -ne 1){$reasons.Add('one complete TEST09 BOOT required')}
     $markers=0
     foreach($line in $Lines){$markers += [regex]::Matches($line,'BOOT test=TEST09(?: |$)').Count}
@@ -65,7 +65,7 @@ function Get-Test09Verdict {
     $ip=$null
     if($net.chip -ne 'W5100' -or $net.udp -ne '5001' -or -not [Net.IPAddress]::TryParse($net.ip,[ref]$ip) -or $ip.AddressFamily -ne [Net.Sockets.AddressFamily]::InterNetwork -or $ip.Equals([Net.IPAddress]::Any)){$reasons.Add('valid W5100 UDP service/IP required')}
     if($net.rtr -cnotmatch '^[0-9A-F]{4}$' -or $net.rtr -in @('0000','FFFF') -or $end.expected_rtr -cne $net.rtr -or $end.rtr1 -cne $net.rtr -or $end.rtr2 -cne $net.rtr){$reasons.Add('before/after RTR preservation required')}
-    if($end.status -cne 'PASS' -or $end.errors -ne '0' -or $end.cleanup -ne '1'){$reasons.Add('successful terminal result and file cleanup required')}
+    if($end.status -cne 'PASS' -or $end.errors -ne '0' -or $end.bus_fault -ne '0' -or $end.cleanup -ne '1'){$reasons.Add('successful terminal result and file cleanup required')}
     if($LoadSeconds -lt $DurationSeconds){$reasons.Add('requested load interval not completed')}
     $sizes=@(16,32,64,128);[long]$total=0
     $minimum=[Math]::Max(24,$DurationSeconds*2)
