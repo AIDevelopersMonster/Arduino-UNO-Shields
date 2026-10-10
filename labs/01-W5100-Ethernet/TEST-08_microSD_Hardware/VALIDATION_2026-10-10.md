@@ -1,6 +1,10 @@
 # TEST-08 — development verification / 2026-10-10
 
-**Firmware/runner 0.2 BUILD VERIFIED; corrected hardware run PENDING.**
+**Firmware/runner 0.2 BUILD VERIFIED; v0.2 hardware CARD_INIT FAIL.**
+The [actual result record](RESULT_2026-10-10.md) preserves both supplied failed
+runs. The compiled SPI model tests a declared peripheral behavior; the real
+v0.2 run failed before the post-SD check, so physical handoff verification is
+still incomplete. An unchanged-firmware cold-start diagnostic is pending.
 No UNO, shield or card was exercised by the assistant. The operator's initial
 v0.1 hardware FAIL is preserved in [its own report](RESULT_2026-10-10.md).
 
