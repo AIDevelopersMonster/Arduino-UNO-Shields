@@ -1,0 +1,25 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$test8\Build-Test08.ps1" -UploadPort COM4
+BUILD PASS / Flash=14422/32256 / static SRAM=1052/2048 / AVR=1.8.8 / SD=1.3.0 / W5100 SPI=4000000 Hz
+Новый порт загрузки: COM4 (serial)
+Measured binary uploaded; hardware result remains PENDING.
+PS C:\GitHub\Arduino-UNO-Shields> & "$test8\Test-MicroSDHardware.ps1" -SerialPort COM4 -DurationSeconds 90
+TEST-08 microSD / SPI order audit / W5100 SPI=4 MHz / bounded 90s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-175144-TEST08-E272AB07
+Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses are needed.
+BOOT test=TEST08 fw=0.4 eth_cs=10 sd_cs=4 uart=115200 eth_spi_hz=4000000
+READY
+ШАГ: автоматически проверяю SPI, карту, запись, чтение, append, remount и удаление тестового файла.
+START token=E272AB07 free=955
+CARD token=E272AB07 error_code=0 error_data=0
+CHECK token=E272AB07 index=1 name=CARD_INIT status=PASS free=950
+ETH_RTR token=E272AB07 phase=BEFORE expected=0750 observed1=0750 observed2=07D0 probe=0000 restored=0000
+CHECK token=E272AB07 index=2 name=ETH_SPI_BEFORE status=FAIL free=950
+RESULT token=E272AB07 status=FAIL checks=2 failures=1 bytes=2112 crc16=0000 free=955 min_free=948 bus_fault=0 elapsed_ms=50
+RESULT FAIL / TEST-08 / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-175144-TEST08-E272AB07
+  all 15 checks required
+  valid card type/capacity required
+  FAT16/FAT32 required
+  before/after RTR diagnostics required
+  three complete readbacks required
+  terminal result gates failed
+A failed run may leave T08CHECK.BIN for diagnosis; existing files are never overwritten.
+PS C:\GitHub\Arduino-UNO-Shields>

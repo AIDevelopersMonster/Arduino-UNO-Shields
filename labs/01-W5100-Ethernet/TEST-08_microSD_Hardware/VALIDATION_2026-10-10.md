@@ -142,3 +142,19 @@ Final local firmware SHA256:
 Final local non-bootloader HEX SHA256:
 `0E5B0A2CD49D058EA977A3B49DC09E2BB94B8FC7217969DB73D70A4CFD5C4805`.
 Another AVR/core build must report its own binary hashes and measurements.
+
+
+## USB-card procedure 0.1 and new operator evidence
+
+TEST-08 v0.4 subsequently produced two actual ETH_SPI_BEFORE FAIL records,
+E272AB07 (0750/07D0) and DDA2F317 (FFFF twice), both following CARD_INIT PASS.
+Their unchanged-v0.4 verdict replays fail. The local build/ownership model
+results above remain software results. Firmware is unchanged.
+
+The separately prepared Windows USB-card procedure has two parsed PowerShell
+files and an actual Add-Type C# build. Its 11 local file-core cases pass,
+including a 16 MiB roundtrip with independent SHA-256 and refusal of occupied
+filenames, data corruption, wrong seeds, truncation, trailing data and expired
+budget. See [USB_SD_CHECK.md](USB_SD_CHECK.md) for scope and commands.
+Windows Storage discovery/remount and the operator's card have not been tested
+locally. Hardware USB-SD status is PENDING.

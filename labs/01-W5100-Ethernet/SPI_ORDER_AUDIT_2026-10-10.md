@@ -2,9 +2,11 @@
 
 The operator stopped selection of frequency/power conditions after the actual
 TEST-08 v0.3 CARD_INIT failure D39AF82E and required an algorithm audit.
-The proposed cold run was not performed. Both revised firmwares are BUILD
-VERIFIED; their **hardware results remain PENDING**. All supplied earlier
-PASS and FAIL records remain unchanged.
+The proposed v0.3 cold run was not performed. Both revised firmwares are BUILD
+VERIFIED. TEST-08 v0.4 subsequently failed ETH_SPI_BEFORE in two actual runs;
+TEST-09 v0.2 hardware remains PENDING. All supplied PASS and FAIL records remain
+unchanged. The operator selected a separate Windows USB-card check, prepared
+but not yet physically executed.
 
 ## Findings and repairs
 
@@ -41,7 +43,7 @@ Final actual Arduino CLI 1.3.1, AVR 1.8.6 builds with SD 1.3.0:
 
 | Firmware | Flash / 32,256 B | Static SRAM / 2,048 B | Hardware status |
 | --- | --- | --- | --- |
-| TEST-08 v0.4 | 14,422 | 1,052 | PENDING |
+| TEST-08 v0.4 | 14,422 | 1,052 | Two actual ETH_SPI_BEFORE FAIL |
 | TEST-09 v0.2, Ethernet 2.0.2 | 25,558 | 1,444 | PENDING |
 
 Final compiler stderr is empty. All eight PowerShell files parse; 36 TEST-08
@@ -55,8 +57,13 @@ init failure with no unprepared Ethernet access. Existing command/SD models pass
 
 These are software tests with declared peripheral mocks. They do not measure
 analog waveforms, voltage levels, physical pin transients, peak SRAM, throughput
-or the cause of the operator's failures. The same card and cables remain in use
-for the next normal TEST-08 v0.4 upload/run; physical-condition selection is paused.
+or the cause of the operator's failures. The subsequent normal run E272AB07
+failed with 0750/07D0 before any RTR write. After the requested replacement,
+DDA2F317 returned FFFF twice; CARD_INIT passed in both. Those findings do not
+prove a damaged card, waveform cause or a new software defect. A proposed
+byte-level trace was not implemented because the operator selected the
+[Windows USB-card procedure](TEST-08_microSD_Hardware/USB_SD_CHECK.md) instead.
+No firmware or acceptance-gate change was made after these failures.
 
 Primary inspected implementations:
 [AVR 1.8.8 pinMode/digitalWrite](https://github.com/arduino/ArduinoCore-avr/blob/1.8.8/cores/arduino/wiring_digital.c),
