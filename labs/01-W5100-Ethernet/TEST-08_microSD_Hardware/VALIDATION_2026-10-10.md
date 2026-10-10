@@ -1,10 +1,11 @@
 # TEST-08 — development verification / 2026-10-10
 
-**Firmware/runner 0.2 BUILD VERIFIED; v0.2 hardware CARD_INIT FAIL.**
-The [actual result record](RESULT_2026-10-10.md) preserves both supplied failed
-runs. The compiled SPI model tests a declared peripheral behavior; the real
-v0.2 run failed before the post-SD check, so physical handoff verification is
-still incomplete. An unchanged-firmware cold-start diagnostic is pending.
+**Firmware/runner 0.2 BUILD VERIFIED; operator's cold-start hardware PASS, 15/15.**
+The [actual result record](RESULT_2026-10-10.md) preserves both earlier failed
+runs and the subsequent supplied 15-check PASS after complete power-off.
+The compiled SPI model tests a declared peripheral behavior; the cold-start
+hardware run additionally confirms exact readbacks and post-SD RTR preservation
+on this sample. It does not prove why either earlier failure occurred.
 No UNO, shield or card was exercised by the assistant. The operator's initial
 v0.1 hardware FAIL is preserved in [its own report](RESULT_2026-10-10.md).
 
@@ -33,7 +34,9 @@ v0.1 hardware FAIL is preserved in [its own report](RESULT_2026-10-10.md).
 
 These checks validate compilation and host decision logic. They do not establish
 SPI wiring, card presence, successful SD writes or hardware SRAM measurements.
-The corrected real runner output and complete `summary.json` are still required.
+The supplied cold-start console also passes the unchanged v0.2 verdict module.
+Complete local `summary.json` / `serial.log` and actual v0.2 AVR 1.8.8 build
+measurements have not yet been supplied; their hashes are not inferred.
 PowerShell telemetry is disabled for local host verification processes.
 
 Measured firmware SHA256:
