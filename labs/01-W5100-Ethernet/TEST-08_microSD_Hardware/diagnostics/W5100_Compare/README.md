@@ -54,9 +54,13 @@ so this does not identify its failure cause.
 
 Next control: the same already-loaded TEST-07 binary with the card physically
 present but not initialized by application code, one Baseline 60 s. This is
-**PENDING**. No firmware/host source or acceptance gate changes are made.
+**Now FAIL at warmup deadline**, after the separate host log-path repair.
+The intended log directory was opened, but stable service was not established;
+no UART STAT lines appeared in the supplied console. Full failed summary/UART
+log are needed to identify the execution point. Firmware and gates are unchanged.
 [Aggregate result, Enter-guided preparation and commands](../../../TEST-07_Network_Robustness/CONTROL_BASELINE_2026-10-10.md)
-are published without raw console, local IP addresses or workstation paths.
+and the next read-only log inspection are published without raw console,
+local IP addresses or workstation paths.
 No frequency or home router changes are required. TEST-09 remains PENDING.
 
 ## Original reproducible diagnostic commands — PowerShell 7
