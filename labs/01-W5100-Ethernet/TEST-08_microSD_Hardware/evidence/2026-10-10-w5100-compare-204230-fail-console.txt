@@ -1,0 +1,23 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$cmp\Test-W5100Compare.ps1" -SerialPort COM4 -DurationSeconds 90
+W5100_COMPARE / 17 checks / raw and Ethernet 2.0.2 RTR comparison / bounded 90s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\diagnostics\W5100_Compare\runs\20261010-204230-W5100_COMPARE-886B359A
+Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses needed.
+BOOT test=W5100_COMPARE fw=0.1 eth_cs=10 sd_cs=4 uart=115200 eth_spi_hz=4000000 eth_init_spi_hz=8000000 sd_init_spi_hz=250000 sd_data_spi_hz=4000000
+READY
+ШАГ: однократно инициализирую драйвер W5100, сравниваю RAW/LIB на 4 МГц до и после SD. Клавиши не нужны.
+START token=886B359A free=875
+CARD token=886B359A error_code=0 error_data=0
+CHECK token=886B359A index=1 name=CARD_INIT status=PASS free=870
+ETH_INIT token=886B359A rc=0 chip=0 init_spi_hz=8000000
+CHECK token=886B359A index=2 name=ETH_DRIVER_INIT status=FAIL free=870
+RESULT token=886B359A status=FAIL checks=2 failures=1 planned_bytes=2112 bytes=0 crc16=0000 free=875 min_free=868 bus_fault=0 baseline=0000 rtr_samples=0 compare_failures=0 elapsed_ms=650
+RESULT FAIL / W5100_COMPARE / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\diagnostics\W5100_Compare\runs\20261010-204230-W5100_COMPARE-886B359A
+  all 17 comparison/SD checks required
+  valid card type/capacity required
+  FAT16/FAT32 required
+  one successful Ethernet 2.0.2 W5100 driver initialization required
+  valid single library RTR baseline required
+  all 36 raw/library observations required
+  three complete readbacks required
+  terminal result gates failed
+A failed run may leave W51CMP.BIN for diagnosis; existing files are never overwritten.
+PS C:\GitHub\Arduino-UNO-Shields>

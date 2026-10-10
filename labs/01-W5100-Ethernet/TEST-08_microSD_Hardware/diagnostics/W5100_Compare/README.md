@@ -1,7 +1,7 @@
 # W5100_COMPARE v0.1 — raw / Ethernet 2.0.2 RTR comparison
 
 Prepared after actual USB-SD 16 MiB PASS and UNO SD_ONLY 13/13 PASS B652B736.
-**BUILD VERIFIED; hardware W5100_COMPARE PENDING.** Full TEST-08 v0.4,
+**BUILD VERIFIED; actual hardware ETH_DRIVER_INIT FAIL, 886B359A.** Full TEST-08 v0.4,
 TEST-09 v0.2 and SD_ONLY firmware/verdicts are unchanged.
 
 This separate diagnostic compares the TEST-08 v0.4 raw read algorithm with
@@ -26,7 +26,47 @@ RTR probe/restore/write; the library's initialization itself writes registers.
 An observed PASS cannot establish that old raw accesses without initialization
 work or that a particular instruction caused the prior failures.
 
-## One automatic run — PowerShell 7
+## Actual hardware run and next control
+
+The [supplied complete console](../../evidence/2026-10-10-w5100-compare-204230-fail-console.txt)
+for `20261010-204230-W5100_COMPARE-886B359A`, COM4, reports CARD_INIT PASS,
+then Ethernet 2.0.2 `W5100.init()` returning rc=0/chip=0 at actual 8 MHz.
+The unchanged verdict module replays FAIL. The diagnostic stopped before
+any RTR comparison, capacity/FAT check or file operation: rtr_samples=0,
+verified bytes=0, min_free=868 B, bus_fault=0, MCU elapsed=650 ms.
+No W51CMP.BIN was created by this run. The generic end warning does not
+establish an existing file. No card failure, damaged W5100, physical signal
+cause or raw-versus-library read difference is established.
+
+`Ethernet.init(10)` sets the library CS pin; `W5100.init()` is the same
+driver initialization called by Ethernet 2.0.2 DHCP/static `Ethernet.begin()`.
+The use of these APIs is valid. The official tagged Ethernet.cpp was
+compared with the locally compiled copy; they match. This check does not
+establish why chip detection failed on the operator's shared bus.
+
+Next, use existing [TEST-07 Baseline](../../../TEST-07_Network_Robustness/)
+as an independent current Ethernet control with microSD physically absent.
+Remove the card only with all UNO/Shield power disconnected; Ethernet remains
+connected. The prompts below separate preparation from the automatic run.
+This changes firmware and power state as well as card presence, so it tests
+current standalone Ethernet service, not the effect of SD presence alone.
+It is one declared control, not retrying W5100_COMPARE until it passes.
+
+```powershell
+git pull --ff-only
+$test = ".\labs\01-W5100-Ethernet\TEST-07_Network_Robustness"
+$null = Read-Host "Отключи всё питание UNO/Shield, извлеки microSD. Ethernet-кабель оставь подключённым. Нажми Enter"
+$null = Read-Host "Подключи USB UNO. Закрой монитор Arduino. После подключения нажми Enter"
+& "$test\Build-Test07.ps1" -UploadPort COM4
+& "$test\Test-NetworkRobustness.ps1" -SerialPort COM4 -Scenario Baseline -DurationSeconds 60
+```
+
+The new control is **PENDING**. Its pass/fail decision is printed in green/red.
+A future PASS establishes its bounded UDP/TCP service with the card absent;
+it does not cancel 886B359A or certify shared-bus integration. Do not change
+home router DHCP settings for this control. Full TEST-09 remains PENDING.
+
+## Original reproducible diagnostic commands — PowerShell 7
 
 Leave the USB-verified card inserted in the same UNO/Shield; leave existing
 cables connected. Close Arduino monitor. No power/card/frequency selection,

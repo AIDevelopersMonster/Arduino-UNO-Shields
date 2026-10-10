@@ -8,7 +8,8 @@ TEST-09 v0.2 hardware remains PENDING. All supplied PASS and FAIL records remain
 unchanged. The operator selected a separate Windows USB-card check, which
 subsequently passed 16 MiB write/read and reconnected readback (82E149BC65C6).
 UNO SD_ONLY subsequently passed 13/13 (B652B736). A separate W5100_COMPARE
-diagnostic is now prepared, hardware PENDING.
+run 886B359A then failed ETH_DRIVER_INIT (rc=0/chip=0) after CARD_INIT PASS.
+No raw/library RTR comparison or file operation was reached.
 
 ## Findings and repairs
 
@@ -97,4 +98,28 @@ aborts further SPI. The library is initialized once after SD init; that
 normal driver initialization resets/configures W5100 at 8 MHz on UNO and
 differs from the old raw-only initialization. Results cannot erase that
 confound or certify the original algorithm without initialization. Hardware
-W5100_COMPARE is PENDING; full TEST-08/09 and SD_ONLY sources are unchanged.
+W5100_COMPARE now has actual ETH_DRIVER_INIT FAIL 886B359A; full TEST-08/09,
+SD_ONLY and comparison firmware sources are unchanged.
+
+## Driver initialization failure 886B359A and independent control
+
+The supplied console reports CARD_INIT PASS, then `W5100.init()` rc=0/chip=0
+with actual init SPI 8 MHz. The diagnostic stops before capacity/FAT, all RTR
+samples and file operations. This is not evidence that library RTR readings
+agree or disagree with raw readings. `bus_fault=0` checks programmed CS levels;
+it is not a measurement of analog slave output release. No W51CMP.BIN was
+created by this run. The unchanged verdict module replays FAIL.
+
+The tagged [Ethernet 2.0.2 Ethernet.cpp](https://github.com/arduino-libraries/Ethernet/blob/2.0.2/src/Ethernet.cpp)
+was fetched and byte-compared with the compiled local copy. `Ethernet.init(10)`
+sets SS; both DHCP/static `Ethernet.begin()` call `W5100.init()`. The diagnostic's
+API sequence is valid. This check does not identify the shared-bus failure cause.
+No additional algorithm repair, frequency change or retry is claimed.
+
+Next control: the existing TEST-07 Baseline, card physically absent, standard
+Ethernet 2.0.2 and a bounded 60 s UDP/TCP run. Preparation is prompted with Enter,
+card removal occurs with all power disconnected, and no home DHCP configuration
+changes are required. Firmware/power state also change, so a future PASS tests
+current standalone Ethernet operation, not SD presence as an isolated causal
+variable. This control is PENDING; original failures remain recorded. Commands
+are in [W5100_COMPARE](TEST-08_microSD_Hardware/diagnostics/W5100_Compare/README.md).

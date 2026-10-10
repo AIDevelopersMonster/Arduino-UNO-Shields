@@ -48,7 +48,7 @@ $summary=[ordered]@{
     source_hashes=$hashes; hardware_status='PENDING'
 }
 $summary | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $build 'build-summary.json') -Encoding utf8
-Write-Host "BUILD $($summary.status) / Flash=$($flash.size)/32256 / static SRAM=$($sram.size)/2048 / AVR=$coreVersion"
+Write-Host "BUILD $($summary.status) / Flash=$($flash.size)/32256 / static SRAM=$($sram.size)/2048 / AVR=$coreVersion" -ForegroundColor $(if($passed){'Green'}else{'Red'})
 if(-not $passed){throw 'Memory budget exceeded (Flash <=29000, static SRAM <=1200 bytes)'}
 if($UploadPort) {
     & $ArduinoCli upload -p $UploadPort --fqbn arduino:avr:uno --input-dir $build $PSScriptRoot

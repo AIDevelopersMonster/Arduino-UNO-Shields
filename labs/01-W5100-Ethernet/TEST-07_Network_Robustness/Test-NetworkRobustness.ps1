@@ -256,6 +256,6 @@ finally {
     Write-Event 'RUN_END' $summary
     $events.Dispose(); $uart.Dispose(); $probes.Dispose()
 }
-Write-Host "RESULT $($verdict.Status) / $Scenario / $run"
+Write-Host "RESULT $($verdict.Status) / $Scenario / $run" -ForegroundColor $(if($verdict.Status -eq 'PASS'){'Green'}else{'Red'})
 foreach ($reason in $verdict.Reasons) { Write-Host "  $reason" }
 if ($verdict.Status -ne 'PASS') { exit 1 }

@@ -1,6 +1,6 @@
 # TEST-08 — development verification / 2026-10-10
 
-**Current firmware/runner 0.4 BUILD VERIFIED; hardware PENDING.**
+**Current firmware/runner 0.4 BUILD VERIFIED; two actual ETH_SPI_BEFORE FAIL.**
 The last actual v0.3 run failed CARD_INIT. The operator stopped condition
 selection and requested the SPI-order audit; no proposed cold run occurred.
 Current v0.4 repairs and their validation are recorded below.
@@ -222,4 +222,26 @@ known owner faults stop further SPI and cleanup.
   source/HEX hashes are in the diagnostic guide. Three existing firmware
   hashes remain unchanged: full TEST-08 v0.4, TEST-09 v0.2 and SD_ONLY v0.1.
 
-Hardware W5100_COMPARE PENDING. No existing physical FAIL is reclassified.
+Hardware W5100_COMPARE now has ETH_DRIVER_INIT FAIL 886B359A after CARD_INIT
+PASS. No RTR comparison or file operation was reached. No existing physical
+FAIL is reclassified.
+
+## Supplied comparison FAIL and next control
+
+The complete 886B359A console is saved verbatim under evidence. The unchanged
+Get-W5100CompareVerdict replays FAIL with the eight reasons printed by the
+operator runner, checks=2, verified bytes=0 and zero RTR samples. This validates
+classification of supplied evidence, not a new physical run.
+
+Official tagged Ethernet.cpp matches the local Ethernet 2.0.2 copy; both normal
+Ethernet.begin variants call W5100.init(), and Ethernet.init sets its CS pin.
+No newly proven initialization algorithm defect is claimed. W5100_COMPARE,
+SD_ONLY, full TEST-08 v0.4 and TEST-09 v0.2 firmware/verdicts are unchanged.
+
+The existing TEST-07 build/runner now color only their final BUILD/RESULT
+verdict green for PASS and red for FAIL; criteria, firmware and scenario
+handling are unchanged. Both edited PowerShell scripts parse. The pending
+next hardware control is TEST-07 Baseline 60 s with microSD physically absent.
+Power/card preparation is explicit and followed by an automatic bounded run.
+Changing firmware and power state prevents a claim that this isolates card
+presence alone. No home router DHCP changes are involved.
