@@ -39,7 +39,7 @@ try {
                 $serial.Write($LibraryStartupMode+"`n")
                 $modeSent=$true
                 $writer.WriteLine((@{utc=[DateTime]::UtcNow.ToString('o');line="HOST mode=$LibraryStartupMode";direction='tx';fields=$null}|ConvertTo-Json -Depth 6 -Compress))
-                Write-Host "РЕЖИМ: $LibraryStartupMode отправлен; карту и кабель оставьте подключёнными." -ForegroundColor Cyan
+                Write-Host "РЕЖИМ: $LibraryStartupMode отправлен; сохраните подготовленное положение карты и подключение Ethernet-кабеля." -ForegroundColor Cyan
             }
         }
         Start-Sleep -Milliseconds 20
