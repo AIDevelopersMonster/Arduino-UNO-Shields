@@ -1,6 +1,6 @@
 # TEST-07 — Ethernet Network Robustness
 
-**Status: PENDING bench results.** Arduino UNO + blue W5100, SD absent.
+**Status: SOURCE READY / hardware test PENDING.** Arduino UNO + blue W5100, SD absent.
 
 ## Purpose
 
@@ -20,7 +20,7 @@ UDP has no guaranteed delivery. The PowerShell script uses binary sequence-ident
 ```powershell
 cd C:\GitHub\Arduino-UNO-Shields
 git pull --ff-only
-$sketch = '.\labs\01-W5100-Ethernet\TEST-07_Network_Robustness'
+$sketch = '.\labs\01-W5100-Ethernet\TEST-07_Network_Robustness\TEST-07_Cable_Recovery'
 arduino-cli compile --fqbn arduino:avr:uno $sketch
 arduino-cli upload -p COM4 --fqbn arduino:avr:uno $sketch
 arduino-cli monitor -p COM4 -c baudrate=115200
@@ -35,6 +35,13 @@ $ip = '192.168.1.84' # EXAMPLE from TEST-06; replace with NEW DHCP address
 ```
 
 Follow prompts to remove and reconnect RJ45. Send both complete PowerShell summary and Arduino Serial monitor logs. Record observations as RESULT_YYYY-MM-DD.md only after hardware test.
+
+## Files
+
+- [Arduino sketch](TEST-07_Cable_Recovery/TEST-07_Cable_Recovery.ino)
+- [PowerShell host tester](Test-NetworkRobustness.ps1)
+
+Router settings, DHCP configuration and firmware remain untouched. Only the Ethernet cable attached to the Arduino shield is unplugged and replugged.
 
 ## Scope
 
