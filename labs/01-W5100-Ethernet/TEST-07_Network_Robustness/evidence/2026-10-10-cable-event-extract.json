@@ -1,0 +1,32 @@
+[
+  {
+    "name": "HEALTHY_FAILURE",
+    "elapsed_ms": 14908,
+    "utc": "2026-10-09T22:08:39.8380394Z",
+    "data": {"Code": "TIMEOUT", "Detail": "TimedOut", "Ms": 1007.9147}
+  },
+  {
+    "name": "HEALTHY_FAILURE",
+    "elapsed_ms": 68745,
+    "utc": "2026-10-09T22:09:33.6749303Z",
+    "data": {"Code": "TIMEOUT", "Detail": "TimedOut", "Ms": 1015.682}
+  },
+  {
+    "name": "OPERATOR_DISCONNECT",
+    "elapsed_ms": 68747,
+    "utc": "2026-10-09T22:09:33.6771003Z",
+    "data": {"meaning": "UNO cable removed"}
+  },
+  {
+    "name": "OPERATOR_RESTORE",
+    "elapsed_ms": 91954,
+    "utc": "2026-10-09T22:09:56.884035Z",
+    "data": {"outage_ms": 23205}
+  },
+  {
+    "name": "RECOVERED",
+    "elapsed_ms": 92202,
+    "utc": "2026-10-09T22:09:57.1316421Z",
+    "data": {"first_exact_echo_ms": 33, "confirmation_echoes": 3}
+  }
+]

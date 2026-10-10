@@ -17,6 +17,8 @@ together.
 ## Laboratories
 
 - [LAB-01 - W5100 + SD](../labs/01-UNO-W5100-SD-4GB/)
+- [LAB-01B - blue W5100 Ethernet, SD removed](../labs/01-W5100-Ethernet/)
+- [TEST-07 - Network Robustness, hardware PENDING](../labs/01-W5100-Ethernet/TEST-07_Network_Robustness/)
 - [LAB-02 - Multi-Function Shield](../labs/02-UNO-MultiFunction-Shield/)
 - [LAB-03 - MAR2406 TFT/Touch](../labs/03-UNO-MAR2406-TFT/)
 - [LAB-05 - frozen KonSol 0.8 environment](../labs/05-UNO-KON-OS/)

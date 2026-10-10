@@ -1,0 +1,27 @@
+TEST-07 Baseline / bounded 60s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-07_Network_Robustness\runs\20261010-005651-Baseline-a18649
+Opening COM with DTR=true may reset UNO; capture one BOOT. Close Arduino monitor.
+Service verified / IP=192.168.1.85 / phase=HEALTHY
+UART ms=4273 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=5000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=9272 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=10000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=14277 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=15000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=19277 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=20000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=24284 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=25000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=29288 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=30000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=34288 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=35000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=39298 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=40000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=44298 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=45000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=49307 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=50000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=54311 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+UART ms=55000 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+RESULT PASS / Baseline / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-07_Network_Robustness\runs\20261010-005651-Baseline-a18649
+PS C:\GitHub\Arduino-UNO-Shields>
