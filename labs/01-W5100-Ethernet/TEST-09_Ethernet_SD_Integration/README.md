@@ -1,10 +1,12 @@
 # TEST-09 — Ethernet + microSD integration
 
-**BUILD VERIFIED / hardware PENDING.** TEST-08 passed its 15 checks after full
+**BUILD VERIFIED / first hardware FAIL (CARD_INIT); diagnosis PENDING.** TEST-08 passed its 15 checks after full
 power-off and reported a second ordinary-repeat PASS; both earlier failures
 remain documented. TEST-09 exercises the same UNO/W5100/card with real UDP
 traffic passing through a file on SD. It has no hardware PASS until the
-operator supplies an actual result. TEST-07 DhcpOutage remains deferred.
+operator supplies a completed load result. The first run failed at CARD_INIT
+(error_code=1/error_data=255), before file creation, DHCP or UDP.
+[Actual result](RESULT_2026-10-10.md). TEST-07 DhcpOutage remains deferred.
 
 ## Что проверяется
 
@@ -42,8 +44,8 @@ arduino-cli lib install "Ethernet@2.0.2" "SD@1.3.0"
 Helper принимает AVR 1.8.6 или 1.8.8, проверяет версии обеих библиотек, реальные
 Flash/SRAM и SHA256 трёх исходников/HEX. Он загружает именно измеренный HEX.
 Локальная реальная сборка: Arduino CLI 1.3.1 / AVR 1.8.6, **25 236 B Flash /
-1 440 B статической SRAM**. Размеры AVR 1.8.8 должен измерить пользовательский
-helper; они не выводятся из результата другого core.
+1 440 B статической SRAM**. Оператор подтвердил те же размеры с AVR 1.8.8
+и успешную загрузку на COM4; локальные HEX/source hash он пока не предоставил.
 
 ## Первый прогон — без ручных действий
 
@@ -118,3 +120,16 @@ mock-объектов и проверяет отказ при short write, CRC c
 [Разработческая проверка](VALIDATION_2026-10-10.md).
 Исходники зависимостей: [Ethernet 2.0.2](https://github.com/arduino-libraries/Ethernet/tree/2.0.2),
 [SD 1.3.0](https://github.com/arduino-libraries/SD/tree/1.3.0).
+
+## Цветной вывод и текущая диагностика
+
+Решения BUILD/RESULT и строки status=PASS выводятся зелёным; FAIL и причины —
+красным. Цвет применяется только через Write-Host, поэтому UART/CSV/JSON остаются
+без управляющих цветовых кодов. После изменения runner требуется Build-Test09: его
+hash входит в measured build gate. Прошивка, протокол и критерии не изменены.
+
+По указанию оператора следующий шаг — отдельная проверка карты прежним TEST-08
+v0.2 (запись/CRC/remount), прежде чем продолжать TEST-09. Она требует загрузки
+TEST-08; отсутствие сетевой нагрузки в этом прогоне не является TEST-09 PASS.
+Ранее предложенный холодный повтор TEST-09 пока не выполнен и остаётся отдельной
+возможной диагностикой после проверки карты.

@@ -1,7 +1,9 @@
 # TEST-09 — development validation / 2026-10-10
 
-**BUILD VERIFIED / hardware PENDING.** No physical UNO, card or network was
-exercised by the assistant for TEST-09. TEST-08's actual evidence belongs to
+**BUILD VERIFIED / actual first hardware CARD_INIT FAIL.** No physical UNO, card or network was
+exercised by the assistant for TEST-09. The operator
+confirmed AVR 1.8.8 build/upload at 25,236 B Flash / 1,440 B SRAM, then supplied
+the [actual failed run](RESULT_2026-10-10.md); no UDP/SD load began. TEST-08's actual evidence belongs to
 its separate result record and does not certify this new firmware.
 
 - Actual Arduino CLI 1.3.1 build: arduino:avr:uno, AVR 1.8.6, Ethernet 2.0.2,

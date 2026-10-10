@@ -36,7 +36,10 @@ function Read-Uart {
     while(($lf=$state.pending.IndexOf("`n")) -ge 0){
         $line=$state.pending.Substring(0,$lf).TrimEnd("`r");$state.pending=$state.pending.Substring($lf+1)
         if(-not $line){continue}
-        $lines.Add($line);$uart.WriteLine([DateTime]::UtcNow.ToString('o')+' '+$line);$uart.Flush();Write-Host $line
+        $lines.Add($line);$uart.WriteLine([DateTime]::UtcNow.ToString('o')+' '+$line);$uart.Flush()
+        if($line -match '(?:^| )status=PASS(?: |$)'){Write-Host $line -ForegroundColor Green}
+            elseif($line -match '(?:^| )status=FAIL(?: |$)' -or $line -match '^FAIL '){Write-Host $line -ForegroundColor Red}
+            else{Write-Host $line}
         if($line -ceq 'READY' -and -not $state.sent){
             if(@($lines | Where-Object {$_ -ceq 'BOOT test=TEST09 fw=0.1 eth_cs=10 sd_cs=4 uart=115200'}).Count -ne 1){throw 'Expected one TEST09 fw=0.1 BOOT before READY; rebuild/upload'}
             $port.WriteLine("RUN $token $DurationSeconds");$state.sent=$true
@@ -90,7 +93,7 @@ $summary=[ordered]@{test='TEST-09';type='HARDWARE';runner_version='0.1';status=$
     port=$SerialPort;token=$token;requested_load_s=$DurationSeconds;actual_load_s=$load.Elapsed.TotalSeconds;total_ms=$clock.ElapsedMilliseconds;
     reasons=$verdict.reasons;metrics=$verdict.metrics;source_hashes=$hashes;build=$build;test_file='T09CHECK.BIN';run_directory=$run}
 $summary | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $run 'summary.json') -Encoding utf8
-Write-Host "RESULT $($summary.status) / TEST-09 / $run"
-foreach($reason in $summary.reasons){Write-Host "  $reason"}
+Write-Host "RESULT $($summary.status) / TEST-09 / $run" -ForegroundColor $(if($summary.status -eq "PASS"){"Green"}else{"Red"})
+foreach($reason in $summary.reasons){Write-Host "  $reason" -ForegroundColor Red}
 if($summary.status -ne 'PASS'){Write-Host 'T09CHECK.BIN may remain for diagnosis. An existing name is never overwritten.';exit 1}
 exit 0

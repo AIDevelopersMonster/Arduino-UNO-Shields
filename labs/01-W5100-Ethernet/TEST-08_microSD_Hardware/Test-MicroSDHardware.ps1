@@ -39,7 +39,9 @@ try{
             if(-not $line){continue}
             $lines.Add($line)
             $log.WriteLine([DateTime]::UtcNow.ToString('o')+' '+$line);$log.Flush()
-            Write-Host $line
+            if($line -match '(?:^| )status=PASS(?: |$)'){Write-Host $line -ForegroundColor Green}
+            elseif($line -match '(?:^| )status=FAIL(?: |$)' -or $line -match '^FAIL '){Write-Host $line -ForegroundColor Red}
+            else{Write-Host $line}
             if($line -ceq 'READY' -and -not $sent){
                 $boots=@($lines | Where-Object {$_ -ceq 'BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200'})
                 if($boots.Count -ne 1){throw 'Expected one complete TEST08 fw=0.2 BOOT before READY; rebuild/upload if needed'}
@@ -68,7 +70,7 @@ $summary=[ordered]@{test='TEST-08';type='HARDWARE';runner_version='0.2';status=$
     completed_duration_ms=$watch.ElapsedMilliseconds;reasons=@($errors | Select-Object -Unique);metrics=$verdict.metrics;
     source_hashes=$hashes;build=$build;test_file='T08CHECK.BIN';run_directory=$run}
 $summary | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $run 'summary.json') -Encoding utf8
-Write-Host "RESULT $($summary.status) / TEST-08 / $run"
-foreach($reason in $summary.reasons){Write-Host "  $reason"}
+Write-Host "RESULT $($summary.status) / TEST-08 / $run" -ForegroundColor $(if($summary.status -eq "PASS"){"Green"}else{"Red"})
+foreach($reason in $summary.reasons){Write-Host "  $reason" -ForegroundColor Red}
 if(-not $passed){Write-Host 'A failed run may leave T08CHECK.BIN for diagnosis; existing files are never overwritten.';exit 1}
 exit 0

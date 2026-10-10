@@ -31,7 +31,7 @@ $summary=[ordered]@{test='TEST-08';type='BUILD_ONLY';status=$(if($passed){'PASS'
     flash_bytes=$flash[0].size;flash_limit=29000;sram_static_bytes=$sram[0].size;sram_static_limit=1200;
     hex_sha256=(Get-FileHash $hex -Algorithm SHA256).Hash;source_hashes=$hashes;hardware_status='PENDING'}
 $summary | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $build 'build-summary.json') -Encoding utf8
-Write-Host "BUILD $($summary.status) / Flash=$($flash[0].size)/32256 / static SRAM=$($sram[0].size)/2048 / AVR=$($platform.version) / SD=1.3.0"
+Write-Host "BUILD $($summary.status) / Flash=$($flash[0].size)/32256 / static SRAM=$($sram[0].size)/2048 / AVR=$($platform.version) / SD=1.3.0" -ForegroundColor $(if($summary.status -eq "PASS"){"Green"}else{"Red"})
 if(-not $passed){throw 'Flash <=29000 and static SRAM <=1200 bytes required'}
 if($UploadPort){
     & $ArduinoCli upload -p $UploadPort --fqbn arduino:avr:uno --input-dir $build $PSScriptRoot
