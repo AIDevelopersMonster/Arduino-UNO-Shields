@@ -5,9 +5,11 @@ $token='A1B2C3D4'
 $names=@('ETH_SPI_BEFORE','CARD_INIT','CARD_INFO','FAT_VOLUME','ROOT_OPEN','EXCLUSIVE_CREATE',
     'WRITE_2048','REOPEN_VERIFY_2048','SEEK_BOUNDARIES','APPEND_64','REOPEN_VERIFY_2112',
     'REMOUNT_VERIFY','REMOVE_TEST_FILE','ETH_SPI_AFTER','RAM')
-$fixture=@('BOOT test=TEST08 fw=0.1 eth_cs=10 sd_cs=4 uart=115200','READY',"START token=$token free=900",
+$fixture=@('BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200','READY',"START token=$token free=900",
     "CARD token=$token error_code=0 error_data=0","CARD_INFO token=$token type=3 blocks=8388608",
-    "VOLUME token=$token fat=32")
+    "VOLUME token=$token fat=32",
+    "ETH_RTR token=$token phase=BEFORE expected=07D0 observed1=07D0 observed2=07D0 probe=1234 restored=07D0",
+    "ETH_RTR token=$token phase=AFTER expected=07D0 observed1=07D0 observed2=07D0")
 for($i=0;$i -lt $names.Count;$i++){$fixture+="CHECK token=$token index=$($i+1) name=$($names[$i]) status=PASS free=850"}
 $fixture+=@("VERIFY token=$token bytes=2048 crc16=$(Get-Test08Crc 2048)",
     "VERIFY token=$token bytes=2112 crc16=$(Get-Test08Crc 2112)",
@@ -30,7 +32,7 @@ Assert-Verdict 'failed card initialization' @($fixture -replace 'name=CARD_INIT 
 Assert-Verdict 'missing removal evidence' @($fixture | Where-Object {$_ -notmatch 'name=REMOVE_TEST_FILE'}) 'FAIL'
 Assert-Verdict 'duplicate check' ($fixture+@($fixture | Where-Object {$_ -match 'name=RAM'})) 'FAIL'
 Assert-Verdict 'wrong pin banner' @($fixture -replace 'sd_cs=4','sd_cs=5') 'FAIL'
-Assert-Verdict 'wrong firmware version' @($fixture -replace 'fw=0.1','fw=0.2') 'FAIL'
+Assert-Verdict 'wrong firmware version' @($fixture -replace 'fw=0.2','fw=0.1') 'FAIL'
 Assert-Verdict 'unsupported filesystem' @($fixture -replace 'fat=32','fat=12') 'FAIL'
 Assert-Verdict 'zero capacity' @($fixture -replace 'blocks=8388608','blocks=0') 'FAIL'
 Assert-Verdict 'bad readback CRC' @($fixture -replace 'crc16=[0-9A-F]{4}','crc16=0000') 'FAIL'
@@ -43,4 +45,12 @@ Assert-Verdict 'terminal FAIL' @($fixture -replace 'RESULT token=A1B2C3D4 status
 Assert-Verdict 'wrong check index' @($fixture -replace 'index=8 name=REOPEN_VERIFY_2048','index=9 name=REOPEN_VERIFY_2048') 'FAIL'
 Assert-Verdict 'command rejected' ($fixture+@('COMMAND_REJECTED')) 'FAIL'
 Assert-Verdict 'truncated check fields' @($fixture -replace 'name=RAM status=PASS free=850','name=RAM status=PASS') 'FAIL'
+Assert-Verdict 'standalone startup noise' (@('???GR????')+$fixture) 'PASS'
+Assert-Verdict 'noise glued to boot' @($fixture -replace '^BOOT ','???GR????BOOT ') 'FAIL'
+Assert-Verdict 'second boot hidden by noise' ($fixture+@('???BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200')) 'FAIL'
+Assert-Verdict 'missing RTR diagnostics' @($fixture | Where-Object {$_ -notmatch '^ETH_RTR'}) 'FAIL'
+Assert-Verdict 'RTR differs after SD' @($fixture -replace 'phase=AFTER expected=07D0 observed1=07D0','phase=AFTER expected=07D0 observed1=FFFF') 'FAIL'
+Assert-Verdict 'RTR restore differs' @($fixture -replace 'restored=07D0','restored=1234') 'FAIL'
+Assert-Verdict 'RTR expected changed after SD' @($fixture -replace 'phase=AFTER expected=07D0','phase=AFTER expected=0000') 'FAIL'
+Assert-Verdict 'truncated RTR diagnostic' @($fixture -replace 'phase=AFTER expected=07D0 observed1=07D0 observed2=07D0','phase=AFTER expected=07D0') 'FAIL'
 Write-Host "HOST CHECKS PASS / $count verdict cases. UART evidence is synthetic; no card hardware result."

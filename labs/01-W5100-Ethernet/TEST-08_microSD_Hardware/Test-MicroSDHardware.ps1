@@ -41,6 +41,8 @@ try{
             $log.WriteLine([DateTime]::UtcNow.ToString('o')+' '+$line);$log.Flush()
             Write-Host $line
             if($line -ceq 'READY' -and -not $sent){
+                $boots=@($lines | Where-Object {$_ -ceq 'BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200'})
+                if($boots.Count -ne 1){throw 'Expected one complete TEST08 fw=0.2 BOOT before READY; rebuild/upload if needed'}
                 $port.WriteLine("RUN $token");$sent=$true
                 Write-Host 'ШАГ: автоматически проверяю SPI, карту, запись, чтение, append, remount и удаление тестового файла.'
             }
@@ -61,7 +63,7 @@ try{$verdict=Get-Test08Verdict -Lines $lines.ToArray() -Token $token}
 catch{$verdict=[pscustomobject]@{status='FAIL';reasons=@('malformed/incomplete UART evidence: '+$_.Exception.Message);metrics=$null}}
 foreach($reason in $verdict.reasons){$errors.Add($reason)}
 $passed=$verdict.status -eq 'PASS' -and $errors.Count -eq 0
-$summary=[ordered]@{test='TEST-08';type='HARDWARE';runner_version='0.1';status=$(if($passed){'PASS'}else{'FAIL'});
+$summary=[ordered]@{test='TEST-08';type='HARDWARE';runner_version='0.2';status=$(if($passed){'PASS'}else{'FAIL'});
     utc=[DateTime]::UtcNow.ToString('o');port=$SerialPort;token=$token;requested_duration_s=$DurationSeconds;
     completed_duration_ms=$watch.ElapsedMilliseconds;reasons=@($errors | Select-Object -Unique);metrics=$verdict.metrics;
     source_hashes=$hashes;build=$build;test_file='T08CHECK.BIN';run_directory=$run}

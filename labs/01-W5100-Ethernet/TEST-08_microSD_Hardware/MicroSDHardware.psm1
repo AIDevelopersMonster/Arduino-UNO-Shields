@@ -25,7 +25,8 @@ function ConvertFrom-Test08Line {
         }
     }
     foreach($key in @('token','test','fw','eth_cs','sd_cs','uart','free','index','name','status',
-        'type','blocks','fat','bytes','crc16','checks','failures','min_free','elapsed_ms')){
+        'type','blocks','fat','bytes','crc16','checks','failures','min_free','elapsed_ms',
+        'phase','expected','observed1','observed2','probe','restored')){
         if(-not $record.ContainsKey($key)){$record[$key]=$null}
     }
     $record
@@ -40,10 +41,18 @@ function Get-Test08Verdict {
     }
     $boots=@($records | Where-Object kind -eq 'BOOT')
     if($boots.Count -ne 1){$reasons.Add('exactly one BOOT required')}
-    elseif($boots[0].test -ne 'TEST08' -or $boots[0].fw -ne '0.1' -or
+    elseif($boots[0].test -ne 'TEST08' -or $boots[0].fw -ne '0.2' -or
            $boots[0].eth_cs -ne '10' -or $boots[0].sd_cs -ne '4' -or $boots[0].uart -ne '115200'){
         $reasons.Add('unexpected firmware/pin banner')
     }
+    $bootMarkers=0
+    foreach($line in $Lines){
+        $bootMarkers+=[regex]::Matches($line,'BOOT test=TEST08(?: |$)').Count
+        if($line -match 'BOOT test=TEST08(?: |$)' -and $line -notmatch '^BOOT test=TEST08(?: |$)'){
+            $reasons.Add('BOOT banner is not on its own line')
+        }
+    }
+    if($bootMarkers -ne 1){$reasons.Add('exactly one TEST08 BOOT marker required')}
     if(@($records | Where-Object kind -eq 'READY').Count -ne 1){$reasons.Add('exactly one READY required')}
     if(@($records | Where-Object kind -eq 'COMMAND_REJECTED').Count){$reasons.Add('command rejected')}
     $start=@($records | Where-Object kind -eq 'START')
@@ -73,6 +82,20 @@ function Get-Test08Verdict {
        -not [uint32]::TryParse($info[0].blocks,[ref]$blocks) -or $blocks -eq 0){$reasons.Add('valid card type/capacity required')}
     $fat=@($records | Where-Object kind -eq 'VOLUME')
     if($fat.Count -ne 1 -or $fat[0].fat -notin @('16','32')){$reasons.Add('FAT16/FAT32 required')}
+    $spi=@($records | Where-Object kind -eq 'ETH_RTR')
+    if($spi.Count -ne 2){$reasons.Add('before/after RTR diagnostics required')}
+    else {
+        if($spi[0].phase -cne 'BEFORE' -or $spi[1].phase -cne 'AFTER' -or
+           $spi[0].expected -cnotmatch '^[0-9A-F]{4}$' -or $spi[0].probe -cne '1234' -or
+           $spi[0].restored -cne $spi[0].expected -or $spi[1].expected -cne $spi[0].expected){
+            $reasons.Add('RTR probe/restore diagnostics inconsistent')
+        }
+        foreach($row in $spi){
+            if($row.observed1 -cne $row.expected -or $row.observed2 -cne $row.expected){
+                $reasons.Add('RTR preservation check failed')
+            }
+        }
+    }
     $verified=@($records | Where-Object kind -eq 'VERIFY')
     $sizes=@(2048,2112,2112)
     if($verified.Count -ne 3){$reasons.Add('three complete readbacks required')}
@@ -97,7 +120,8 @@ function Get-Test08Verdict {
            $free -lt $initial-64){$reasons.Add('SRAM minimum/drift gates failed')}
         $metrics=[ordered]@{checks=$checks.Count;bytes=2112;crc16=$last.crc16;
             initial_free=$initial;final_free=$free;min_free=$minimum;elapsed_ms=$elapsed;
-            card_blocks=$blocks;card_bytes=([uint64]$blocks*512);fat=$(if($fat.Count -eq 1){$fat[0].fat}else{$null})}
+            card_blocks=$blocks;card_bytes=([uint64]$blocks*512);fat=$(if($fat.Count -eq 1){$fat[0].fat}else{$null});
+            ethernet_rtr=@($spi | ForEach-Object {[pscustomobject]@{phase=$_.phase;expected=$_.expected;observed1=$_.observed1;observed2=$_.observed2}})}
     }
     [pscustomobject]@{status=$(if($reasons.Count -eq 0){'PASS'}else{'FAIL'});reasons=@($reasons | Select-Object -Unique);metrics=$metrics}
 }
