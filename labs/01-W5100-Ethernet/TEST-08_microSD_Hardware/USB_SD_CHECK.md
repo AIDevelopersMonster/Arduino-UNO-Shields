@@ -3,7 +3,13 @@
 Оператор выбрал эту процедуру после двух TEST-08 v0.4 ETH_SPI_BEFORE FAIL.
 Windows сообщил USB-диск №2 Generic STORAGE DEVICE, 3,75 GiB, раздел F: FAT32,
 HealthStatus=Healthy. Это метаданные, а не результат записи/чтения.
-**Аппаратный результат USB-SD пока PENDING. Прошивка UNO остаётся v0.4.**
+**Аппаратный USB-SD PASS: 16 MiB в прогоне 82E149BC65C6.**
+[Предоставленный консольный фрагмент](evidence/2026-10-10-usbsd-183308-pass-console-excerpt.txt):
+write=16 777 216 B / 1727 ms, чтение до и после переподключения совпало побайтово,
+SHA-256=F3D84EBB8A9E35117DDFF9B5A26177D003345FE343EAC8A91A99C11444FB4074.
+Итог runner PASS. Полный summary.json, seed и хеши исходников не предоставлены;
+их значения не восстанавливаются по предположению. Это ограниченный результат
+карты/картридера/Windows, не полный PASS TEST-08 или W5100.
 
 В PowerShell 7 из C:\GitHub\Arduino-UNO-Shields:
 

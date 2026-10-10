@@ -5,8 +5,9 @@ TEST-08 v0.3 CARD_INIT failure D39AF82E and required an algorithm audit.
 The proposed v0.3 cold run was not performed. Both revised firmwares are BUILD
 VERIFIED. TEST-08 v0.4 subsequently failed ETH_SPI_BEFORE in two actual runs;
 TEST-09 v0.2 hardware remains PENDING. All supplied PASS and FAIL records remain
-unchanged. The operator selected a separate Windows USB-card check, prepared
-but not yet physically executed.
+unchanged. The operator selected a separate Windows USB-card check, which
+subsequently passed 16 MiB write/read and reconnected readback (82E149BC65C6).
+A separate UNO SD_ONLY diagnostic is now prepared, hardware PENDING.
 
 ## Findings and repairs
 
@@ -70,3 +71,15 @@ Primary inspected implementations:
 [AVR 1.8.6 SPI transactions](https://github.com/arduino/ArduinoCore-avr/blob/1.8.6/libraries/SPI/src/SPI.h),
 [SD 1.3.0 init/readEnd/writeBlock/select handling](https://github.com/arduino-libraries/SD/blob/1.3.0/src/utility/Sd2Card.cpp),
 [SD 1.3.0 filesystem cache flush](https://github.com/arduino-libraries/SD/blob/1.3.0/src/utility/SdVolume.cpp).
+
+
+## Follow-up isolation after USB-card PASS
+
+The supplied USB-SD console reports 16 MiB write, exact readback and the same
+SHA-256 after USB reconnection. This does not isolate UNO SPI causes. The next
+[SD_ONLY diagnostic](TEST-08_microSD_Hardware/diagnostics/SD_Only/) reuses SD file
+operations while removing W5100 register transactions. Ethernet remains on the
+physical shared bus with its CS HIGH; an electrical isolation claim is not made.
+SD init/data clocks stay unchanged. The diagnostic is separately named and
+requires 13 SD checks; it cannot be counted as the full 15-check TEST-08 PASS.
+Both full firmwares remain unchanged. Hardware SD_ONLY is PENDING.

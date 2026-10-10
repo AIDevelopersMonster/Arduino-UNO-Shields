@@ -157,4 +157,36 @@ including a 16 MiB roundtrip with independent SHA-256 and refusal of occupied
 filenames, data corruption, wrong seeds, truncation, trailing data and expired
 budget. See [USB_SD_CHECK.md](USB_SD_CHECK.md) for scope and commands.
 Windows Storage discovery/remount and the operator's card have not been tested
-locally. Hardware USB-SD status is PENDING.
+locally. The operator subsequently reported actual USB-SD PASS, recorded below.
+
+## Operator USB-SD PASS and separate UNO SD_ONLY diagnostic
+
+Operator run `20261010-183308-USBSD-82E149BC65C6` reports 16 MiB written,
+every-byte/SHA-256 readback PASS and readback PASS after actual USB reader
+disconnection/reconnection. Both SHA-256 values are
+`F3D84EBB8A9E35117DDFF9B5A26177D003345FE343EAC8A91A99C11444FB4074`.
+The supplied console excerpt is preserved in evidence. Full run summary,
+seed and source hashes were not supplied. This bounded USB-SD result does
+not change either full TEST-08 v0.4 FAIL or certify UNO shared SPI.
+
+The next check is now the separate [SD_ONLY](diagnostics/SD_Only/README.md),
+not another full TEST-08 retry. It retains SD file operations, omits W5100
+register accesses, holds ETH CS high, uses exclusive SDONLY.BIN, and has
+13 checks. Ethernet is still physically installed on the shared bus.
+Its distinct BOOT/result/runner prevents promotion to full TEST-08 PASS.
+
+Actual final local build with Arduino CLI 1.3.1 / AVR 1.8.6 / SD 1.3.0:
+**13,758 B Flash / 1,050 B static SRAM**; compiler stderr is empty; libraries
+are SPI 1.0 and SD 1.3.0 only. All four diagnostic PowerShell files parse.
+All **36 synthetic host verdict cases** pass. Independent Python payload
+CRC-HQX matches A535 for 2048 B and 2B28 for 2112 B. Application source
+contains no Ethernet include, SPI.transfer, RTR helper or ETH_CS LOW;
+13 named checks start with CARD_INIT and finish with RAM. This is source
+and host validation, not a physical SPI waveform or SD_ONLY hardware result.
+
+Final SD_ONLY source SHA-256:
+`7B6702EC1BA40A1107206D5E54246E519B3D97D1F6007FD29485D8834DCE818C`.
+Local non-bootloader HEX SHA-256:
+`BC6D411DADEFC44B1B87823263DF93DD04EE26F4856CDFBF5DAF4686466143CD`.
+Final runner/module hashes match the measured build. Full TEST-08 v0.4 and
+TEST-09 v0.2 firmware hashes above remain unchanged. Hardware SD_ONLY PENDING.
