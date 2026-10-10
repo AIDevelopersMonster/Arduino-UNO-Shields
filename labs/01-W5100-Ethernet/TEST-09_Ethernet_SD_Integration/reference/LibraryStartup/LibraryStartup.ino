@@ -7,6 +7,9 @@
 #include <SD.h>
 #include <Ethernet.h>
 #include <string.h>
+#ifdef LIBRARY_STARTUP_TRACE
+#include <LibraryStartupTrace.h>
+#endif
 
 const uint8_t ETHERNET_CS = 10;
 const uint8_t SD_CS = 4;
@@ -84,6 +87,9 @@ void setup() {
   Serial.println(F("BOOT test=LIBRARY_STARTUP fw=0.2 eth_cs=10 sd_cs=4 uart=115200"));
   Serial.print(F("START free="));
   Serial.println(freeRam());
+#ifdef LIBRARY_STARTUP_TRACE
+  Serial.println(F("TRACE_BUILD variant=DETECTION_BUFFER source=Ethernet_2.0.2 no_extra_spi_reads=1"));
+#endif
 
   const __FlashStringHelper *modeError = selectMode();
   if (modeError) {
@@ -93,6 +99,9 @@ void setup() {
   Serial.print(F("MODE name="));
   printMode();
   Serial.println();
+#ifdef LIBRARY_STARTUP_TRACE
+  libraryStartupTraceSnapshot(LS_BEFORE_SD);
+#endif
 
   unsigned long started;
   if (initializeSd) {
@@ -109,18 +118,28 @@ void setup() {
       return;
     }
   } else {
-    // Card stays physically present; the application never initializes SD.
+    // Card position follows the prepared control; no SD calls in this mode.
     Serial.println(F("CHECK name=SD_BEGIN status=SKIP reason=ETH_ONLY"));
   }
+#ifdef LIBRARY_STARTUP_TRACE
+  libraryStartupTraceSnapshot(LS_AFTER_SD);
+#endif
 
   // Ethernet.init selects CS; Ethernet.begin initializes the driver and DHCP.
   // Do not open/close sockets or read W5100 registers before this call.
   Ethernet.init(ETHERNET_CS);
   Serial.println(F("STEP name=ETHERNET_BEGIN timeout_ms=6000 response_timeout_ms=1000"));
   Serial.flush();
+#ifdef LIBRARY_STARTUP_TRACE
+  libraryStartupTraceSnapshot(LS_BEFORE_ETH);
+#endif
   started = millis();
   int dhcp = Ethernet.begin(mac, DHCP_TIMEOUT_MS, DHCP_RESPONSE_TIMEOUT_MS);
   unsigned long elapsed = millis() - started;
+#ifdef LIBRARY_STARTUP_TRACE
+  libraryStartupTraceSnapshot(LS_AFTER_ETH);
+  libraryStartupTracePrint();
+#endif
 
   // hardwareStatus() uses the chip type cached by the library initialization.
   EthernetHardwareStatus hardware = Ethernet.hardwareStatus();
