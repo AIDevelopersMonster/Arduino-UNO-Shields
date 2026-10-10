@@ -44,27 +44,20 @@ The use of these APIs is valid. The official tagged Ethernet.cpp was
 compared with the locally compiled copy; they match. This check does not
 establish why chip detection failed on the operator's shared bus.
 
-Next, use existing [TEST-07 Baseline](../../../TEST-07_Network_Robustness/)
-as an independent current Ethernet control with microSD physically absent.
-Remove the card only with all UNO/Shield power disconnected; Ethernet remains
-connected. The prompts below separate preparation from the automatic run.
-This changes firmware and power state as well as card presence, so it tests
-current standalone Ethernet service, not the effect of SD presence alone.
-It is one declared control, not retrying W5100_COMPARE until it passes.
+The subsequent existing TEST-07 Baseline control now has actual operator
+**PASS**: AVR 1.8.8, 20,392 B Flash / 879 B static SRAM, service verified,
+displayed free SRAM=1,133 B. The last printed 458 UDP / 10 TCP / zero errors
+is at five seconds remaining, not final counts. The preceding instructions
+requested card removal; an independent observation of card absence is not
+claimed. Firmware and power state also changed relative to W5100_COMPARE,
+so this does not identify its failure cause.
 
-```powershell
-git pull --ff-only
-$test = ".\labs\01-W5100-Ethernet\TEST-07_Network_Robustness"
-$null = Read-Host "Отключи всё питание UNO/Shield, извлеки microSD. Ethernet-кабель оставь подключённым. Нажми Enter"
-$null = Read-Host "Подключи USB UNO. Закрой монитор Arduino. После подключения нажми Enter"
-& "$test\Build-Test07.ps1" -UploadPort COM4
-& "$test\Test-NetworkRobustness.ps1" -SerialPort COM4 -Scenario Baseline -DurationSeconds 60
-```
-
-The new control is **PENDING**. Its pass/fail decision is printed in green/red.
-A future PASS establishes its bounded UDP/TCP service with the card absent;
-it does not cancel 886B359A or certify shared-bus integration. Do not change
-home router DHCP settings for this control. Full TEST-09 remains PENDING.
+Next control: the same already-loaded TEST-07 binary with the card physically
+present but not initialized by application code, one Baseline 60 s. This is
+**PENDING**. No firmware/host source or acceptance gate changes are made.
+[Aggregate result, Enter-guided preparation and commands](../../../TEST-07_Network_Robustness/CONTROL_BASELINE_2026-10-10.md)
+are published without raw console, local IP addresses or workstation paths.
+No frequency or home router changes are required. TEST-09 remains PENDING.
 
 ## Original reproducible diagnostic commands — PowerShell 7
 
