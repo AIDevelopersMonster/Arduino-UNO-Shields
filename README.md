@@ -135,6 +135,8 @@ Shield. This is separate from the original LAB-01 with SD 4GB.
   SPI/card/FAT diagnostics, exclusive test-file creation, exact binary readback,
   append, remount, cleanup and PowerShell logs; **HARDWARE PASS v0.2, 15/15 cold-start and operator-reported repeat; prior FAIL retained**;
   [hardware evidence](labs/01-W5100-Ethernet/TEST-08_microSD_Hardware/RESULT_2026-10-10.md).
+- [TEST-09 Ethernet + SD](labs/01-W5100-Ethernet/TEST-09_Ethernet_SD_Integration/):
+  bounded UDP -> SD write/sync/cache-discard/readback -> exact UDP reply; **BUILD VERIFIED / hardware PENDING**.
 
 The lab README includes full pin mapping, serial/Arduino CLI commands,
 certification evidence and the TEST-01–10 programme.
