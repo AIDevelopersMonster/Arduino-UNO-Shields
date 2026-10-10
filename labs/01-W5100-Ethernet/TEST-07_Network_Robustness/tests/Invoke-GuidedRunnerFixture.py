@@ -102,7 +102,7 @@ def run_case(case, pwsh):
                 stop.wait(0.02)
             started = time.monotonic()
             emit("EVT ms=0 name=BOOT")
-            emit("INFO test=07 version=0.1")
+            emit("INFO test=07 version=0.2")
             emit("EVT ms=1 name=HARDWARE chip=W5100")
             if startup:
                 emit("EVT ms=2 name=DHCP_BEGIN attempt=1")
