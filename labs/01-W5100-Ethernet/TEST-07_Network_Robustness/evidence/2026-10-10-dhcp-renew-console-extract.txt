@@ -1,0 +1,8 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$test\Test-NetworkRobustness.ps1" -SerialPort COM4 -Scenario DhcpRenew -DurationSeconds 600
+TEST-07 DhcpRenew / bounded 600s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-07_Network_Robustness\runs\20261010-035008-DhcpRenew-add207
+Автоматический сценарий: кабель оставьте подключённым, действий не требуется.
+UART ms=4241 ready=1 IP=192.168.1.85 free=1133 phase=WARMUP
+Service verified / IP=192.168.1.85 / phase=HEALTHY
+ПРОГРЕСС: phase=HEALTHY / UDP=5395 / TCP=118 / errors=0 / outage_fail=0 / выдержка=0s / осталось=5s
+UART ms=595141 ready=1 IP=192.168.1.85 free=1133 phase=HEALTHY
+RESULT PASS / DhcpRenew / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-07_Network_Robustness\runs\20261010-035008-DhcpRenew-add207
