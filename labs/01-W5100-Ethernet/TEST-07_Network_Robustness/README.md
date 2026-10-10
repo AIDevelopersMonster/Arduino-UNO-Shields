@@ -1,12 +1,12 @@
 # TEST-07 — Network Robustness / UNO + W5100
 
-**Статус: BUILD VERIFIED / Baseline, повторный Cable, TcpAbort и StartupDhcp PASS / три сценария PENDING.**
+**Статус: BUILD VERIFIED / Baseline, повторный Cable, TcpAbort, StartupDhcp и Soak PASS / два сценария PENDING.**
 Дата подготовки: 2026-10-09. [Аппаратный Baseline от 2026-10-10](RESULT_2026-10-10.md)
 завершился с `RESULT PASS`. Первый Cable завершился FAIL; повторный Cable — PASS.
 Baseline/Cable относятся к первоначальному runner. TcpAbort также завершился PASS;
 версия его runner в предоставленной итоговой строке не указана. Пошаговый host runner
 **0.2** проверен отдельно на модели: [проверки разработки](VALIDATION_GUIDED_2026-10-10.md).
-StartupDhcp также завершился аппаратным PASS по предоставленному результату.
+StartupDhcp и Soak также завершились аппаратным PASS по предоставленным результатам.
 Полный TEST-07 FULL PASS пока не подтверждён.
 TEST-05/06 сохраняют свои собственные результаты; они не подтверждают устойчивость
 новой прошивки. Этот тест использует оба их протокола одновременно.
