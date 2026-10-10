@@ -41,7 +41,7 @@ function Phase([string]$name,[int]$count){
   Write-Host "$name $i/$count : $($r.Kind) $($r.Ms)ms"
   Start-Sleep -Milliseconds 200
  }
- return ,$results
+ return $results
 }
 try {
  Write-Host "TEST-07 / UDP port=$Port / Arduino IP=$IP"
