@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "normalization": "UTF-8; remove leading BOM; CRLF/CR to LF; remove trailing LF only",
+  "supported_avr_cores": {
+    "1.8.6": "42fa4a1ea1b1b11d1cc0a60298e529d37f9d14bd",
+    "1.8.8": "86df345b3cf46754a5db38fb983ec2808ce31303"
+  },
+  "libraries": [
+    {
+      "name": "SPI",
+      "version": "1.0",
+      "repository": "arduino/ArduinoCore-avr",
+      "source_ref": "AVR 1.8.6 / 1.8.8 (identical SPI blobs)",
+      "files": [
+        {
+          "path": "library.properties",
+          "git_blob_sha1": "4ed8db90e99528a5cd068d1adea5e966a0b8be3b",
+          "normalized_sha256": "2E78EDFA6162F35CE64FE4F47A99FF063D4666DFD7F5D4DFBC9ACFB8A811070E"
+        },
+        {
+          "path": "src/SPI.cpp",
+          "git_blob_sha1": "af14e07b12fa251b81a53f4462c8ad0870cd4aed",
+          "normalized_sha256": "4DC0F4FE7FBA4B01BBA3E737D1FAAD3678403B487D3C99388781F65BDD58239E"
+        },
+        {
+          "path": "src/SPI.h",
+          "git_blob_sha1": "1e37079a9b826ef8bf8fe6c9a8aa7d87d335d0a5",
+          "normalized_sha256": "86F92F5BD7814DD24073E0E9A453A0047299DEE4044B5FA256DED60482E104F0"
+        }
+      ]
+    },
+    {
+      "name": "Ethernet",
+      "version": "2.0.2",
+      "repository": "arduino-libraries/Ethernet",
+      "source_ref": "2.0.2",
+      "files": [
+        {
+          "path": "library.properties",
+          "git_blob_sha1": "f3f361662b929523d9271bf5a45fed3e83736494",
+          "normalized_sha256": "C1BBD625708A5F543B58E1B1EF1ADE929C108FCD91BA4AE308BA2D7F52ED589E"
+        },
+        {
+          "path": "src/Dhcp.cpp",
+          "git_blob_sha1": "2bfd584bb29e3a59ebeb5a713cca1da6b7caee3d",
+          "normalized_sha256": "DCBBA5740BB7B75B52BC1BE79CFCC94F6E3FCB5F61710DD8BC90163E765D8AF0"
+        },
+        {
+          "path": "src/Dhcp.h",
+          "git_blob_sha1": "43ec4f8531f3f4e5fcf3cd27577780e90e5e9b92",
+          "normalized_sha256": "1F0A5FB4C0F825632AA0F5D4EBC83992A3A874171251DD3533CA9E1C54AB04D2"
+        },
+        {
+          "path": "src/Dns.cpp",
+          "git_blob_sha1": "dca7ce42375d347e1b100d591b0648f414ad7d68",
+          "normalized_sha256": "2C45055A45CBBFF08C8B95E3D644EEDB496D18A6860E75948474623B7DD0584E"
+        },
+        {
+          "path": "src/Dns.h",
+          "git_blob_sha1": "58f9d2c5384fc0b3a5005a1b3c3c1672aa749d6e",
+          "normalized_sha256": "F14D94482B1A0F9516D4ADA53C5AFA3FEC5F91DDAF962888B7FCFB78E90B6BFF"
+        },
+        {
+          "path": "src/Ethernet.cpp",
+          "git_blob_sha1": "8d9ce7fd8c3ffe1d539743350f2bad976e3d06d8",
+          "normalized_sha256": "6B4D4FDF1B0CD24F533C239687E7F26F963CB459BCBCE179194CF6DA53D26913"
+        },
+        {
+          "path": "src/Ethernet.h",
+          "git_blob_sha1": "0045de8815731a11bc1973c4ee099048a47a1a68",
+          "normalized_sha256": "30926E882048017AF0240A2FC882742A3AFD7577A28A8B3211430ECF78646780"
+        },
+        {
+          "path": "src/EthernetClient.cpp",
+          "git_blob_sha1": "5a20c74808ad419b9ef5e9bf140e25cfbc296313",
+          "normalized_sha256": "57B0F8F0E35F509ABD186CF62859CEC9361EAC5E2702767A05C90800A0BC44F4"
+        },
+        {
+          "path": "src/EthernetClient.h",
+          "git_blob_sha1": "b5aef9602e457402bfcff9a98fdd08877bc64ac2",
+          "normalized_sha256": "7E13EAD26F7501D159B650C83594D9B7BBA652C2A3BA23C9A33A90FFA05DF8EA"
+        },
+        {
+          "path": "src/EthernetServer.cpp",
+          "git_blob_sha1": "ddebd154a487d5831e13f1d8a24251aacfc478a6",
+          "normalized_sha256": "C21A1BAA1028DC1E5A19BA2296E7D1F52D55CC01BC50066A4D43E4D08FA00B12"
+        },
+        {
+          "path": "src/EthernetServer.h",
+          "git_blob_sha1": "b5aef9602e457402bfcff9a98fdd08877bc64ac2",
+          "normalized_sha256": "7E13EAD26F7501D159B650C83594D9B7BBA652C2A3BA23C9A33A90FFA05DF8EA"
+        },
+        {
+          "path": "src/EthernetUdp.cpp",
+          "git_blob_sha1": "e28791f6aa119b351cfbd374ccbc97b85fbccb95",
+          "normalized_sha256": "6E7623875F0110BC5396E0F819C3D05154FF5B37482F34F3A7F7B246F7E3B9FC"
+        },
+        {
+          "path": "src/EthernetUdp.h",
+          "git_blob_sha1": "16bb062e5c16032ac5b195167addefbfc7005ae8",
+          "normalized_sha256": "B19ADAC22F55020D1BC3C2E9E950128D2E1734EA686F9903BA5F5B3D219E9028"
+        },
+        {
+          "path": "src/socket.cpp",
+          "git_blob_sha1": "7dc83feb83ae0eed9f779ca85d77702e7cce14d6",
+          "normalized_sha256": "614EC1F279669B8679173A789D75E4494350B425D4619B04DD74E41E94A131CF"
+        },
+        {
+          "path": "src/utility/w5100.cpp",
+          "git_blob_sha1": "6e7dbd2033f18978614565464bb3c2fbc2e5b35d",
+          "normalized_sha256": "5FAD8DC782D353881A76D930D38D717A0090870D1501F2D17A2BB29E30145A05"
+        },
+        {
+          "path": "src/utility/w5100.h",
+          "git_blob_sha1": "b2e8ec8378590e2b3f3fb39c41f1bd03d34b7490",
+          "normalized_sha256": "BB9B5305DD2514D4385CC7CB4CB6BE927C4FDFE63A3BF0A1714E3C2F1DC952D3"
+        }
+      ]
+    },
+    {
+      "name": "SD",
+      "version": "1.3.0",
+      "repository": "arduino-libraries/SD",
+      "source_ref": "1.3.0",
+      "files": [
+        {
+          "path": "library.properties",
+          "git_blob_sha1": "9e6d791a2736df094922782d89120478da69aefb",
+          "normalized_sha256": "4595EE669A1D34CC5ACE36972810BCF6ACB77106FD5CD769173639D577650E6B"
+        },
+        {
+          "path": "src/File.cpp",
+          "git_blob_sha1": "3e27fb418e810d0843dd468b78bacd310308df55",
+          "normalized_sha256": "091A94528F9BB34B958E7475E506B1A5C7C813A52145A434AA0D9877DE66C057"
+        },
+        {
+          "path": "src/README.txt",
+          "git_blob_sha1": "495ea4c7976cf040e0740c64189bdccb7051c602",
+          "normalized_sha256": "8DCC84AC79C2E8F2DEB34D198FDC5FC3DB9104D9F2D654CABA2802CE2F6BFED4"
+        },
+        {
+          "path": "src/SD.cpp",
+          "git_blob_sha1": "423db45115d63ea23a4af9ef350891d9979477d3",
+          "normalized_sha256": "9EC3D8B9B36E4149B5C0D84A92FBF8169D2513BD0532457494E988085FF85168"
+        },
+        {
+          "path": "src/SD.h",
+          "git_blob_sha1": "c81a7d3cb808079a3f834a4f04dc639a575e68b2",
+          "normalized_sha256": "8D1919A6939082D70BA3E98ECFD7F45125C89C0939EBF6CBC53A0AB11EC4A5EF"
+        },
+        {
+          "path": "src/utility/FatStructs.h",
+          "git_blob_sha1": "84c1cc71b5b887ea08815070dd478ced766028dd",
+          "normalized_sha256": "115693D725EC24F46AC4C7BF8CE6408C274AEBD4B3241C66D6BACB02247CADD1"
+        },
+        {
+          "path": "src/utility/Sd2Card.cpp",
+          "git_blob_sha1": "7cfbe73eec16745a5adbdbec83768994bac57606",
+          "normalized_sha256": "4C7CDCE0C847818F57D7BCA4F26DD7B3B31EFCE8F7F00DBA1AF95CAF20A88839"
+        },
+        {
+          "path": "src/utility/Sd2Card.h",
+          "git_blob_sha1": "5d91ebf51b565e04d2713ad51888a799656ac776",
+          "normalized_sha256": "2C618B8E3EF334819846B8B2387C0AC4B1512810517A25B7B5B2A07B0683841D"
+        },
+        {
+          "path": "src/utility/Sd2PinMap.h",
+          "git_blob_sha1": "12d8926f3931e7f1ca41cb7900fc62d75e41c1cc",
+          "normalized_sha256": "4E611BB3258FAB88227BA0FE3F03C0D75ECE0975E8E39095F053A4536A3BBA51"
+        },
+        {
+          "path": "src/utility/SdFat.h",
+          "git_blob_sha1": "46b880bd95147a51cc90730507f2fc14764c0927",
+          "normalized_sha256": "874B7B6F6FD20D2FEC7795B0C859FFACD40354E0EF140E1BD968F00B6FCEFC43"
+        },
+        {
+          "path": "src/utility/SdFatUtil.h",
+          "git_blob_sha1": "4b93de8a8c1f19c5ef4fef457b19d130685e704b",
+          "normalized_sha256": "461BA42057D601EFC391DE8FB46B94D389BE586C7E599E981204E6A29E8B5A8A"
+        },
+        {
+          "path": "src/utility/SdFatmainpage.h",
+          "git_blob_sha1": "1e6d96f9c5baa73da3e24b4246ddfd3f6637d7a8",
+          "normalized_sha256": "475CDB0D3FFA13E05753C377DAD89C543B488286DBCA151835237733C88B19D3"
+        },
+        {
+          "path": "src/utility/SdFile.cpp",
+          "git_blob_sha1": "18a1db6e7c254ea7bd5841174e7583f2ba842720",
+          "normalized_sha256": "BE188F89988A456A20FB1C3D86A6D3675B60A179DDEAAEFBF8CAC8C73F34EBF8"
+        },
+        {
+          "path": "src/utility/SdInfo.h",
+          "git_blob_sha1": "6a0e087f445b26a9278c79ee0a1eaa3095922305",
+          "normalized_sha256": "08AD834D6DE045ADD0482BC739AFDA8AE352ECC548CC52EB19255047CCA80326"
+        },
+        {
+          "path": "src/utility/SdVolume.cpp",
+          "git_blob_sha1": "60375c47154a8b397d2c2a670a360ea033c3cf59",
+          "normalized_sha256": "CC6E9A03666AE9E5BF4D716CC9EF9FC4251929B42474C69F0C4ED9D8C26896CA"
+        }
+      ]
+    }
+  ]
+}
