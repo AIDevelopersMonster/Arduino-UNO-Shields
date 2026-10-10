@@ -24,7 +24,14 @@ try {
             $line=$pending.Substring(0,$lf).TrimEnd("`r"); $pending=$pending.Substring($lf+1)
             $obj=ConvertFrom-NetworkLine $line
             $writer.WriteLine((@{utc=[DateTime]::UtcNow.ToString('o');line=$line;fields=$obj}|ConvertTo-Json -Depth 6 -Compress))
-            Write-Host $line
+            # Colour reported decisions only; keep the saved UART line unchanged.
+            if ($line -match '(?:^|\s)status=FAIL(?:\s|$)|^RESULT FAIL(?:\s|$)') {
+                Write-Host $line -ForegroundColor Red
+            } elseif ($line -match '(?:^|\s)status=PASS(?:\s|$)|^RESULT PASS(?:\s|$)') {
+                Write-Host $line -ForegroundColor Green
+            } else {
+                Write-Host $line
+            }
         }
         Start-Sleep -Milliseconds 20
     }
