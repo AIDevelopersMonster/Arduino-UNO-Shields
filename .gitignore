@@ -6,6 +6,7 @@ build/
 *.map
 *.bin
 labs/01-W5100-Ethernet/TEST-07_Network_Robustness/runs/
+labs/01-W5100-Ethernet/TEST-08_microSD_Hardware/runs/
 
 # Python test tools
 __pycache__/

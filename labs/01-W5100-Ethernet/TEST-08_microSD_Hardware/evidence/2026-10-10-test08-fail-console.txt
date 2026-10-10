@@ -1,0 +1,35 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$test8\Test-MicroSDHardware.ps1" -SerialPort COM4 -DurationSeconds 90
+TEST-08 microSD / bounded 90s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-071438-TEST08-64B0479A
+Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses are needed.
+???GR????BOOT test=TEST08 fw=0.1 eth_cs=10 sd_cs=4 uart=115200
+READY
+ШАГ: автоматически проверяю SPI, карту, запись, чтение, append, remount и удаление тестового файла.
+START token=64B0479A free=959
+CHECK token=64B0479A index=1 name=ETH_SPI_BEFORE status=PASS free=953
+CARD token=64B0479A error_code=0 error_data=0
+CHECK token=64B0479A index=2 name=CARD_INIT status=PASS free=953
+CARD_INFO token=64B0479A type=3 blocks=30536704
+CHECK token=64B0479A index=3 name=CARD_INFO status=PASS free=953
+VOLUME token=64B0479A fat=32
+CHECK token=64B0479A index=4 name=FAT_VOLUME status=PASS free=953
+CHECK token=64B0479A index=5 name=ROOT_OPEN status=PASS free=953
+CHECK token=64B0479A index=6 name=EXCLUSIVE_CREATE status=PASS free=953
+WRITE token=64B0479A bytes=2048 elapsed_ms=29
+CHECK token=64B0479A index=7 name=WRITE_2048 status=PASS free=953
+VERIFY token=64B0479A bytes=2048 crc16=A535
+CHECK token=64B0479A index=8 name=REOPEN_VERIFY_2048 status=PASS free=953
+CHECK token=64B0479A index=9 name=SEEK_BOUNDARIES status=PASS free=953
+CHECK token=64B0479A index=10 name=APPEND_64 status=PASS free=953
+VERIFY token=64B0479A bytes=2112 crc16=2B28
+CHECK token=64B0479A index=11 name=REOPEN_VERIFY_2112 status=PASS free=953
+VERIFY token=64B0479A bytes=2112 crc16=2B28
+CHECK token=64B0479A index=12 name=REMOUNT_VERIFY status=PASS free=953
+CHECK token=64B0479A index=13 name=REMOVE_TEST_FILE status=PASS free=953
+CHECK token=64B0479A index=14 name=ETH_SPI_AFTER status=FAIL free=953
+RESULT token=64B0479A status=FAIL checks=14 failures=1 bytes=2112 crc16=2B28 free=959 min_free=940 elapsed_ms=541
+RESULT FAIL / TEST-08 / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-071438-TEST08-64B0479A
+  exactly one BOOT required
+  all 15 checks required
+  terminal result gates failed
+A failed run may leave T08CHECK.BIN for diagnosis; existing files are never overwritten.
+PS C:\GitHub\Arduino-UNO-Shields>
