@@ -7,7 +7,8 @@ VERIFIED. TEST-08 v0.4 subsequently failed ETH_SPI_BEFORE in two actual runs;
 TEST-09 v0.2 hardware remains PENDING. All supplied PASS and FAIL records remain
 unchanged. The operator selected a separate Windows USB-card check, which
 subsequently passed 16 MiB write/read and reconnected readback (82E149BC65C6).
-A separate UNO SD_ONLY diagnostic is now prepared, hardware PENDING.
+UNO SD_ONLY subsequently passed 13/13 (B652B736). A separate W5100_COMPARE
+diagnostic is now prepared, hardware PENDING.
 
 ## Findings and repairs
 
@@ -82,4 +83,18 @@ operations while removing W5100 register transactions. Ethernet remains on the
 physical shared bus with its CS HIGH; an electrical isolation claim is not made.
 SD init/data clocks stay unchanged. The diagnostic is separately named and
 requires 13 SD checks; it cannot be counted as the full 15-check TEST-08 PASS.
-Both full firmwares remain unchanged. Hardware SD_ONLY is PENDING.
+Both full firmwares remain unchanged. SD_ONLY now has actual PASS B652B736: all
+13 checks, three exact CRC readbacks, cleanup, min_free=938 B and 443 ms.
+The supplied console replays PASS under the unchanged diagnostic verdict.
+This is one bounded run, not a hardware root-cause proof.
+
+Next [W5100_COMPARE](TEST-08_microSD_Hardware/diagnostics/W5100_Compare/) compares
+TEST-08 raw and actual Ethernet 2.0.2 driver RTR reads at the same 4 MHz.
+Three ABBA cycles are captured before files, after write/append and after
+remount. No read is discarded or outvoted. A discrepancy remains FAIL while
+SD diagnostics continue if chip-select ownership remains sound. An owner fault
+aborts further SPI. The library is initialized once after SD init; that
+normal driver initialization resets/configures W5100 at 8 MHz on UNO and
+differs from the old raw-only initialization. Results cannot erase that
+confound or certify the original algorithm without initialization. Hardware
+W5100_COMPARE is PENDING; full TEST-08/09 and SD_ONLY sources are unchanged.

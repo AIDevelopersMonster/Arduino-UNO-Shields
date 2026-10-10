@@ -1,0 +1,30 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$sdOnly\Test-SdOnly.ps1" -SerialPort COM4 -DurationSeconds 90
+SD_ONLY / 13 SD checks / no W5100 register access / bounded 90s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\diagnostics\SD_Only\runs\20261010-202038-SD_ONLY-B652B736
+Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses are needed.
+BOOT test=SD_ONLY fw=0.1 eth_cs=10 sd_cs=4 uart=115200 eth_spi_hz=0 sd_init_spi_hz=250000 sd_data_spi_hz=4000000
+READY
+ШАГ: проверяю только SD: карту, FAT, запись, чтение, CRC, append, remount и удаление своего файла. Ethernet CS остаётся HIGH.
+START token=B652B736 free=957
+CARD token=B652B736 error_code=0 error_data=0
+CHECK token=B652B736 index=1 name=CARD_INIT status=PASS free=952
+CARD_INFO token=B652B736 type=3 blocks=7864320
+CHECK token=B652B736 index=2 name=CARD_INFO status=PASS free=952
+VOLUME token=B652B736 fat=32
+CHECK token=B652B736 index=3 name=FAT_VOLUME status=PASS free=952
+CHECK token=B652B736 index=4 name=ROOT_OPEN status=PASS free=952
+CHECK token=B652B736 index=5 name=EXCLUSIVE_CREATE status=PASS free=952
+WRITE token=B652B736 bytes=2048 elapsed_ms=50
+CHECK token=B652B736 index=6 name=WRITE_2048 status=PASS free=952
+VERIFY token=B652B736 bytes=2048 crc16=A535
+CHECK token=B652B736 index=7 name=REOPEN_VERIFY_2048 status=PASS free=952
+CHECK token=B652B736 index=8 name=SEEK_BOUNDARIES status=PASS free=952
+CHECK token=B652B736 index=9 name=APPEND_64 status=PASS free=952
+VERIFY token=B652B736 bytes=2112 crc16=2B28
+CHECK token=B652B736 index=10 name=REOPEN_VERIFY_2112 status=PASS free=952
+VERIFY token=B652B736 bytes=2112 crc16=2B28
+CHECK token=B652B736 index=11 name=REMOUNT_VERIFY status=PASS free=952
+CHECK token=B652B736 index=12 name=REMOVE_TEST_FILE status=PASS free=952
+CHECK token=B652B736 index=13 name=RAM status=PASS free=952
+RESULT token=B652B736 status=PASS checks=13 failures=0 planned_bytes=2112 bytes=2112 crc16=2B28 free=957 min_free=938 bus_fault=0 elapsed_ms=443
+RESULT PASS / SD_ONLY / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\diagnostics\SD_Only\runs\20261010-202038-SD_ONLY-B652B736
+PS C:\GitHub\Arduino-UNO-Shields>

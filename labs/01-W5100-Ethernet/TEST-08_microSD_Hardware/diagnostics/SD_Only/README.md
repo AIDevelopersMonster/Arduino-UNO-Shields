@@ -1,7 +1,7 @@
 # SD_ONLY v0.1 — отдельная диагностика SD на UNO
 
 Подготовлена после фактического USB-SD PASS 16 MiB и двух TEST-08 v0.4
-ETH_SPI_BEFORE FAIL. **BUILD VERIFIED; аппаратный результат SD_ONLY PENDING.**
+ETH_SPI_BEFORE FAIL. **Аппаратный SD_ONLY PASS, 13/13: B652B736, 10 октября 2026.**
 Полный TEST-08 v0.4 и TEST-09 v0.2 не изменены. Этот результат называется
 SD_ONLY, а не полный PASS TEST-08.
 
@@ -95,4 +95,19 @@ SHA-256 диагностического SD_Only.ino:
 SHA-256 локального HEX без bootloader:
 `BC6D411DADEFC44B1B87823263DF93DD04EE26F4856CDFBF5DAF4686466143CD`.
 Хеши runner/module совпадают с финальным build-summary.json.
-**Аппаратный результат SD_ONLY: PENDING.**
+**Аппаратный результат SD_ONLY: PASS для прогона B652B736.**
+
+
+## Фактический прогон B652B736
+
+[Полная консоль](../../evidence/2026-10-10-sd-only-202038-pass-console.txt):
+`20261010-202038-SD_ONLY-B652B736`, COM4, один корректный BOOT/READY.
+Все 13 CHECK PASS, failures=0, bus_fault=0; SDHC, 7 864 320 блоков, FAT32.
+Побайтовые readback: 2048 B / A535, 2112 B / 2B28, remount 2112 B / 2B28.
+Свой файл удалён; free=957 B до/после, sampled min_free=938 B, elapsed=443 ms.
+Неизменённый Get-SdOnlyVerdict повторно оценил supplied UART как PASS без причин.
+Операторские build-summary.json, HEX/source hashes и полный serial.log не
+предоставлены; их содержимое не реконструируется. Это ограниченный SD_ONLY
+результат; полные TEST-08 v0.4 FAIL остаются FAIL. Причина RTR-сбоев не доказана.
+
+Следующая отдельная диагностика: [W5100_COMPARE](../W5100_Compare/).

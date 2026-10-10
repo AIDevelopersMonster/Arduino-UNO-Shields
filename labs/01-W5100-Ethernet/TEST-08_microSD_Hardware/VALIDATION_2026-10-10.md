@@ -189,4 +189,37 @@ Final SD_ONLY source SHA-256:
 Local non-bootloader HEX SHA-256:
 `BC6D411DADEFC44B1B87823263DF93DD04EE26F4856CDFBF5DAF4686466143CD`.
 Final runner/module hashes match the measured build. Full TEST-08 v0.4 and
-TEST-09 v0.2 firmware hashes above remain unchanged. Hardware SD_ONLY PENDING.
+TEST-09 v0.2 firmware hashes above remain unchanged. The operator subsequently
+reported SD_ONLY PASS B652B736, 13/13. Its unchanged verdict replay is PASS;
+[actual console/results](RESULT_2026-10-10.md) are separate from local models.
+
+## W5100_COMPARE v0.1, after actual SD_ONLY PASS
+
+The supplied complete SD_ONLY console B652B736 replays PASS with the unchanged
+SdOnly.psm1: 13 checks, exact 2048/2112/2112 CRC readbacks, cleanup, min_free
+938 B and elapsed 443 ms. Its build/HEX/source hashes were not supplied.
+
+The separately named [W5100_COMPARE](diagnostics/W5100_Compare/) adds one
+Ethernet 2.0.2 driver initialization and raw/driver RTR comparison around the
+same SD file operations. Comparison data paths are both 4 MHz; normal library
+initialization is 8 MHz on UNO, resets/configures the chip, and is an explicit
+scope difference from old raw-only TEST-08. There is no DHCP/UDP, application
+probe/restore, majority vote, frequency selection or automatic retry.
+Both complete access paths are compared; a single-instruction cause is not
+isolated. Read discrepancies count as FAIL while safe SD work continues;
+known owner faults stop further SPI and cleanup.
+
+- Actual Arduino CLI 1.3.1 / AVR 1.8.6 / SD 1.3.0 / Ethernet 2.0.2 helper build:
+  **17,184 B Flash / 1,130 B static SRAM**. Four unused `tag` parameter warnings
+  come from AVR core new.cpp; none from the diagnostic sketch.
+- Four new PowerShell files parse; **54 synthetic verdict cases pass**.
+- Native g++ compiles actual raw/read/comparison helpers against the shared
+  ownership model, retaining a bad first sample and all 36 observations;
+  FFFF and selected owners are rejected. The LIB peripheral is a frame mock,
+  not the real driver or analog hardware; Arduino compilation uses the real
+  Ethernet library.
+- Final firmware/host hashes match the measured build summary; Flash/SRAM and
+  source/HEX hashes are in the diagnostic guide. Three existing firmware
+  hashes remain unchanged: full TEST-08 v0.4, TEST-09 v0.2 and SD_ONLY v0.1.
+
+Hardware W5100_COMPARE PENDING. No existing physical FAIL is reclassified.
