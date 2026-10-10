@@ -124,7 +124,8 @@ No UART STAT lines appear in the supplied console. Absence from the console
 does not prove absence of raw UART bytes: the runner saves every complete
 received line before parsing it and prints only STAT lines. A missing/invalid
 BOOT count can also mean a malformed or duplicated BOOT, not necessarily zero
-bytes. The summary and serial.log of this failed run have not yet been supplied.
+bytes. At this stage the summary and serial.log had not yet been supplied;
+their subsequent inspection and the repair are recorded below.
 This does not certify SD damage, electrical bus contention, exact chip-detection
 failure or a physical reboot. Prior network and SD_ONLY PASS records stand.
 
@@ -147,8 +148,8 @@ All five tagged source files match the locally inspected library. This identifie
 an application defect but does not yet establish that the latest physical run
 stopped there. Firmware and host criteria are unchanged in this follow-up.
 
-Next step is **read existing logs**, with no new hardware run, upload, power/card
-change or UART-monitor session. Use the most recent folder under this control:
+The requested diagnostic step was **read existing logs**, with no new hardware
+run, upload, power/card change or UART-monitor session:
 
 ```powershell
 $test = ".\labs\01-W5100-Ethernet\TEST-07_Network_Robustness"
@@ -159,7 +160,104 @@ Get-Content "$run\serial.log"
 Get-Content "$run\summary.json" -Raw
 ```
 
-The UART log will distinguish loss of BOOT framing from an execution stop before
-DHCP_BEGIN or later within DHCP/driver initialization. The full failed summary
-will provide exact BOOT/banner/stat counts and runner hashes. No physical
-root-cause assignment or new hardware PASS is made from the terminal alone.
+## Supplied logs and firmware 0.2 repair
+
+The operator subsequently supplied the 168-byte serial.log and complete failed
+summary. UART contains two lines: reset noise directly followed by the BOOT EVT
+on the first line, then INFO for firmware 0.1 on the second. No DHCP_BEGIN,
+HARDWARE or STAT is present. The observed BOOT text was not accepted by the
+anchored parser because the line did not start with EVT. This is a framing
+failure, not evidence that the MCU never executed setup.
+
+| Supplied failed summary | Value |
+| --- | --- |
+| Actual duration / requested | 30.0307185 / 60 s |
+| Completed / stable healthy time | false / 0 s |
+| Parsed BOOT / STAT / firmware INFO | 0 / 0 / recognized |
+| W5100 observation | false; no HARDWARE event, not a chip-detection measurement |
+| Successful UDP / TCP / size coverage | 0 / 0 / 0 |
+| MinFree | 32767, initial sentinel; no RAM sample was received |
+| Verdict | FAIL, six unchanged reasons listed above |
+
+The supplied firmware, module and runner SHA-256 values match the pre-repair
+repository sources with Windows CRLF endings. The unchanged Get-NetworkVerdict
+reproduces the same six FAIL reasons. The old raw log and result are not rewritten.
+
+The lack of DHCP_BEGIN places the last UART observation before the first DHCP
+call and is consistent with the pre-init stopServices path. The ordering defect
+is established by source inspection and reproduced by a strict lifecycle model;
+the raw UART is not an instruction trace and does not prove the exact physical
+instruction or exclude a later UART fault.
+
+Firmware **0.2** repairs this path:
+
+- Track successful driver initialization separately from DHCP/service readiness.
+  Before it succeeds, stopServices/closeAllSockets do not issue socket commands.
+- After Ethernet.begin returns, use cached hardwareStatus before IP/RTR/RCR
+  register access. No detected chip emits DHCP_FAIL reason=NO_HARDWARE and keeps
+  the existing 5 s retry interval. A detected chip with failed DHCP also retries.
+- STAT and a manual DHCP request before initialization avoid hardware accesses;
+  STAT uses IP 0.0.0.0. Normal cleanup, lease reacquisition and service restart
+  remain active after initialization.
+- Set both inactive CS latches HIGH before switching them to OUTPUT. Add a line
+  delimiter immediately before BOOT. Do not strip noise in the host parser or
+  hide duplicate BOOTs. The runner now requires INFO version=0.2 so an old upload
+  cannot be certified against the repaired source.
+
+No library patch, SPI-frequency change, static-IP fallback, extra packet retry
+or relaxed RAM/exchange/BOOT gate is added. Synchronous Ethernet 2.0.2 driver
+waits after initialization remain outside a strict MCU deadline; no watchdog
+or physical SPI recovery is claimed.
+
+### Executed software verification
+
+Actual Arduino CLI 1.3.1, AVR 1.8.6, Ethernet 2.0.2, arduino:avr:uno:
+**BUILD PASS, Flash 20,622 / 32,256 B; static SRAM 880 / 2,048 B**.
+The existing budgets of Flash <=29,000 B and static SRAM <=1,200 B pass.
+Four unused tag warnings originate in AVR core new.cpp; none from the sketch.
+The operator's AVR 1.8.8 build must record its own sizes and HEX hash.
+
+Firmware LF SHA-256:
+`B063E74E971F162052BBFE99A3276EE3663FE2EFD0CCB24E1F95465BF6F2DB1B`.
+Local non-bootloader HEX SHA-256:
+`38DC2415BEDDE19CCE5FD7266BBBC53F6A4F66708FEC8C91B0F6290A8044A753`.
+
+[Eight lifecycle models](tests/test_startup_order.py) compile the actual entire
+sketch against a driver that rejects register/socket calls before initialization.
+They cover direct/normal startup, no chip then recovery, no lease then retry,
+early STAT/manual DHCP, maintenance failure and address-change service restart.
+The pre-repair sketch reproduces uninitialized socketDisconnect in this model;
+the repaired sketch passes all eight. Native freeRam is not an AVR measurement.
+
+[Six UART cases](tests/Invoke-StartupUartRegression.ps1) execute the actual
+Drain-Serial/Write-Event functions with memory UART. Noise-merged BOOT stays
+unrecognized; a delimited BOOT counts once; missing/duplicate BOOT is preserved;
+the old firmware banner is rejected; fragmented input is assembled correctly.
+The existing host self-test passes its positive/negative verdict, guidance and
+real loopback UDP/TCP checks. All five log-path regression cases still pass.
+The full guided StartupPass fixture also passes with the 0.2 banner, memory/file
+UART and real loopback transport. Eight PowerShell files and the published
+command blocks parse successfully.
+These are software checks, not physical UNO/W5100 results.
+
+### Next single hardware control
+
+**Firmware 0.2 hardware result: PENDING.** Retain the currently inserted card,
+Ethernet cable and USB. The application does not initialize SD or access files.
+Pull on the current feature/w5100-test09-ethernet-sd branch, rebuild/upload the
+changed firmware without UseExistingBuild, then run one automatic Baseline:
+
+```powershell
+git pull --ff-only
+$test = ".\labs\01-W5100-Ethernet\TEST-07_Network_Robustness"
+& "$test\Build-Test07.ps1" -UploadPort COM4
+if ($?) {
+    & "$test\Test-NetworkRobustness.ps1" -SerialPort COM4 -Scenario Baseline -DurationSeconds 60 -OutputDirectory "$test\runs\controls\card-present-fw02"
+}
+```
+
+No key presses or planned cable/router interruption are needed. Preserve the
+single resulting verdict and logs, including any FAIL. A future PASS would
+confirm only this bounded Ethernet control with an application-uninitialized
+card. It would not certify SD/network integration or transfer the six historical
+scenario PASS results to the new firmware; DhcpOutage remains DEFERRED.

@@ -68,7 +68,7 @@ function Drain-Serial {
         $obj = ConvertFrom-NetworkLine $line
         if ($null -eq $obj) { continue }
         Write-Event 'UART' $obj
-        if ($obj.type -eq 'INFO' -and $obj.test -eq '07' -and $obj.version -eq '0.1') { $m.Firmware=$true }
+        if ($obj.type -eq 'INFO' -and $obj.test -eq '07' -and $obj.version -eq '0.2') { $m.Firmware=$true }
         if ($obj.PSObject.Properties['ms']) {
             $boardMs = [long]$obj.ms
             if ($state.LastBoardMs -gt $boardMs) { $m.Fatal = 'device uptime went backwards (reset/wrap)' }
