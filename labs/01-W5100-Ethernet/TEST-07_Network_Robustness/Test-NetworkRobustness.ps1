@@ -25,7 +25,9 @@ if ($MarkerFile -and (Test-Path $MarkerFile) -and (Get-Item $MarkerFile).Length 
 $preparationSeconds=0
 if ($Scenario -eq 'StartupDhcp') { $preparationSeconds=Wait-NetworkPreparation -MarkerFile $MarkerFile }
 $run = Join-Path $OutputDirectory ((Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + $Scenario + '-' + [guid]::NewGuid().ToString('N').Substring(0,6))
-$null = New-Item -ItemType Directory -Path $run -Force
+# New-Item resolves against PowerShell's location. StreamWriter resolves a
+# relative path against the process directory, which may be different.
+$run = (New-Item -ItemType Directory -Path $run -Force).FullName
 $utf8 = [Text.UTF8Encoding]::new($false)
 $events = [IO.StreamWriter]::new((Join-Path $run 'events.jsonl'), $false, $utf8)
 $uart = [IO.StreamWriter]::new((Join-Path $run 'serial.log'), $false, $utf8)
