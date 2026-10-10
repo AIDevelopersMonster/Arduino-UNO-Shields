@@ -1,4 +1,4 @@
-// TEST-08 v0.2. UNO + W5100 shield: SD hardware/filesystem, no network traffic.
+// TEST-08 v0.3. Diagnostic: W5100 SPI 1 MHz; SD settings unchanged.
 // Arduino SD 1.3.0 low-level API avoids the File wrapper's heap allocation.
 #include <SPI.h>
 #include <SD.h>
@@ -6,6 +6,7 @@
 
 const uint8_t ETH_CS = 10;
 const uint8_t SD_CS = 4;
+const uint32_t ETH_SPI_HZ = 1000000UL;
 const uint16_t INITIAL_BYTES = 2048;
 const uint16_t TOTAL_BYTES = 2112;
 const char TEST_FILE[] = "T08CHECK.BIN";
@@ -58,7 +59,7 @@ bool check(const __FlashStringHelper *name, bool passed) {
 void beginEthernetTransaction() {
   digitalWrite(ETH_CS, HIGH);
   digitalWrite(SD_CS, HIGH);
-  SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  SPI.beginTransaction(SPISettings(ETH_SPI_HZ, MSBFIRST, SPI_MODE0));
   // Clock one idle byte with both slaves deselected before selecting W5100.
   // SD 1.3.0 deselect does not clock the bus to release the card's DO/MISO.
   SPI.transfer(0xFF);
@@ -239,7 +240,8 @@ void setup() {
   SPI.begin();
   delay(300);
   Serial.println(); // Separate any startup/bootloader bytes from the banner.
-  Serial.println(F("BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200"));
+  Serial.print(F("BOOT test=TEST08 fw=0.3 eth_cs=10 sd_cs=4 uart=115200 eth_spi_hz="));
+  Serial.println(ETH_SPI_HZ);
   Serial.println(F("READY"));
 }
 void loop() {

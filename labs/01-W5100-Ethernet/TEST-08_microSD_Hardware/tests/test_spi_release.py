@@ -5,6 +5,7 @@ An optional source path allows demonstrating that the earlier firmware fails
 when SD keeps MISO driven until an idle byte is clocked with both CS high.
 """
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -13,18 +14,21 @@ source = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().pa
 sketch = source.read_text()
 start = sketch.index("void beginEthernetTransaction()") if "void beginEthernetTransaction()" in sketch else sketch.index("uint8_t ethernetRead(")
 helpers = sketch[start:sketch.index("uint8_t expectedByte(")]
+clock_match = re.search(r"const uint32_t ETH_SPI_HZ = ([0-9]+)UL;", sketch)
+clock = int(clock_match.group(1)) if clock_match else 4000000
 model = r'''
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
-using std::uint8_t; using std::uint16_t;
+using std::uint8_t; using std::uint16_t; using std::uint32_t;
 const int HIGH=1, LOW=0, MSBFIRST=1, SPI_MODE0=0;
 const uint8_t ETH_CS=10, SD_CS=4;
 const uint16_t ETH_RTR=0x0017;
+const uint32_t ETH_SPI_HZ=MODEL_CLOCK;
 int pins[16];
 struct SPISettings {
   SPISettings(int clock, int order, int mode) {
-    if(clock!=4000000 || order!=MSBFIRST || mode!=SPI_MODE0) throw std::runtime_error("settings");
+    if(clock!=MODEL_CLOCK || order!=MSBFIRST || mode!=SPI_MODE0) throw std::runtime_error("settings");
   }
 };
 struct SpiModel {
@@ -80,6 +84,6 @@ int main(){
 with tempfile.TemporaryDirectory(prefix="test08-spi-model-") as directory:
     directory=Path(directory)
     cpp=directory/"spi_model.cpp";binary=directory/"spi_model"
-    cpp.write_text(model.replace("SKETCH_HELPERS",helpers))
+    cpp.write_text(model.replace("SKETCH_HELPERS",helpers).replace("MODEL_CLOCK",str(clock)))
     subprocess.run(["g++","-std=c++11","-Wall","-Wextra","-Werror",str(cpp),"-o",str(binary)],check=True,timeout=30)
     raise SystemExit(subprocess.run([str(binary)],timeout=5).returncode)

@@ -24,7 +24,7 @@ function ConvertFrom-Test08Line {
             $record[$Matches.key]=$Matches.value
         }
     }
-    foreach($key in @('token','test','fw','eth_cs','sd_cs','uart','free','index','name','status',
+    foreach($key in @('token','test','fw','eth_cs','sd_cs','uart','eth_spi_hz','free','index','name','status',
         'type','blocks','fat','bytes','crc16','checks','failures','min_free','elapsed_ms',
         'phase','expected','observed1','observed2','probe','restored')){
         if(-not $record.ContainsKey($key)){$record[$key]=$null}
@@ -41,9 +41,10 @@ function Get-Test08Verdict {
     }
     $boots=@($records | Where-Object kind -eq 'BOOT')
     if($boots.Count -ne 1){$reasons.Add('exactly one BOOT required')}
-    elseif($boots[0].test -ne 'TEST08' -or $boots[0].fw -ne '0.2' -or
-           $boots[0].eth_cs -ne '10' -or $boots[0].sd_cs -ne '4' -or $boots[0].uart -ne '115200'){
-        $reasons.Add('unexpected firmware/pin banner')
+    elseif($boots[0].test -ne 'TEST08' -or $boots[0].fw -ne '0.3' -or
+           $boots[0].eth_cs -ne '10' -or $boots[0].sd_cs -ne '4' -or $boots[0].uart -ne '115200' -or
+           $boots[0].eth_spi_hz -ne '1000000'){
+        $reasons.Add('unexpected firmware/pin/SPI banner')
     }
     $bootMarkers=0
     foreach($line in $Lines){

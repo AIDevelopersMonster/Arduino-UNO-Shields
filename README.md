@@ -133,7 +133,7 @@ Shield. This is separate from the original LAB-01 with SD 4GB.
   [hardware result](labs/01-W5100-Ethernet/TEST-07_Network_Robustness/RESULT_2026-10-10.md).
 - [TEST-08 microSD Hardware](labs/01-W5100-Ethernet/TEST-08_microSD_Hardware/):
   SPI/card/FAT diagnostics, exclusive test-file creation, exact binary readback,
-  append, remount, cleanup and PowerShell logs; **v0.2 data-integrity PASS 15/15; repeated CARD_INIT FAIL, diagnosis ongoing; all outcomes retained**;
+  append, remount, cleanup and PowerShell logs; **v0.2 integrity PASS 15/15; CARD_INIT/RTR FAIL retained; v0.3 1 MHz diagnostic hardware PENDING**;
   [hardware evidence](labs/01-W5100-Ethernet/TEST-08_microSD_Hardware/RESULT_2026-10-10.md).
 - [TEST-09 Ethernet + SD](labs/01-W5100-Ethernet/TEST-09_Ethernet_SD_Integration/):
   bounded UDP -> SD write/sync/cache-discard/readback -> exact UDP reply; **BUILD VERIFIED / first hardware CARD_INIT FAIL; diagnosis PENDING**.
