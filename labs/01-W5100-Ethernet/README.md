@@ -1,6 +1,6 @@
 # LAB-01B — Arduino UNO + W5100 Ethernet Shield (blue board, no SD)
 
-> **Scope and naming.** This directory is the independently tested **blue W5100 Ethernet Shield** sequence (TEST-01–07) with microSD **removed**. It supplements, but does not supersede, the older [LAB-01 — UNO + W5100 + SD 4GB](../01-UNO-W5100-SD-4GB/README.md) and the [shield hardware inventory](../../shields/W5100-Ethernet-SD/README.md). Evidence and PASS reports apply to the **specific tested sample**, not all W5100 clones.
+> **Scope and naming.** This directory is the independently tested **blue W5100 Ethernet Shield** sequence. Ethernet-only operation is the accepted project scope. The onboard microSD/shared-SPI path was investigated through TEST-12 and rejected as unreliable on the tested clone samples. Evidence and PASS reports apply to the **specific tested samples**, not all W5100 shields.
 
 ## Hardware and wiring
 
@@ -45,19 +45,11 @@ arduino-cli monitor -p COM4 -c baudrate=115200
 
 Leave microSD out. Check the current Arduino DHCP IP. In another PowerShell window run `Test-TcpEcho.ps1` from TEST-05 with `-IP <actual-IP>`. Do not assume previously assigned DHCP addresses remain valid.
 
-## Forward roadmap — planned, not certified
+## Project decision after TEST-12
 
-| Stage | Topic | Acceptance concept |
-| --- | --- | --- |
-| TEST-04 | Browser Web Control | D6/D7 UI + JSON + independent output level measurement |
-| TEST-05 | TCP echo server + Windows client | **FULL PASS**; 20 sessions, 64-byte boundary, interrupted client/reconnect |
-| TEST-06 | UDP communication | **FULL PASS** — 24 byte-exact UDP replies, zero timeouts |
-| TEST-07 | RJ45 cable recovery only | **FULL PASS**; 10/10 baseline, 10/10 outage timeouts, 30/30 recovery, 60/60 soak; router unchanged |
-| TEST-08 | microSD hardware certification | Card presence, init, read/write, file integrity; separate SPI/CS verification |
-| TEST-09 | W5100 + microSD integration | Network traffic together with SD file read/write, SRAM pressure |
-| TEST-10 | Applied miniature network device | Reproducible GPIO / telemetry demonstration with documented limits |
+The onboard microSD/shared-SPI investigation is **closed**. TEST-12 failed the final stock-library acceptance sequence (`SD -> LAN -> SD`) on replacement hardware: SD baseline write/read passed, but Ethernet DHCP failed immediately after the SD phase. Together with the prior state-dependent and card-dependent results, the tested clone boards are classified as defective or unsuitable for reliable combined W5100 + onboard microSD operation.
 
-TEST-05 firmware and host client are hardware-verified for this bounded test. TEST-06 is hardware-verified for 24 UDP datagrams; TEST-07 cable-recovery test is FULL PASS for its bounded protocol; TEST-08 onward are tracked separately. The older LAB-01 SD branch has separate historic results and should not be silently merged with these outcomes.
+No further SD repair, rework, pull-up experiments, library forks, or attempts to force a PASS are planned. LAB-01 continues as **Ethernet-only**. In Ethernet firmware, keep microSD CS D4 HIGH when the SD subsystem is not used. Future applied work may continue with DHCP, TCP, UDP, HTTP, web control, telemetry and related W5100 networking tasks.
 
 ## Documentation map
 
