@@ -34,8 +34,8 @@ See: [boards/Arduino-UNO-Clone](boards/Arduino-UNO-Clone/)
 - network configuration tests
 - TCP/UDP experiments
 - web server and client examples
-- SD read/write tests
-- combined Ethernet + SD applications
+- SD read/write diagnostics
+- combined Ethernet + SD investigation (closed as unreliable on tested clone samples)
 
 See: [shields/W5100-Ethernet-SD](shields/W5100-Ethernet-SD/)
 
@@ -114,8 +114,7 @@ See: [libraries/HY_M302](libraries/HY_M302/)
 
 The first complete hardware stand.
 
-Goal: first prove that the UNO, W5100 and SD card work separately and together,
-then use the verified stand for practical network projects.
+Historical goal: prove UNO, W5100 and SD separately and together. The original combined track did not reach acceptance and is now closed; the later blue W5100 track is retained for Ethernet-only reuse.
 
 See: [labs/01-UNO-W5100-SD-4GB](labs/01-UNO-W5100-SD-4GB/)
 
@@ -283,6 +282,12 @@ KSC-04 video:
 https://youtu.be/pqV5DG1o-WA
 
 See: [projects/KSC-KonSol-Commander](projects/KSC-KonSol-Commander/)
+
+### Project 03 — KON Relay & Control (auxiliary / frozen)
+
+Four-channel relay work established the tested D4-D7 mapping and ACTIVE HIGH USB/Serial control profile. A W5100 Ethernet control profile with Web/API/CLI/GUI is retained as a reusable prototype. The former RS-485 / Modbus / KON-PLC Lite roadmap is deferred with no active schedule.
+
+See: [projects/KON-Relay-Control](projects/KON-Relay-Control/)
 
 ## Project structure
 
