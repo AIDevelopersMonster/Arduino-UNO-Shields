@@ -1,5 +1,7 @@
 # LAB-01 — Arduino UNO Clone + W5100 + SD 4 GB
 
+> **Status: CLOSED / HISTORICAL HARDWARE TRACK.** The original shield sample was deferred as suspect hardware. The later blue W5100 track established useful Ethernet-only results, while reliable combined onboard microSD + W5100 operation on tested clone hardware was ultimately rejected. No further repair or shared-SPI development is planned.
+
 ## Purpose
 
 This is the first complete laboratory stand in the **Arduino UNO & Shields** project.
@@ -14,8 +16,7 @@ Hardware:
 
 The laboratory is intentionally a **series of examples**, not one sketch.
 
-First we prove that every part works. After that, the same verified hardware
-becomes a base for practical projects.
+This README preserves the original staged plan. The final project decision supersedes that plan where the tested hardware failed or was later scoped to Ethernet-only use.
 
 ## Pin map used by this laboratory
 
@@ -38,7 +39,7 @@ Run the sketches in this order:
 3. `03_SD_Card` — disable W5100 and prove that the 4 GB card can be written and read.
 4. `04_Ethernet_SD_Combined` — initialize and use Ethernet and SD in one sketch.
 
-Do not move to practical projects until all four stages pass.
+Historical gate: the original plan required all four stages to pass before practical projects. That condition was not reached on the original sample, and the track is now closed.
 
 ## Expected result
 
@@ -52,7 +53,7 @@ At the end of Stage A we should have:
 - a test file written and read from the card;
 - Ethernet and SD both initialized in the same program.
 
-## Stage B — demonstrations
+## Stage B — demonstrations (historical plan)
 
 After bring-up, this laboratory will contain multiple demonstrations such as:
 
@@ -66,7 +67,7 @@ After bring-up, this laboratory will contain multiple demonstrations such as:
 - SD logging;
 - network configuration stored on SD.
 
-## Stage C — practical projects
+## Stage C — practical projects (historical plan)
 
 The same stand can then be used for real applications:
 
