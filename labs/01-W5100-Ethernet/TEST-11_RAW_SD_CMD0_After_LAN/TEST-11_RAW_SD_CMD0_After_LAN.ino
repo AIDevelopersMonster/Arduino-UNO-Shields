@@ -38,6 +38,8 @@ EthernetUDP udp;
 char cmd[8];
 uint8_t used = 0;
 bool lanOn = false;
+static bool rawReady = false;
+static uint16_t rawReadyPolls = 0;
 
 static uint8_t rawSdCmd0() {
   // Known idle boundary: both CS high, 80 clocks at 250 kHz.
@@ -52,6 +54,27 @@ static uint8_t rawSdCmd0() {
   for (uint8_t i = 0; i < 10; ++i) SPI.transfer(0xFF);
 
   digitalWrite(SD_CS, LOW);
+
+  // Mirror Sd2Card::cardCommand() more closely: after selecting the card,
+  // wait until DO/MISO returns 0xFF (not busy) before sending CMD0.
+  rawReady = false;
+  rawReadyPolls = 0;
+  unsigned long t0 = millis();
+  do {
+    uint8_t b = SPI.transfer(0xFF);
+    ++rawReadyPolls;
+    if (b == 0xFF) {
+      rawReady = true;
+      break;
+    }
+  } while ((unsigned long)(millis() - t0) < 300UL);
+
+  if (!rawReady) {
+    digitalWrite(SD_CS, HIGH);
+    SPI.transfer(0xFF);
+    SPI.endTransaction();
+    return 0xFF;
+  }
 
   // CMD0, arg=0, valid CRC=0x95.
   SPI.transfer(0x40);
@@ -115,6 +138,10 @@ void doC0() {
 
   Serial.print(F("C0 MISO before="));
   Serial.print(before ? F("HIGH") : F("LOW"));
+  Serial.print(F(" ready="));
+  Serial.print(rawReady ? F("YES") : F("NO"));
+  Serial.print(F(" polls="));
+  Serial.print(rawReadyPolls);
   Serial.print(F(" R1=0x"));
   if (r1 < 0x10) Serial.print('0');
   Serial.print(r1, HEX);
