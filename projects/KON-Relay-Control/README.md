@@ -1,7 +1,9 @@
 # KON Relay & Control Lab
 
+> **Repository status: FROZEN / AUXILIARY (2026-10-11).** The bounded four-channel USB/Serial profile is retained as a useful Arduino UNO accessory. The former RS-485 / Modbus / KON-PLC Lite roadmap is **deferred with no active schedule**. Reopen only for a concrete auxiliary task or when moving the control concept to a more appropriate modern platform.
+
 Статус: **STAGE-02 BASIC USB/SERIAL CONTROL BENCH PASS** (2026-10-11). Расширенная силовая/Modbus сертификация не выполнена.
-Основная траектория: **4-relay Arduino UNO → самостоятельная KON_RelayShield → UART/RS-485 → Modbus RTU → KON-PLC Lite**.
+Исторически планировалась траектория **4-relay Arduino UNO → KON_RelayShield → UART/RS-485 → Modbus RTU → KON-PLC Lite**; после заморозки Arduino UNO-направления она сохранена только как справочная архитектура.
 Bluetooth UART/BLE и KSC Target — отдельные последующие адаптеры, а не зависимости базовой библиотеки.
 
 ## Цель этапа 01
@@ -23,7 +25,7 @@ Bluetooth UART/BLE и KSC Target — отдельные последующие �
 - [01_PinProbe](firmware/01_PinProbe/01_PinProbe.ino) — исходный пассивный диагностический скетч.
 - [02_SerialControl](firmware/02_SerialControl/02_SerialControl.ino) — **BENCH PASS**: USB/COM 115200, R1–R4 на D4–D7, ACTIVE HIGH.
 - [Library placeholder](libraries/KON_RelayShield/README.md) — граница работ следующего этапа.
-- [Host placeholder](host/README.md) — Python/GUI в следующих этапах.
+- [Host placeholder](host/README.md) — историческая заготовка; дальнейшее развитие не запланировано.
 
 ## Структурный принцип
 
