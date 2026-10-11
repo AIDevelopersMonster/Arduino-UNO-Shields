@@ -2,7 +2,7 @@
 
 ## Status
 
-**Arduino UNO + HY-M302 target phase: FULL PHYSICAL PASS through KSC-04C.**
+**FROZEN / COMPLETED ARDUINO UNO PHASE.** Arduino UNO + HY-M302 reached FULL PHYSICAL PASS through KSC-04C. The repository is maintenance-only as of 2026-10-11; the future-target sections below are preserved as architectural options, not an active implementation roadmap.
 
 Certified milestones:
 
@@ -32,9 +32,7 @@ IR drop 0/0
 HOST M/0 R0
 ~~~
 
-This closes the **HY-M302 target phase only**. The wider KSC programme remains
-open for structurally different targets such as LCD Keypad Shield,
-relay/control hardware, W5100 + SD, and later other MCU/SBC platforms.
+This closes the **HY-M302 Arduino UNO target phase**. Broader KSC ideas may be revisited on other hardware or in a separate project, but no additional Arduino UNO target is scheduled here.
 
 ## Publications
 
