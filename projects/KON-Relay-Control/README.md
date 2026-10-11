@@ -47,3 +47,11 @@ Bluetooth UART/BLE и KSC Target — отдельные последующие �
 ## Bench result 2026-10-11
 
 Фактически подтверждено на Arduino UNO с данным 4-relay shield: **R1=D4, R2=D5, R3=D6, R4=D7**, логика входов **ACTIVE HIGH**, управление всеми четырьмя каналами по USB/COM 115200 работает. Базовый Serial controller принят как рабочий профиль. Это не является сертификацией силовых контактов, токов, 230 В, RESET-глитчей или Modbus.
+
+
+## Рабочие профили
+
+- [02_SerialControl](firmware/02_SerialControl/02_SerialControl.ino) — **BENCH PASS**. Arduino UNO + 4-relay shield, R1=D4, R2=D5, R3=D6, R4=D7, ACTIVE HIGH, управление по USB/COM 115200.
+- [03_EthernetControl](firmware/03_EthernetControl/) — W5100 Ethernet + 4-relay control. Web UI, HTTP JSON API, Serial CLI, PowerShell CLI и Windows GUI. microSD должна быть физически удалена, поскольку D4 используется как R1.
+
+Таким образом, все варианты управления этим релейным шилдом теперь собраны под `projects/KON-Relay-Control/`, а не разбросаны по отдельным лабораториям.
