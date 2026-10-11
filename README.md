@@ -1,9 +1,12 @@
 # Arduino UNO & Shields
 
-Hardware research, documentation, laboratory tests and practical projects
-based on Arduino UNO compatible boards and expansion shields.
+Hardware research, documentation, laboratory tests and practical projects based on Arduino UNO compatible boards and expansion shields.
 
-## Project goals
+> **PROJECT STATUS — FROZEN / MAINTENANCE-ONLY (2026-10-11).** The repository is preserved as a reproducible record of completed Arduino UNO / ATmega328P experiments, libraries, tools and publications. Arduino UNO is treated here as a **legacy 8-bit platform**: it remains useful for simple auxiliary tasks and for reproducing the documented work, but its price/performance, memory limits and declining practical relevance no longer justify an actively expanding project line. New work in this repository should be occasional and task-driven rather than roadmap-driven.
+
+The project is not abandoned: completed results remain maintained, and an Arduino UNO may still be used when its simplicity, existing shield ecosystem or already-tested hardware makes it the convenient auxiliary choice. New primary development should normally prefer a more capable contemporary MCU/platform.
+
+## Original project goals
 
 - identify and document Arduino UNO compatible hardware;
 - verify power, USB, UART, GPIO and shield interfaces;
@@ -12,7 +15,7 @@ based on Arduino UNO compatible boards and expansion shields.
 - document shield pin usage and compatibility;
 - develop practical projects from tested hardware combinations.
 
-## Current hardware
+## Documented hardware
 
 ### Arduino UNO compatible board
 
@@ -225,7 +228,7 @@ See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
 ## Projects
 
-### Project 01 — HY-M302 KonSol Operating Environment (design branch)
+### Project 01 — HY-M302 KonSol Operating Environment (legacy design branch)
 
 Driver-based KonSol line for Arduino UNO + HY-M302:
 
@@ -244,9 +247,9 @@ Arduino library can own the same pins simultaneously.
 
 See: [projects/HY-M302-KonSol-OS](projects/HY-M302-KonSol-OS/)
 
-### Project 02 — KSC / KonSol Commander
+### Project 02 — KSC / KonSol Commander (completed UNO phase)
 
-KSC is the active target-decoupled research line built around one navigable
+KSC is the completed target-decoupled Arduino UNO research line built around one navigable
 VFS-like namespace for physical devices, runtime state, configuration and
 remote PC files.
 
@@ -291,11 +294,11 @@ See: [projects/KSC-KonSol-Commander](projects/KSC-KonSol-Commander/)
 - `tools/` — utilities and test tools
 - `projects/` — higher-level systems built from certified boards, shields and drivers
 
-## Status
+## Repository status
 
 - **LAB-01** — W5100 + SD hardware diagnostics documented.
 - **LAB-02** — Multi-Function Shield Stage A PASS on the physical shield: LEDs, buttons, potentiometer, display, active buzzer and GUI/serial control verified.
 - **LAB-03** — **COMPLETE** on 2026-10-04: ILI9341, graphics, ROT1 geometry, resistive touch, microSD and integrated LCD + Touch + SD verified; TEST-08 final application builds on Arduino UNO at 30746 / 32256 bytes Flash (95%) and 1106 / 2048 bytes SRAM globals (54%).
 - **LAB-05** — **KonSol 0.8 / TEST-11 FULL PHYSICAL PASS and frozen**. The resident cooperative environment, external KAP1/KAP2 applications, KASM, TFT/Touch services, APPS/FILES navigation, HOST1, Host Manager and SD-backed boot resource are treated as a completed reproducible research result. Publication DOI: 10.5281/zenodo.23223036.
 
-Optional LAB-02 IR, temperature, UART and external-GPIO interfaces remain available for future work.
+Optional LAB-02 interfaces remain documented for occasional auxiliary reuse; there is no active expansion schedule.
