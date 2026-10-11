@@ -1,6 +1,7 @@
 /**
  * APP-01 — 4-Relay Serial Controller
  *
+ * Repository status: FROZEN / maintenance-only auxiliary profile.
  * Arduino UNO, USB/COM control only.
  * Relay inputs:
  *   R1 -> D4
