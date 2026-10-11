@@ -1,5 +1,7 @@
 # LAB-04 — Arduino UNO + MAR2406 + FreeRTOS
 
+> **Status: CLOSED / FROZEN EXPERIMENT.** TEST-01 proved a compact FreeRTOS configuration viable; TEST-02 showed the practical memory limit of RTOS + SD/file-manager work on ATmega328P. No optimization programme is active.
+
 ## Goal
 
 Determine what a real preemptive RTOS can practically do on the classic
