@@ -60,8 +60,3 @@ See:
 
 Stage preprint:
 https://doi.org/10.5281/zenodo.23251546
-
-
-## BT18 read-only host tools
-
-Read-only UART AT fingerprint and BLE/GATT discovery for the unmarked DX-BT18-like module; no flashing or configuration writes. See [tools/bt18](bt18/) and [LAB-06](../labs/06-Bluetooth-DX-BT18/README.md).
