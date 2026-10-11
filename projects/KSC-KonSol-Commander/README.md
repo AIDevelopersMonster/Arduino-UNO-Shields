@@ -74,7 +74,7 @@ and the physical HY-M302 target adapter on Arduino UNO.
 - [Publication index](publication/README.md)
 - [HY-M302 stage article spine](publication/KSC_HYM302_STAGE_ARTICLE_SPINE_v0.1.md)
 
-KSC is a new experimental branch of the Arduino UNO & Shields project.
+KSC began as an experimental branch of the Arduino UNO & Shields project; its Arduino UNO target phase is now frozen.
 
 It is not a continuation of the frozen KonSol 0.8 firmware and does not promise
 binary compatibility with KAP1/KAP2, HOST1, the MAR2406 UI, or the KonSol 0.8
