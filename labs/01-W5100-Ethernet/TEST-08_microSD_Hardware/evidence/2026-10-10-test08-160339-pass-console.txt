@@ -1,0 +1,39 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$test8\Build-Test08.ps1" -UploadPort COM4
+BUILD PASS / Flash=14134/32256 / static SRAM=1050/2048 / AVR=1.8.8 / SD=1.3.0
+Новый порт загрузки: COM4 (serial)
+Measured binary uploaded; hardware result remains PENDING.
+PS C:\GitHub\Arduino-UNO-Shields>
+PS C:\GitHub\Arduino-UNO-Shields> & "$test8\Test-MicroSDHardware.ps1" -SerialPort COM4 -DurationSeconds 90
+TEST-08 microSD / bounded 90s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-160339-TEST08-76CEC702
+Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses are needed.
+BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200
+READY
+ШАГ: автоматически проверяю SPI, карту, запись, чтение, append, remount и удаление тестового файла.
+START token=76CEC702 free=959
+ETH_RTR token=76CEC702 phase=BEFORE expected=07D0 observed1=07D0 observed2=07D0 probe=1234 restored=07D0
+CHECK token=76CEC702 index=1 name=ETH_SPI_BEFORE status=PASS free=953
+CARD token=76CEC702 error_code=0 error_data=0
+CHECK token=76CEC702 index=2 name=CARD_INIT status=PASS free=953
+CARD_INFO token=76CEC702 type=3 blocks=30536704
+CHECK token=76CEC702 index=3 name=CARD_INFO status=PASS free=953
+VOLUME token=76CEC702 fat=32
+CHECK token=76CEC702 index=4 name=FAT_VOLUME status=PASS free=953
+CHECK token=76CEC702 index=5 name=ROOT_OPEN status=PASS free=953
+CHECK token=76CEC702 index=6 name=EXCLUSIVE_CREATE status=PASS free=953
+WRITE token=76CEC702 bytes=2048 elapsed_ms=29
+CHECK token=76CEC702 index=7 name=WRITE_2048 status=PASS free=953
+VERIFY token=76CEC702 bytes=2048 crc16=A535
+CHECK token=76CEC702 index=8 name=REOPEN_VERIFY_2048 status=PASS free=953
+CHECK token=76CEC702 index=9 name=SEEK_BOUNDARIES status=PASS free=953
+CHECK token=76CEC702 index=10 name=APPEND_64 status=PASS free=953
+VERIFY token=76CEC702 bytes=2112 crc16=2B28
+CHECK token=76CEC702 index=11 name=REOPEN_VERIFY_2112 status=PASS free=953
+VERIFY token=76CEC702 bytes=2112 crc16=2B28
+CHECK token=76CEC702 index=12 name=REMOUNT_VERIFY status=PASS free=953
+CHECK token=76CEC702 index=13 name=REMOVE_TEST_FILE status=PASS free=953
+ETH_RTR token=76CEC702 phase=AFTER expected=07D0 observed1=07D0 observed2=07D0
+CHECK token=76CEC702 index=14 name=ETH_SPI_AFTER status=PASS free=953
+CHECK token=76CEC702 index=15 name=RAM status=PASS free=953
+RESULT token=76CEC702 status=PASS checks=15 failures=0 bytes=2112 crc16=2B28 free=959 min_free=940 elapsed_ms=276
+RESULT PASS / TEST-08 / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-160339-TEST08-76CEC702
+PS C:\GitHub\Arduino-UNO-Shields>

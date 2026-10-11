@@ -25,7 +25,9 @@ if ($MarkerFile -and (Test-Path $MarkerFile) -and (Get-Item $MarkerFile).Length 
 $preparationSeconds=0
 if ($Scenario -eq 'StartupDhcp') { $preparationSeconds=Wait-NetworkPreparation -MarkerFile $MarkerFile }
 $run = Join-Path $OutputDirectory ((Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + $Scenario + '-' + [guid]::NewGuid().ToString('N').Substring(0,6))
-$null = New-Item -ItemType Directory -Path $run -Force
+# New-Item resolves against PowerShell's location. StreamWriter resolves a
+# relative path against the process directory, which may be different.
+$run = (New-Item -ItemType Directory -Path $run -Force).FullName
 $utf8 = [Text.UTF8Encoding]::new($false)
 $events = [IO.StreamWriter]::new((Join-Path $run 'events.jsonl'), $false, $utf8)
 $uart = [IO.StreamWriter]::new((Join-Path $run 'serial.log'), $false, $utf8)
@@ -66,7 +68,7 @@ function Drain-Serial {
         $obj = ConvertFrom-NetworkLine $line
         if ($null -eq $obj) { continue }
         Write-Event 'UART' $obj
-        if ($obj.type -eq 'INFO' -and $obj.test -eq '07' -and $obj.version -eq '0.1') { $m.Firmware=$true }
+        if ($obj.type -eq 'INFO' -and $obj.test -eq '07' -and $obj.version -eq '0.2') { $m.Firmware=$true }
         if ($obj.PSObject.Properties['ms']) {
             $boardMs = [long]$obj.ms
             if ($state.LastBoardMs -gt $boardMs) { $m.Fatal = 'device uptime went backwards (reset/wrap)' }
@@ -256,6 +258,6 @@ finally {
     Write-Event 'RUN_END' $summary
     $events.Dispose(); $uart.Dispose(); $probes.Dispose()
 }
-Write-Host "RESULT $($verdict.Status) / $Scenario / $run"
+Write-Host "RESULT $($verdict.Status) / $Scenario / $run" -ForegroundColor $(if($verdict.Status -eq 'PASS'){'Green'}else{'Red'})
 foreach ($reason in $verdict.Reasons) { Write-Host "  $reason" }
 if ($verdict.Status -ne 'PASS') { exit 1 }

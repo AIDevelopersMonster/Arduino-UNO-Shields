@@ -1,0 +1,21 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$test8\Test-MicroSDHardware.ps1" -SerialPort COM4 -DurationSeconds 90
+TEST-08 microSD / bounded 90s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-073022-TEST08-16CF964E
+Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses are needed.
+BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200
+READY
+ШАГ: автоматически проверяю SPI, карту, запись, чтение, append, remount и удаление тестового файла.
+START token=16CF964E free=959
+ETH_RTR token=16CF964E phase=BEFORE expected=07D0 observed1=07D0 observed2=07D0 probe=1234 restored=07D0
+CHECK token=16CF964E index=1 name=ETH_SPI_BEFORE status=PASS free=953
+CARD token=16CF964E error_code=1 error_data=255
+CHECK token=16CF964E index=2 name=CARD_INIT status=FAIL free=953
+RESULT token=16CF964E status=FAIL checks=2 failures=1 bytes=2112 crc16=0000 free=959 min_free=951 elapsed_ms=2031
+RESULT FAIL / TEST-08 / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-08_microSD_Hardware\runs\20261010-073022-TEST08-16CF964E
+  all 15 checks required
+  valid card type/capacity required
+  FAT16/FAT32 required
+  before/after RTR diagnostics required
+  three complete readbacks required
+  terminal result gates failed
+A failed run may leave T08CHECK.BIN for diagnosis; existing files are never overwritten.
+PS C:\GitHub\Arduino-UNO-Shields>

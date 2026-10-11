@@ -1,0 +1,26 @@
+PS C:\GitHub\Arduino-UNO-Shields> & "$test9\Test-EthernetSD.ps1" -SerialPort COM4 -DurationSeconds 60
+TEST-09 Ethernet + SD / load 60s / logs: C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-09_Ethernet_SD_Integration\runs\20261010-155517-TEST09-0EDDF020
+Оставь карту и Ethernet-кабель подключёнными. Закрой монитор Arduino. Клавиши не нужны.
+BOOT test=TEST09 fw=0.1 eth_cs=10 sd_cs=4 uart=115200
+READY
+START token=0EDDF020 duration_s=60
+CARD token=0EDDF020 error_code=1 error_data=255
+FAIL token=0EDDF020 stage=CARD_INIT
+RESULT token=0EDDF020 status=FAIL rx=0 verified=0 tx=0 bytes=0 errors=1 cleanup=0 expected_rtr=0000 rtr1=07D0 rtr2=07D0 crc16=0000 initial_free=0 free=533 min_free=531 max_sd_ms=0 elapsed_ms=0
+RESULT FAIL / TEST-09 / C:\GitHub\Arduino-UNO-Shields\labs\01-W5100-Ethernet\TEST-09_Ethernet_SD_Integration\runs\20261010-155517-TEST09-0EDDF020
+  SD/DHCP preparation failed or exceeded 30 s; see serial.log
+  device failure or rejected command
+  one SD required
+  one NET required
+  SD init did not succeed
+  valid SDHC/SD and FAT16/FAT32 metadata required
+  valid W5100 UDP service/IP required
+  before/after RTR preservation required
+  successful terminal result and file cleanup required
+  requested load interval not completed
+  at least 120 verified SD/UDP transactions required
+  at least two UART SRAM/statistics samples required
+  sampled RAM gate failed
+  device load duration invalid
+T09CHECK.BIN may remain for diagnosis. An existing name is never overwritten.
+PS C:\GitHub\Arduino-UNO-Shields>

@@ -1,4 +1,4 @@
-/* LAB-01B TEST-07 v0.1 — UNO ATmega328P + W5100, SD removed.
+/* LAB-01B TEST-07 v0.2 — UNO ATmega328P + W5100, SD disabled.
  * UDP binary echo 1..128 B :5001; TCP TEST-05 line echo :5000.
  * DHCP retry after startup/maintenance failure; no static fallback.
  * Ethernet 2.0.2, CS D10, SD CS D4 HIGH, UART 115200.
@@ -21,7 +21,7 @@ EthernetClient client;
 uint8_t packet[UDP_CAP];
 char line[64];
 uint8_t lineLength = 0;
-bool ready = false, retryNow = true;
+bool ready = false, retryNow = true, ethernetInitialized = false;
 IPAddress boundIP;
 uint32_t retryTick = 0, maintainTick = 0, statTick = 0, clientTick = 0;
 uint32_t attempts = 0, dhcpOK = 0, dhcpFail = 0, renewOK = 0, renewFail = 0;
@@ -48,10 +48,12 @@ void simpleEvent(const __FlashStringHelper *name) {
   event(name); Serial.println();
 }
 void closeClient() {
-  if (client) client.stop();
+  if (ethernetInitialized && client) client.stop();
   lineLength = 0;
 }
 void closeAllSockets() {
+  // Indexed clients access hardware even when no application socket is open.
+  if (!ethernetInitialized) return;
   // Public indexed-client API. Ethernet.socketClose() itself is private.
   for (uint8_t i = 0; i < 4; ++i) {
     EthernetClient socket(i);
@@ -60,21 +62,23 @@ void closeAllSockets() {
   }
 }
 void stopServices() {
+  ready = false;
+  if (!ethernetInitialized) { lineLength = 0; return; }
   closeClient();
   udp.stop();
   // EthernetServer has no end(). Close all four W5100 sockets explicitly.
   closeAllSockets();
-  ready = false;
 }
 void scheduleDhcp(const __FlashStringHelper *reason) {
   stopServices();
-  Ethernet.setLocalIP(IPAddress(0,0,0,0));
+  if (ethernetInitialized) Ethernet.setLocalIP(IPAddress(0,0,0,0));
   retryTick = millis();
   retryNow = false;
   event(F("RETRY_SCHEDULED")); Serial.print(F(" reason="));
   Serial.print(reason); Serial.println(F(" delay_ms=5000"));
 }
 bool startServices() {
+  if (!ethernetInitialized) return false;
   udp.stop();
   closeClient();
   closeAllSockets();
@@ -105,11 +109,20 @@ void acquireDhcp() {
   sampleRam();
   retryNow = false;
   retryTick = millis();
+  // begin() initializes the driver even when DHCP fails. hardwareStatus()
+  // reads its cached chip identity; it does not issue a register transaction.
+  ethernetInitialized = Ethernet.hardwareStatus() != EthernetNoHardware;
+  event(F("HARDWARE")); Serial.print(F(" chip="));
+  Serial.println(Ethernet.hardwareStatus() == EthernetW5100 ? F("W5100") : F("OTHER_OR_NONE"));
+  if (!ethernetInitialized) {
+    dhcpFail++;
+    event(F("DHCP_FAIL")); Serial.print(F(" elapsed_ms=")); Serial.print(elapsed);
+    Serial.println(F(" reason=NO_HARDWARE"));
+    return;
+  }
   // Bounds ARP/TCP retries. These are chip settings, not total call deadlines.
   Ethernet.setRetransmissionTimeout(200);
   Ethernet.setRetransmissionCount(2);
-  event(F("HARDWARE")); Serial.print(F(" chip="));
-  Serial.println(Ethernet.hardwareStatus() == EthernetW5100 ? F("W5100") : F("OTHER_OR_NONE"));
   if (result != 1 || Ethernet.localIP() == IPAddress(0,0,0,0)) {
     dhcpFail++;
     Ethernet.setLocalIP(IPAddress(0,0,0,0));
@@ -214,7 +227,8 @@ void stats() {
   sampleRam();
   Serial.print(F("STAT ms=")); Serial.print(millis());
   Serial.print(F(" ready=")); Serial.print(ready);
-  Serial.print(F(" ip=")); Serial.print(Ethernet.localIP());
+  Serial.print(F(" ip="));
+  Serial.print(ethernetInitialized ? Ethernet.localIP() : IPAddress(0,0,0,0));
   Serial.print(F(" free=")); Serial.print(freeRam());
   Serial.print(F(" min_free=")); Serial.print(minFree);
   Serial.print(F(" attempts=")); Serial.print(attempts);
@@ -235,11 +249,12 @@ void stats() {
 }
 void setup() {
   Serial.begin(115200);
-  pinMode(ETH_CS, OUTPUT); digitalWrite(ETH_CS, HIGH);
-  pinMode(SD_CS, OUTPUT); digitalWrite(SD_CS, HIGH);
+  digitalWrite(ETH_CS, HIGH); digitalWrite(SD_CS, HIGH);
+  pinMode(ETH_CS, OUTPUT); pinMode(SD_CS, OUTPUT);
   delay(350);
+  Serial.println(); // Separate the BOOT line from bytes received during reset.
   simpleEvent(F("BOOT"));
-  Serial.println(F("INFO test=07 version=0.1 mac=02:4B:4F:4E:51:07 link=Unknown_expected"));
+  Serial.println(F("INFO test=07 version=0.2 mac=02:4B:4F:4E:51:07 link=Unknown_expected"));
   Ethernet.init(ETH_CS);
 }
 void loop() {
