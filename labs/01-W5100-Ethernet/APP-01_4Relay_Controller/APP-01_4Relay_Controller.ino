@@ -8,8 +8,7 @@
  * Control: Web UI, HTTP JSON API, Serial CLI at 115200.
  * Windows PowerShell CLI/GUI use the HTTP API.
  *
- * Default: ACTIVE LOW relay module. Set RELAY_ACTIVE_LOW=false
- * for an active-HIGH input module.
+ * Bench result: relay module is ACTIVE HIGH. RELAY_ACTIVE_LOW=false.
  */
 
 #include <SPI.h>
@@ -19,7 +18,7 @@
 
 const uint8_t ETH_CS = 10;
 const uint8_t RELAY_PINS[4] = {4, 5, 6, 7};
-const bool RELAY_ACTIVE_LOW = true;
+const bool RELAY_ACTIVE_LOW = false;
 
 byte mac[] = {0x02, 0x4B, 0x4F, 0x4E, 0x60, 0x01};
 EthernetServer server(80);
