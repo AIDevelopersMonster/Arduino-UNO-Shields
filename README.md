@@ -223,6 +223,12 @@ consuming additional UNO firmware resources.
 
 See: [labs/05-UNO-KON-OS](labs/05-UNO-KON-OS/)
 
+### LAB-06 — DX-BT18 / BT18-compatible Bluetooth UART
+
+Read-only identification laboratory for an **unmarked** DX-BT18-like module: AT fingerprint over 3.3V USB-UART, BLE advertising/GATT inspection, careful chip/firmware feasibility audit. **PENDING hardware evidence**; no assumed PASS, no firmware rewrite.
+
+Start here (Russian Git install, clone, PowerShell commands): [LAB-06 guide](labs/06-Bluetooth-DX-BT18/README.md).
+
 ## Projects
 
 ### Project 01 — HY-M302 KonSol Operating Environment (design branch)
