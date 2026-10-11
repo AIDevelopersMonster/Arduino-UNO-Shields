@@ -17,13 +17,13 @@ Applied Ethernet-only controller for Arduino UNO + W5100 shield.
 
 The microSD card must be physically removed because D4 is reused as Relay 1.
 
-The firmware defaults to common ACTIVE LOW relay inputs:
+Bench result: this relay module uses **ACTIVE HIGH** inputs:
 
 ```cpp
-const bool RELAY_ACTIVE_LOW = true;
+const bool RELAY_ACTIVE_LOW = false;
 ```
 
-Set this to `false` for an active-HIGH module.
+This value is now fixed to `false` for the tested module.
 
 Arduino GPIO pins must drive only the relay module logic inputs. Do not power relay coils directly from D4-D7.
 
