@@ -20,7 +20,7 @@
 | [TEST-04 Web Control](TEST-04_Web_Control/) | Browser commands for D6/D7; independent physical output verification | **SOFTWARE PASS** — browser, 10 request routes; physical GPIO still pending | [Evidence](TEST-04_Web_Control/RESULT_2026-10-09.md) |
 | [TEST-05 TCP Echo](TEST-05_TCP_Echo/) | 20 independent TCP exchanges, 64-byte boundary, reconnect after abort | **FULL PASS** — 22 exact echoes, 23 connections, expected aborted request | [Result](TEST-05_TCP_Echo/RESULT_2026-10-09.md) |
 | [TEST-06 UDP Echo](TEST-06_UDP_Communication/) | Binary echo 1–128 bytes, 20 sequenced packets, host byte verification | **FULL PASS** — 24/24 binary echoes, 0 timeouts | [Result](TEST-06_UDP_Communication/RESULT_2026-10-09.md) |
-| [TEST-07 RJ45 Recovery](TEST-07_Network_Robustness/) | LAN baseline, Arduino RJ45 unplug/replug, short soak | **PENDING** — source ready, router untouched | [Procedure](TEST-07_Network_Robustness/README.md) |
+| [TEST-07 RJ45 Recovery](TEST-07_Network_Robustness/) | LAN baseline, Arduino RJ45 unplug/replug, short soak | **FULL PASS** — 100/100 connected Echo responses, 10/10 expected outage timeouts | [Result](TEST-07_Network_Robustness/RESULT_2026-10-11.md) |
 
 **Pass granularity:** TEST-01–03 certify only their listed functions; TEST-04 has a software-only result; TEST-05 has FULL PASS for the specified TCP echo protocol. Neither short Ping nor a few HTTP requests certify throughput, uptime over days, security, or operation of the microSD subsystem. TEST-04 software state and actual pin voltage are separate measurements.
 
@@ -52,12 +52,12 @@ Leave microSD out. Check the current Arduino DHCP IP. In another PowerShell wind
 | TEST-04 | Browser Web Control | D6/D7 UI + JSON + independent output level measurement |
 | TEST-05 | TCP echo server + Windows client | **FULL PASS**; 20 sessions, 64-byte boundary, interrupted client/reconnect |
 | TEST-06 | UDP communication | **FULL PASS** — 24 byte-exact UDP replies, zero timeouts |
-| TEST-07 | RJ45 cable recovery only | **Source ready, PENDING test**; unplug/replug Arduino cable, recovery, 60-second soak; no router configuration changes |
+| TEST-07 | RJ45 cable recovery only | **FULL PASS**; 10/10 baseline, 10/10 outage timeouts, 30/30 recovery, 60/60 soak; router unchanged |
 | TEST-08 | microSD hardware certification | Card presence, init, read/write, file integrity; separate SPI/CS verification |
 | TEST-09 | W5100 + microSD integration | Network traffic together with SD file read/write, SRAM pressure |
 | TEST-10 | Applied miniature network device | Reproducible GPIO / telemetry demonstration with documented limits |
 
-TEST-05 firmware and host client are hardware-verified for this bounded test. TEST-06 is hardware-verified for 24 UDP datagrams; TEST-07 cable-recovery sketch and host script published, PENDING bench result. TEST-08 onward are proposed. The older LAB-01 SD branch has separate historic results and should not be silently merged with these outcomes.
+TEST-05 firmware and host client are hardware-verified for this bounded test. TEST-06 is hardware-verified for 24 UDP datagrams; TEST-07 cable-recovery test is FULL PASS for its bounded protocol; TEST-08 onward are tracked separately. The older LAB-01 SD branch has separate historic results and should not be silently merged with these outcomes.
 
 ## Documentation map
 
