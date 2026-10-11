@@ -1,6 +1,7 @@
 /**
  * APP-01 - W5100 4-Relay Controller
  *
+ * Repository status: FROZEN / maintenance-only auxiliary profile.
  * Arduino UNO + W5100 Ethernet Shield, Ethernet only.
  * Relay inputs: D4, D5, D6, D7. W5100 CS: D10.
  * microSD MUST be physically removed because D4 is reused as Relay 1.
