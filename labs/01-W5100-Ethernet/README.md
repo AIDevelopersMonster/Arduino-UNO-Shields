@@ -1,5 +1,9 @@
 # LAB-01B — Arduino UNO + W5100 Ethernet Shield (blue board, no SD)
 
+## Repository status
+
+**FROZEN / MAINTENANCE-ONLY (2026-10-11).** The bounded Ethernet results are retained for reproducibility and occasional auxiliary use. There is no active W5100 development roadmap in this repository. The controller is treated as legacy hardware; new work is justified only by a concrete auxiliary need.
+
 > **Scope and naming.** This directory is the independently tested **blue W5100 Ethernet Shield** sequence. Ethernet-only operation is the accepted project scope. The onboard microSD/shared-SPI path was investigated through TEST-12 and rejected as unreliable on the tested clone samples. Evidence and PASS reports apply to the **specific tested samples**, not all W5100 shields.
 
 ## Hardware and wiring
@@ -24,15 +28,15 @@
 
 **Pass granularity:** TEST-01–03 certify only their listed functions; TEST-04 has a software-only result; TEST-05 has FULL PASS for the specified TCP echo protocol. Neither short Ping nor a few HTTP requests certify throughput, uptime over days, security, or operation of the microSD subsystem. TEST-04 software state and actual pin voltage are separate measurements.
 
-## Test workflow (GitHub-first)
+## Reproduction workflow
 
 1. Assistant edits firmware/documentation **directly in this GitHub repository**.
 2. User runs `git pull --ff-only` locally, then `arduino-cli compile`, `arduino-cli upload` and `arduino-cli monitor`.
 3. User supplies actual console output, browser screenshots or instrument measurements.
 4. A `RESULT_YYYY-MM-DD.md` file is created/updated **only** from observed evidence, with PASS/PARTIAL/FAIL and non-claims.
-5. Future steps remain PENDING until demonstrated; compile success is not hardware certification.
+5. Unverified steps remain unverified; compile success is not hardware certification.
 
-Commands for the current TEST-05:
+Example reproduction commands for TEST-05:
 
 ```powershell
 cd C:\GitHub\Arduino-UNO-Shields
