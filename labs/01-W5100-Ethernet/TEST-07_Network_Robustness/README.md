@@ -1,6 +1,6 @@
 # TEST-07 — Ethernet Network Robustness
 
-**Status: SOURCE READY / hardware test PENDING.** Arduino UNO + blue W5100, SD absent.
+**Status: FULL PASS — bounded cable recovery protocol (2026-10-11).** [Recorded evidence](RESULT_2026-10-11.md). Arduino UNO + blue W5100, SD absent.
 
 ## Purpose
 
@@ -46,3 +46,6 @@ Router settings, DHCP configuration and firmware remain untouched. Only the Ethe
 ## Scope
 
 Trusted LAN only, UDP unauthenticated. A PASS proves only these bounded phases; it does not certify prolonged service, automatic restoration in every network, physical PHY link detection, or lease renewal if no renewal event occurred.
+## Verified bench outcome (2026-10-11)
+
+The operator's PowerShell 7.6.6 transcript reports **BASELINE 10/10 OK**, **OUTAGE 10/10 expected timeouts**, **RECOVERY 30/30 OK**, and **SOAK 60/60 OK**. Overall connected operation **100/100 exact replies** and no unexpected timeouts. See [test report](RESULT_2026-10-11.md) for measurement limitations, particularly the unmeasured time from RJ45 insertion to link recovery and absence of serial uptime evidence.
