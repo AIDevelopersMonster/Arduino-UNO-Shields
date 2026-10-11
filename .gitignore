@@ -20,3 +20,5 @@ Thumbs.db
 
 # Local publication captures that may contain user/profile paths
 projects/KSC-KonSol-Commander/publication/zenodo/toolchain-final.txt
+
+labs/01-W5100-Ethernet/TEST-09_Ethernet_SD_Integration/runs/

@@ -1,4 +1,4 @@
-// TEST-08 v0.2. UNO + W5100 shield: SD hardware/filesystem, no network traffic.
+// TEST-08 v0.4. Audit repair: SD-first startup and driver-owned SPI handoff.
 // Arduino SD 1.3.0 low-level API avoids the File wrapper's heap allocation.
 #include <SPI.h>
 #include <SD.h>
@@ -6,6 +6,8 @@
 
 const uint8_t ETH_CS = 10;
 const uint8_t SD_CS = 4;
+const uint32_t ETH_SPI_HZ = 4000000UL;
+const uint32_t SD_SPI_HZ = 4000000UL;
 const uint16_t INITIAL_BYTES = 2048;
 const uint16_t TOTAL_BYTES = 2112;
 const char TEST_FILE[] = "T08CHECK.BIN";
@@ -20,6 +22,8 @@ char token[9];
 uint8_t commandLength = 0;
 bool overflow = false;
 bool hasRun = false;
+bool sdReady = false;
+bool busFault = false;
 uint8_t checks = 0;
 uint8_t failures = 0;
 uint16_t originalRtr = 0;
@@ -45,7 +49,7 @@ void prefix(const __FlashStringHelper *kind) {
 }
 bool check(const __FlashStringHelper *name, bool passed) {
   sampleRam();
-  passed = passed && digitalRead(ETH_CS) == HIGH;
+  passed = passed && !busFault && digitalRead(ETH_CS) == HIGH && digitalRead(SD_CS) == HIGH;
   ++checks;
   if (!passed) ++failures;
   prefix(F("CHECK"));
@@ -55,17 +59,29 @@ bool check(const __FlashStringHelper *name, bool passed) {
   Serial.print(F(" free=")); Serial.println(freeRam());
   return passed;
 }
-void beginEthernetTransaction() {
+void initializeChipSelects() {
+  // Set inactive output latches BEFORE changing direction: no LOW select pulse.
   digitalWrite(ETH_CS, HIGH);
   digitalWrite(SD_CS, HIGH);
-  SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
-  // Clock one idle byte with both slaves deselected before selecting W5100.
-  // SD 1.3.0 deselect does not clock the bus to release the card's DO/MISO.
+  pinMode(ETH_CS, OUTPUT);
+  pinMode(SD_CS, OUTPUT);
+  SPI.begin();
+}
+bool beginEthernetTransaction() {
+  if (busFault || digitalRead(ETH_CS) != HIGH) { busFault = true; return false; }
+  // Finish a partial SD read through its driver, before touching CS or SPI settings.
+  if (sdReady) card.readEnd();
+  if (digitalRead(SD_CS) != HIGH) { busFault = true; return false; }
+  // Complete the deselected SD handoff in SD's own SPI configuration first.
+  SPI.beginTransaction(SPISettings(SD_SPI_HZ, MSBFIRST, SPI_MODE0));
   SPI.transfer(0xFF);
+  SPI.endTransaction();
+  SPI.beginTransaction(SPISettings(ETH_SPI_HZ, MSBFIRST, SPI_MODE0));
   digitalWrite(ETH_CS, LOW);
+  return true;
 }
 uint8_t ethernetRead(uint16_t address) {
-  beginEthernetTransaction();
+  if (!beginEthernetTransaction()) return 0xFF;
   SPI.transfer(0x0F);
   SPI.transfer(address >> 8); SPI.transfer(address & 0xFF);
   uint8_t result = SPI.transfer(0);
@@ -74,7 +90,7 @@ uint8_t ethernetRead(uint16_t address) {
   return result;
 }
 void ethernetWrite(uint16_t address, uint8_t value) {
-  beginEthernetTransaction();
+  if (!beginEthernetTransaction()) return;
   SPI.transfer(0xF0);
   SPI.transfer(address >> 8); SPI.transfer(address & 0xFF);
   SPI.transfer(value);
@@ -148,23 +164,30 @@ bool seekCheck() {
   return passed && closed;
 }
 void runChecks() {
+  // Put SD into SPI mode before any clocks addressed to the other slave.
+  sdReady = card.init(SPI_HALF_SPEED, SD_CS);
+  prefix(F("CARD")); Serial.print(F(" error_code=")); Serial.print(card.errorCode());
+  Serial.print(F(" error_data=")); Serial.println(card.errorData());
+  if (!check(F("CARD_INIT"), sdReady)) return;
+
   originalRtr = readRtr();
   uint16_t beforeSecond = readRtr();
-  writeRtr(0x1234);
-  uint16_t probe = readRtr();
-  writeRtr(originalRtr); // Restore even if the probe failed.
-  uint16_t restored = readRtr();
+  uint16_t probe = 0, restored = 0;
+  bool stable = !busFault && originalRtr != 0 && originalRtr != 0xFFFF && beforeSecond == originalRtr;
+  // Never write a probe or restore an unverified initial sample.
+  if (stable) {
+    writeRtr(0x1234);
+    probe = readRtr();
+    writeRtr(originalRtr); // Restore the verified original even when the probe differs.
+    restored = readRtr();
+  }
   prefix(F("ETH_RTR")); Serial.print(F(" phase=BEFORE expected=")); hex16(originalRtr);
   Serial.print(F(" observed1=")); hex16(originalRtr);
   Serial.print(F(" observed2=")); hex16(beforeSecond);
   Serial.print(F(" probe=")); hex16(probe);
   Serial.print(F(" restored=")); hex16(restored); Serial.println();
-  if (!check(F("ETH_SPI_BEFORE"), beforeSecond == originalRtr && probe == 0x1234 && restored == originalRtr)) return;
+  if (!check(F("ETH_SPI_BEFORE"), stable && probe == 0x1234 && restored == originalRtr)) return;
 
-  bool initialized = card.init(SPI_HALF_SPEED, SD_CS);
-  prefix(F("CARD")); Serial.print(F(" error_code=")); Serial.print(card.errorCode());
-  Serial.print(F(" error_data=")); Serial.println(card.errorData());
-  if (!check(F("CARD_INIT"), initialized)) return;
   uint32_t blocks = card.cardSize();
   uint8_t type = card.type();
   prefix(F("CARD_INFO")); Serial.print(F(" type=")); Serial.print(type);
@@ -202,8 +225,8 @@ void runChecks() {
   bool removed = SdFile::remove(&root, TEST_FILE);
   bool stillExists = file.open(&root, TEST_FILE, O_READ);
   if (stillExists) file.close();
-  if (!check(F("REMOVE_TEST_FILE"), removed && !stillExists)) return;
-  root.close();
+  bool rootClosedAfterCleanup = root.close();
+  if (!check(F("REMOVE_TEST_FILE"), removed && !stillExists && rootClosedAfterCleanup)) return;
   uint16_t afterFirst = readRtr();
   uint16_t afterSecond = readRtr();
   prefix(F("ETH_RTR")); Serial.print(F(" phase=AFTER expected=")); hex16(originalRtr);
@@ -219,27 +242,29 @@ void runTest() {
   initialFree = freeRam(); sampleRam();
   prefix(F("START")); Serial.print(F(" free=")); Serial.println(initialFree);
   runChecks();
-  if (file.isOpen()) file.close();
-  if (root.isOpen()) root.close();
+  if (!busFault) {
+    if (file.isOpen() && !file.close()) ++failures;
+    if (root.isOpen() && !root.close()) ++failures;
+  }
   sampleRam();
   prefix(F("RESULT"));
-  Serial.print(F(" status=")); Serial.print(failures == 0 && checks == 15 ? F("PASS") : F("FAIL"));
+  Serial.print(F(" status=")); Serial.print(!busFault && failures == 0 && checks == 15 ? F("PASS") : F("FAIL"));
   Serial.print(F(" checks=")); Serial.print(checks);
   Serial.print(F(" failures=")); Serial.print(failures);
   Serial.print(F(" bytes=")); Serial.print(TOTAL_BYTES);
   Serial.print(F(" crc16=")); hex16(lastCrc);
   Serial.print(F(" free=")); Serial.print(freeRam());
   Serial.print(F(" min_free=")); Serial.print(minFree);
+  Serial.print(F(" bus_fault=")); Serial.print(busFault);
   Serial.print(F(" elapsed_ms=")); Serial.println(millis() - runStarted);
 }
 void setup() {
-  pinMode(ETH_CS, OUTPUT); digitalWrite(ETH_CS, HIGH);
-  pinMode(SD_CS, OUTPUT); digitalWrite(SD_CS, HIGH);
+  initializeChipSelects();
   Serial.begin(115200);
-  SPI.begin();
   delay(300);
   Serial.println(); // Separate any startup/bootloader bytes from the banner.
-  Serial.println(F("BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200"));
+  Serial.print(F("BOOT test=TEST08 fw=0.4 eth_cs=10 sd_cs=4 uart=115200 eth_spi_hz="));
+  Serial.println(ETH_SPI_HZ);
   Serial.println(F("READY"));
 }
 void loop() {

@@ -9,7 +9,9 @@ Import-Module (Join-Path $PSScriptRoot 'MicroSDHardware.psm1') -Force
 $build=Get-Content -Raw -LiteralPath $BuildSummary | ConvertFrom-Json
 if($build.test -ne 'TEST-08' -or $build.type -ne 'BUILD_ONLY' -or $build.status -ne 'PASS' -or
    $build.flash_bytes -le 0 -or $build.flash_bytes -gt 29000 -or $build.sram_static_bytes -le 0 -or
-   $build.sram_static_bytes -gt 1200 -or $build.core -notin @('1.8.6','1.8.8') -or $build.sd -ne '1.3.0'){
+   $build.sram_static_bytes -gt 1200 -or $build.core -notin @('1.8.6','1.8.8') -or $build.sd -ne '1.3.0' -or
+   $build.firmware_version -ne '0.4' -or $build.ethernet_spi_hz -ne 4000000 -or
+   $build.sd_init_spi_hz -ne 250000 -or $build.sd_data_spi_hz -ne 4000000){
     throw 'A valid TEST-08 build summary is required before opening COM'
 }
 $hashes=[ordered]@{}
@@ -27,7 +29,7 @@ $port=[IO.Ports.SerialPort]::new($SerialPort,115200,[IO.Ports.Parity]::None,8,[I
 $port.DtrEnable=$true; $port.RtsEnable=$false; $port.WriteTimeout=1000; $port.NewLine="`n"
 $log=[IO.StreamWriter]::new((Join-Path $run 'serial.log'),$false,[Text.UTF8Encoding]::new($false))
 $pending='';$sent=$false;$finished=$false;$nextProgress=5
-Write-Host "TEST-08 microSD / bounded ${DurationSeconds}s / logs: $run"
+Write-Host "TEST-08 microSD / SPI order audit / W5100 SPI=4 MHz / bounded ${DurationSeconds}s / logs: $run"
 Write-Host 'Close Arduino monitor. COM opening may reset UNO. Keep the card inserted; no key presses are needed.'
 try{
     $port.Open()
@@ -39,10 +41,12 @@ try{
             if(-not $line){continue}
             $lines.Add($line)
             $log.WriteLine([DateTime]::UtcNow.ToString('o')+' '+$line);$log.Flush()
-            Write-Host $line
+            if($line -match '(?:^| )status=PASS(?: |$)'){Write-Host $line -ForegroundColor Green}
+            elseif($line -match '(?:^| )status=FAIL(?: |$)' -or $line -match '^FAIL '){Write-Host $line -ForegroundColor Red}
+            else{Write-Host $line}
             if($line -ceq 'READY' -and -not $sent){
-                $boots=@($lines | Where-Object {$_ -ceq 'BOOT test=TEST08 fw=0.2 eth_cs=10 sd_cs=4 uart=115200'})
-                if($boots.Count -ne 1){throw 'Expected one complete TEST08 fw=0.2 BOOT before READY; rebuild/upload if needed'}
+                $boots=@($lines | Where-Object {$_ -ceq 'BOOT test=TEST08 fw=0.4 eth_cs=10 sd_cs=4 uart=115200 eth_spi_hz=4000000'})
+                if($boots.Count -ne 1){throw 'Expected one complete TEST08 fw=0.4 / W5100 SPI=4 MHz BOOT before READY; rebuild/upload if needed'}
                 $port.WriteLine("RUN $token");$sent=$true
                 Write-Host 'ШАГ: автоматически проверяю SPI, карту, запись, чтение, append, remount и удаление тестового файла.'
             }
@@ -63,12 +67,13 @@ try{$verdict=Get-Test08Verdict -Lines $lines.ToArray() -Token $token}
 catch{$verdict=[pscustomobject]@{status='FAIL';reasons=@('malformed/incomplete UART evidence: '+$_.Exception.Message);metrics=$null}}
 foreach($reason in $verdict.reasons){$errors.Add($reason)}
 $passed=$verdict.status -eq 'PASS' -and $errors.Count -eq 0
-$summary=[ordered]@{test='TEST-08';type='HARDWARE';runner_version='0.2';status=$(if($passed){'PASS'}else{'FAIL'});
+$summary=[ordered]@{test='TEST-08';type='HARDWARE';runner_version='0.4';ethernet_spi_hz=4000000;
+    sd_init_spi_hz=250000;sd_data_spi_hz=4000000;status=$(if($passed){'PASS'}else{'FAIL'});
     utc=[DateTime]::UtcNow.ToString('o');port=$SerialPort;token=$token;requested_duration_s=$DurationSeconds;
     completed_duration_ms=$watch.ElapsedMilliseconds;reasons=@($errors | Select-Object -Unique);metrics=$verdict.metrics;
     source_hashes=$hashes;build=$build;test_file='T08CHECK.BIN';run_directory=$run}
 $summary | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $run 'summary.json') -Encoding utf8
-Write-Host "RESULT $($summary.status) / TEST-08 / $run"
-foreach($reason in $summary.reasons){Write-Host "  $reason"}
+Write-Host "RESULT $($summary.status) / TEST-08 / $run" -ForegroundColor $(if($summary.status -eq "PASS"){"Green"}else{"Red"})
+foreach($reason in $summary.reasons){Write-Host "  $reason" -ForegroundColor Red}
 if(-not $passed){Write-Host 'A failed run may leave T08CHECK.BIN for diagnosis; existing files are never overwritten.';exit 1}
 exit 0
