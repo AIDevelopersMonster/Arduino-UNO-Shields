@@ -14,8 +14,9 @@ or data on removable storage.
 
 ## Project status — KonSol 0.8 frozen
 
-KonSol 0.8 / TEST-11 is the current completed research milestone and is now
-**frozen**.
+KonSol 0.8 / TEST-11 is the completed research milestone and is **frozen**.
+
+The umbrella Arduino UNO & Shields repository is also maintenance-only as of 2026-10-11. The detailed continuation ideas below are retained as an architectural record, not as an active schedule.
 
 The project has reached the result it was created to test on the physical
 Arduino UNO / ATmega328P platform:
@@ -52,7 +53,7 @@ Until such a trigger exists, KonSol 0.8 should be treated as a completed,
 published and reproducible research result rather than an actively expanding
 firmware branch.
 
-## What to do after unfreezing
+## Archived continuation plan (only if deliberately reopened)
 
 If KonSol is ever unfrozen, development should not resume as uncontrolled
 feature growth inside the published 0.8 firmware. The 0.8 result should remain

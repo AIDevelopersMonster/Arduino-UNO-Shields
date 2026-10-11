@@ -1,5 +1,7 @@
 # LAB-02 — Arduino UNO + Multi-Function Shield
 
+> **Status: STAGE A PASS / FROZEN AUXILIARY LAB.** The accepted diagnostic firmware and GUI are retained for reuse. Optional interfaces may be revisited only for a concrete need; there is no active roadmap.
+
 ## Purpose
 
 LAB-02 turns the classic Multi-Function Shield into one reproducible diagnostic
@@ -39,7 +41,7 @@ No optional IR, temperature or UART module is required for Stage A.
 | Button S2 | A2 |
 | Button S3 | A3 |
 
-Optional future interfaces:
+Optional / not currently scheduled interfaces:
 
 | Function | Arduino UNO pin |
 | --- | ---: |

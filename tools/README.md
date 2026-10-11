@@ -1,7 +1,8 @@
 # Tools
 
-Utilities used for hardware checks, network tests, serial diagnostics,
-SD-card verification and reproducible project workflows.
+Utilities used for hardware checks, network tests, serial diagnostics, SD-card verification and reproducible project workflows.
+
+> **Status: MAINTENANCE-ONLY.** These tools are retained to reproduce completed Arduino UNO work and for occasional auxiliary use. There is no active tool-expansion roadmap.
 
 
 ## KASM - KonSol KAP assembler

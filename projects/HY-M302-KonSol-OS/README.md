@@ -2,9 +2,7 @@
 
 ## Status and relationship to KSC
 
-This directory is retained as the earlier **driver-based KonSol-HY design
-branch**. It is not the current KSC / KonSol Commander implementation and should
-not be read as the present project status.
+**FROZEN LEGACY DESIGN BRANCH.** This directory is retained as the earlier driver-based KonSol-HY design record. It is not an active implementation line and should not be read as a current roadmap.
 
 The hardware/library work that originated here remains useful, but the
 target-decoupled execution line moved to:
@@ -18,10 +16,7 @@ KSC-04C, including `/host` streaming, Commander File Viewer, streamed
 HY-M302 stage preprint:
 https://doi.org/10.5281/zenodo.23251546
 
-This document remains a design/reference record for ideas such as explicit
-driver resource ownership, optional Bluetooth/SD/display integration and
-conflict analysis. Those proposed stages are not silently treated as completed
-unless separately physically certified.
+This document remains a design/reference record for ideas such as explicit driver resource ownership, optional Bluetooth/SD/display integration and conflict analysis. The proposed stages below are historical architecture notes, not scheduled work, unless the repository is explicitly reopened for a concrete task.
 
 ## Concept
 
@@ -47,7 +42,7 @@ driver-based operating environment inside the UNO resource envelope.
 
 ## Base HY-M302 hardware map
 
-Current silkscreen evidence on our physical sample establishes:
+Recorded silkscreen evidence on our physical sample establishes:
 
 | Service | UNO resource |
 | --- | --- |

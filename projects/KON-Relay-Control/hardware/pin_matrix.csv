@@ -1,5 +1,5 @@
 resource,arduino_uno,purpose,status,conflict_note
-RELAY_CANDIDATES,D4-D7,4 relay control,CANDIDATE_ONLY,order/polarity unverified
+RELAY_CHANNELS,D4-D7,4 relay control,BENCH_PASS,R1=D4 R2=D5 R3=D6 R4=D7; ACTIVE_HIGH
 USB_SERIAL,D0-D1,Arduino programming or host console,UNO_REFERENCE,hardware UART shared with RS485 production mode
 MODBUS_RS485_UART,D0-D1,UART 8E1 target profile,DESIGN,USB-UART contention must be isolated/tested
 RS485_DIR,D2,DE and inverted RE tied to direction GPIO,DESIGN,add defined receive default via resistor

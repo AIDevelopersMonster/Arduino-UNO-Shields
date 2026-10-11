@@ -2,6 +2,8 @@
 
 First shield in the **Arduino UNO & Shields** project.
 
+> **Status: LEGACY / ETHERNET-ONLY FOR PRACTICAL REUSE.** Ethernet functions were successfully exercised on the blue W5100 sample. Combined onboard microSD + W5100 operation on tested clone hardware was not reliable and the SD investigation is closed. No repair or compatibility roadmap is active.
+
 ## Hardware
 
 - WIZnet W5100 Ethernet controller
@@ -9,7 +11,7 @@ First shield in the **Arduino UNO & Shields** project.
 - SD card socket/interface
 - Arduino UNO shield form factor
 
-## Test sequence
+## Historical test sequence
 
 1. Visual identification and board revision notes
 2. Arduino UNO + shield assembly
@@ -28,7 +30,7 @@ First shield in the **Arduino UNO & Shields** project.
 - W5100 Ethernet Shield
 - 4 GB SD card
 
-Pin mapping and verified examples will be added after bench tests.
+Pin mapping and verified examples are recorded in the linked laboratories; this sentence is retained only as historical context of the original bring-up plan.
 
 ## Verified blue W5100 sample (separate no-SD test track)
 

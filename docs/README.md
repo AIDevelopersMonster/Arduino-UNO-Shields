@@ -2,6 +2,8 @@
 
 Common documentation index for the **Arduino UNO & Shields** repository.
 
+> **Repository state: FROZEN / MAINTENANCE-ONLY since 2026-10-11.** This index points to completed or historically useful material. References to future stages inside older experiment documents describe the plan at the time they were written; they are not an active repository roadmap unless a later status note explicitly reopens them.
+
 Most detailed documentation lives next to the hardware, laboratory, tool, or
 project it describes so the physical evidence and the implementation stay
 together.
@@ -23,7 +25,7 @@ together.
 
 ## KSC / KonSol Commander
 
-Current target-decoupled research line:
+Completed Arduino UNO target phase:
 
 - [Project README](../projects/KSC-KonSol-Commander/)
 - [Quick start](../projects/KSC-KonSol-Commander/QUICKSTART.md)
