@@ -49,7 +49,7 @@ Leave microSD out. Check the current Arduino DHCP IP. In another PowerShell wind
 
 The onboard microSD/shared-SPI investigation is **closed**. TEST-12 failed the final stock-library acceptance sequence (`SD -> LAN -> SD`) on replacement hardware: SD baseline write/read passed, but Ethernet DHCP failed immediately after the SD phase. Together with the prior state-dependent and card-dependent results, the tested clone boards are classified as defective or unsuitable for reliable combined W5100 + onboard microSD operation.
 
-No further SD repair, rework, pull-up experiments, library forks, or attempts to force a PASS are planned. LAB-01 continues as **Ethernet-only**. In Ethernet firmware, keep microSD CS D4 HIGH when the SD subsystem is not used. Future applied work may continue with DHCP, TCP, UDP, HTTP, web control, telemetry and related W5100 networking tasks.
+No further SD repair, rework, pull-up experiments, library forks, or attempts to force a PASS are planned. The W5100 itself is now a **legacy / outdated Ethernet controller**, so deep repair or custom driver work for this inexpensive clone is not justified by the project goals. LAB-01 continues as **Ethernet-only** for bounded educational and applied networking tasks. In Ethernet firmware, keep microSD CS D4 HIGH when the SD subsystem is not used. Future work may continue with DHCP, TCP, UDP, HTTP, web control and telemetry only where using this legacy hardware remains useful.
 
 ## Documentation map
 
