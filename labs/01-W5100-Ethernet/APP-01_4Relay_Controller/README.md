@@ -1,5 +1,7 @@
 # APP-01 — W5100 4-Relay Controller
 
+> **Status: FROZEN PROTOTYPE / MAINTENANCE-ONLY.** The relay input polarity was bench-established as ACTIVE HIGH on the tested module, but the combined W5100 control application is retained as a reusable auxiliary profile rather than an active project line.
+
 Applied Ethernet-only controller for Arduino UNO + W5100 shield.
 
 ## Hardware
@@ -99,7 +101,7 @@ The GUI exposes ON / OFF / TOGGLE for every channel and ALL ON / ALL OFF.
 cd C:\GitHub\Arduino-UNO-Shields
 git fetch origin
 
-git restore --source=origin/feature/w5100-4relay-controller --worktree -- `
+git restore --source=origin/main --worktree -- `
   labs/01-W5100-Ethernet/APP-01_4Relay_Controller/
 
 $sketch = ".\labs\01-W5100-Ethernet\APP-01_4Relay_Controller"
@@ -126,7 +128,7 @@ Software PASS requires consistent state across Web UI, Serial CLI, PowerShell CL
 
 Hardware PASS additionally requires physical confirmation that all four relay channels respond correctly.
 
-Status: **PENDING bench test**.
+Status: **FROZEN PROTOTYPE**. Do not infer a full hardware PASS for the combined Ethernet+relay profile unless a dated physical result is added later.
 
 ## Security
 
